@@ -38,6 +38,10 @@
   color: var(--status-up);
 }
 
+.status-down {
+  color: var(--status-degraded);
+}
+
 .tab-bar {
   display: flex;
   flex-wrap: wrap;
@@ -100,3 +104,37 @@
   color: var(--status-info);
 }
 
+.panel-placeholder-degraded {
+  color: var(--status-degraded);
+}
+
+.failure-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.failure-detail {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.retry-button {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.125em;
+  color: var(--status-degraded);
+  background-color: transparent;
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+}
+
+.retry-button:hover {
+  color: var(--text-primary);
+}

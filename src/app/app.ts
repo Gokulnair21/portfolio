@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { PortfolioDataLoader } from './core/data/portfolio-data-loader.service';
 import { ClusterStateService } from './core/state/cluster-state.service';
 import { TABS } from './core/state/tabs';
 
@@ -10,8 +11,20 @@ import { TABS } from './core/state/tabs';
 })
 export class App {
   protected readonly serviceTitle = signal('PORTFOLIO-SERVICE');
-  protected readonly statusLabel = signal('UP');
 
   protected readonly tabs = TABS;
   protected readonly store = inject(ClusterStateService);
+  protected readonly loader = inject(PortfolioDataLoader);
+
+  protected readonly statusLabel = computed(() =>
+    this.store.dataStatus() === 'failed' ? 'DOWN' : 'UP',
+  );
+
+  protected readonly tabsEnabled = computed(() => this.store.dataStatus() === 'ready');
+
+  protected retry(): void {
+    if (!this.loader.pending()) {
+      this.loader.load();
+    }
+  }
 }

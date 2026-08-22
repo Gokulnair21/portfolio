@@ -2,11 +2,9 @@
   <header class="header">
     <span class="status-dot" aria-hidden="true"></span>
     <h1 class="title">{{ serviceTitle() }}</h1>
-    <span
-      class="status-badge"
-      [class]="'status-badge status-' + statusLabel().toLowerCase()"
-      >{{ statusLabel() }}</span
-    >
+    <span class="status-badge" [class]="'status-badge status-' + statusLabel().toLowerCase()">{{
+      statusLabel()
+    }}</span>
   </header>
   <nav class="tab-bar" role="tablist" aria-label="Dashboard sections">
     @for (tab of tabs; track tab.id) {
@@ -14,6 +12,7 @@
         type="button"
         role="tab"
         class="tab-button"
+        [disabled]="!tabsEnabled()"
         [class.tab-active]="store.selectedTab() === tab.id"
         [attr.aria-selected]="store.selectedTab() === tab.id"
         (click)="store.selectTab(tab.id)"
@@ -23,15 +22,41 @@
     }
   </nav>
   <main class="panel-area" aria-label="Dashboard panels">
-    @switch (store.selectedTab()) {
-      @case ('health-dashboard') {
-        <section class="panel">
-          <p class="panel-placeholder panel-placeholder-info">HEALTH MODULE DEPLOYING</p>
+    @switch (store.dataStatus()) {
+      @case ('ready') {
+        @switch (store.selectedTab()) {
+          @case ('health-dashboard') {
+            <section class="panel">
+              <p class="panel-placeholder panel-placeholder-info">HEALTH MODULE DEPLOYING</p>
+            </section>
+          }
+          @default {
+            <section class="panel">
+              <p class="panel-placeholder">MODULE NOT DEPLOYED</p>
+            </section>
+          }
+        }
+      }
+      @case ('failed') {
+        <section class="panel" role="alert">
+          <div class="failure-panel">
+            <p class="panel-placeholder panel-placeholder-degraded">SERVICE UNAVAILABLE</p>
+            <p class="failure-detail">PORTFOLIO DATA COULD NOT BE LOADED</p>
+            <button
+              type="button"
+              class="retry-button"
+              aria-label="Retry loading portfolio content"
+              [disabled]="loader.pending()"
+              (click)="retry()"
+            >
+              RETRY
+            </button>
+          </div>
         </section>
       }
       @default {
-        <section class="panel">
-          <p class="panel-placeholder">MODULE NOT DEPLOYED</p>
+        <section class="panel" role="status" aria-live="polite">
+          <p class="panel-placeholder">LOADING CONTENT</p>
         </section>
       }
     }

@@ -1,0 +1,52 @@
+{
+  "projects": [
+    {
+      "name": "cluster-control",
+      "description": "Self-service operations console for provisioning and inspecting Kafka clusters across environments.",
+      "stack": ["Angular", "TypeScript", "Spring Boot", "Kafka"],
+      "repoUrl": "https://github.com/example/cluster-control"
+    },
+    {
+      "name": "ledger-stream",
+      "description": "Exactly-once transaction ledger pipeline with schema-registry governance and replay tooling.",
+      "stack": ["Java 21", "Kafka Streams", "Avro", "Postgres"],
+      "repoUrl": "https://github.com/example/ledger-stream"
+    },
+    {
+      "name": "probe-mesh",
+      "description": "Federated liveness/readiness probing with per-region rollups and pager escalation rules.",
+      "stack": ["Go", "gRPC", "Prometheus", "Grafana"],
+      "repoUrl": "https://github.com/example/probe-mesh"
+    }
+  ],
+  "experience": [
+    {
+      "company": "Example Corp",
+      "role": "Staff Platform Engineer",
+      "period": "2022-03 — present",
+      "highlights": [
+        "Led migration of 40+ services to event-driven integration on Kafka.",
+        "Cut p99 deployment lead time from 3 days to under 2 hours."
+      ]
+    },
+    {
+      "company": "Previous Systems Ltd",
+      "role": "Senior Backend Engineer",
+      "period": "2018-06 — 2022-02",
+      "highlights": [
+        "Designed multi-tenant billing pipeline processing 10M events/day.",
+        "Introduced contract testing that reduced cross-team incidents by half."
+      ]
+    }
+  ],
+  "contact": {
+    "email": "you@example.com",
+    "github": "https://github.com/your-handle",
+    "linkedin": "https://www.linkedin.com/in/your-handle"
+  },
+  "envProperties": [
+    { "key": "spring.profiles.active", "value": "portfolio-prod" },
+    { "key": "management.endpoints.web.exposure.include", "value": "health,info,metrics" },
+    { "key": "cluster.region", "value": "eu-central-1" }
+  ]
+}
