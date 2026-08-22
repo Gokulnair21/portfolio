@@ -9,3 +9,12 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-1-terminal-console-log-pane.md`
   summary: Add terminal-console accessibility semantics — `role="log"` with `aria-live` announcement of new entries, keyboard-scrollable viewport, and a non-color level cue.
   evidence: Review found the new console pane conveys log levels by color alone, announces nothing to assistive tech, and its scroll viewport is not keyboard-reachable; consistent with the project-wide i18n/a11y audit pass already deferred in this file.
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-2-simulationengine-outage-trigger.md`
+  summary: Add accessibility semantics to the outage simulation controls — live-region announcement of the DEGRADED transition, a spoken reason for the disabled button, and :focus-visible styling for `.outage-button`.
+  evidence: Review found the outage control announces nothing to assistive tech and its disabled state gives no reason; consistent with the project-wide i18n/a11y audit pass already deferred in this file (tabs ARIA, console log semantics, focus-visible tokens).
+- source_spec: `_bmad-output/implementation-artifacts/spec-sprint-status-review-reconciliation.md`
+  summary: Run or explicitly skip the Epic 1 retrospective now that all four of its stories are done.
+  evidence: Review found `epic-1-retrospective: optional` left undecided after epic-1 flipped to done; the run/skip decision is human-owned.
+- source_spec: `_bmad-output/implementation-artifacts/spec-sprint-status-review-reconciliation.md`
+  summary: Draft story 2-3-auto-recovery-sequence so it becomes ready-for-dev following its completed predecessors.
+  evidence: Sprint workflow notes say the next story is typically created after the previous ones finish; 2-3 remains backlog while 2-1 and 2-2 are done.
