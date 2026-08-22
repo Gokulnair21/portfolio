@@ -1,7 +1,16 @@
 import { TestBed } from '@angular/core/testing';
-import { PortfolioData } from '../data/portfolio-data';
-import { ClusterStateService } from './cluster-state.service';
+import { LogEntry, PortfolioData } from '../data/portfolio-data';
+import { ClusterStateService, LOG_CAP } from './cluster-state.service';
 import { TabId } from './tabs';
+
+function makeLog(index: number): LogEntry {
+  return {
+    timestamp: new Date(Date.UTC(2026, 0, 1, 0, 0, index)).toISOString(),
+    source: 'test-source',
+    level: index % 3 === 2 ? 'ERROR' : index % 3 === 1 ? 'WARN' : 'INFO',
+    message: `entry-${index}`,
+  };
+}
 
 const VALID_DATA: PortfolioData = {
   projects: [
@@ -119,5 +128,51 @@ describe('ClusterStateService', () => {
   it('should expose content as read-only', () => {
     expect((store as { content: unknown }).content).not.toHaveProperty('set');
     expect((store as { dataStatus: unknown }).dataStatus).not.toHaveProperty('set');
+  });
+
+  it('should start with an empty log', () => {
+    expect(store.logs()).toEqual([]);
+  });
+
+  it('should append entries in order below the cap', () => {
+    store.appendLog(makeLog(0));
+    store.appendLog(makeLog(1));
+    store.appendLog(makeLog(2));
+
+    const logs = store.logs();
+    expect(logs.map((entry) => entry.message)).toEqual(['entry-0', 'entry-1', 'entry-2']);
+    expect(logs[1]).toEqual({
+      timestamp: makeLog(1).timestamp,
+      source: 'test-source',
+      level: 'WARN',
+      message: 'entry-1',
+    });
+  });
+
+  it('should cap logs at exactly 200 entries, dropping the oldest', () => {
+    for (let index = 0; index < LOG_CAP + 5; index++) {
+      store.appendLog(makeLog(index));
+    }
+
+    const logs = store.logs();
+    expect(logs.length).toBe(LOG_CAP);
+    expect(logs[0].message).toBe('entry-5');
+    expect(logs[LOG_CAP - 1].message).toBe(`entry-${LOG_CAP + 4}`);
+    expect(logs.every((entry) => !['entry-0', 'entry-4'].includes(entry.message))).toBe(true);
+  });
+
+  it('should keep length stable at the cap once reached', () => {
+    for (let index = 0; index < LOG_CAP; index++) {
+      store.appendLog(makeLog(index));
+    }
+
+    store.appendLog(makeLog(LOG_CAP));
+
+    expect(store.logs().length).toBe(LOG_CAP);
+    expect(store.logs()[0].message).toBe('entry-1');
+  });
+
+  it('should expose logs as read-only', () => {
+    expect((store as { logs: unknown }).logs).not.toHaveProperty('set');
   });
 });

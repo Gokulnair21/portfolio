@@ -3,11 +3,12 @@ import { PortfolioDataLoader } from './core/data/portfolio-data-loader.service';
 import { ClusterStateService } from './core/state/cluster-state.service';
 import { TABS } from './core/state/tabs';
 import { HealthDashboard } from './features/health-dashboard/health-dashboard';
+import { TerminalConsole } from './features/terminal-console/terminal-console';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
-  imports: [HealthDashboard],
+  imports: [HealthDashboard, TerminalConsole],
   styleUrl: './app.css',
   templateUrl: './app.html',
 })

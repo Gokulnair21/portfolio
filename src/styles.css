@@ -10,6 +10,7 @@
   --status-up: #22c55e;
   --status-degraded: #ef4444;
   --status-info: #38bdf8;
+  --status-warn: #f59e0b;
 
   /* Surfaces & chrome (derived dashboard palette) */
   --bg-base: #0b0f14;

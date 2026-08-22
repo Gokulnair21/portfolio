@@ -55,6 +55,9 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('app-terminal-console .console'),
+    ).toBeTruthy();
   });
 
   it('should render title', async () => {

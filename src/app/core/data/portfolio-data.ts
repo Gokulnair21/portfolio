@@ -46,6 +46,15 @@ export interface PortfolioData {
   health: HealthConfig;
 }
 
+export type LogLevel = 'INFO' | 'WARN' | 'ERROR';
+
+export interface LogEntry {
+  timestamp: string;
+  source: string;
+  level: LogLevel;
+  message: string;
+}
+
 export type ParseResult<T> =
   { readonly ok: true; readonly value: T } | { readonly ok: false; readonly reason: string };
 

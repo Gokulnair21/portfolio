@@ -6,3 +6,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-2-signals-store-tab-panel-navigation.md`
   summary: Implement the full ARIA tabs pattern for the dashboard tab bar — arrow-key/Home/End navigation with roving tabindex, `role="tabpanel"` containers with `aria-labelledby`/`aria-controls`, `:focus-visible` styling, and a live-region announcement of the newly shown panel.
   evidence: Review found the tab bar declares `role="tablist"`/`role="tab"` but ships no keyboard navigation, panel role linkage, or focus indicator; deferred because the architecture spine explicitly defers an i18n/a11y audit pass for the single-audience MVP.
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-terminal-console-log-pane.md`
+  summary: Add terminal-console accessibility semantics — `role="log"` with `aria-live` announcement of new entries, keyboard-scrollable viewport, and a non-color level cue.
+  evidence: Review found the new console pane conveys log levels by color alone, announces nothing to assistive tech, and its scroll viewport is not keyboard-reachable; consistent with the project-wide i18n/a11y audit pass already deferred in this file.
