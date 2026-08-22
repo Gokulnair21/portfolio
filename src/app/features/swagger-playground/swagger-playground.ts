@@ -3,6 +3,7 @@ import { ClusterStateService } from '../../core/state/cluster-state.service';
 import {
   MESSAGE_DELIVERY,
   DeliveryReceipt,
+  DeliveryResult,
   MessagePayload,
 } from '../../delivery/message-delivery.port';
 
@@ -83,6 +84,8 @@ export class SwaggerPlayground {
     if (!this.tryItOut()) {
       this.bodyText.set(this.defaultBody());
       this.validationError.set(null);
+      this.receipt.set(null);
+      this.deliveryError.set(null);
     }
   }
 
@@ -107,8 +110,12 @@ export class SwaggerPlayground {
       `${HTTP_METHOD} ${ENDPOINT_PATH}: controller received contact POST from ${result.value.email}`,
     );
     this.sending.set(true);
-    const deliveryResult = await this.delivery.send(result.value);
-    this.sending.set(false);
+    let deliveryResult: DeliveryResult;
+    try {
+      deliveryResult = await this.delivery.send(result.value);
+    } finally {
+      this.sending.set(false);
+    }
 
     if (deliveryResult.ok) {
       this.#appendLog(

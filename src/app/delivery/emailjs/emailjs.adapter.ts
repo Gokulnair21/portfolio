@@ -12,8 +12,9 @@ export class EmailJsAdapter implements MessageDelivery {
   #nextOffset = 0;
 
   async send(payload: MessagePayload): Promise<DeliveryResult> {
+    let response: { status: number; text: string };
     try {
-      await send(
+      response = await send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
         {
@@ -29,6 +30,16 @@ export class EmailJsAdapter implements MessageDelivery {
         failure: {
           reason: 'provider-error',
           detail: error instanceof Error ? error.message : String(error),
+        },
+      };
+    }
+
+    if (response.status < 200 || response.status >= 300) {
+      return {
+        ok: false,
+        failure: {
+          reason: 'provider-error',
+          detail: `EmailJS responded with ${response.status}: ${response.text}`,
         },
       };
     }

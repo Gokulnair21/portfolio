@@ -238,6 +238,11 @@ describe('App with real application providers', () => {
 
   afterEach(() => http.verify());
 
+  it('should bind MESSAGE_DELIVERY to the production EmailJsAdapter', () => {
+    expect(TestBed.inject(MESSAGE_DELIVERY)).toBeInstanceOf(EmailJsAdapter);
+    http.expectOne(DATA_URL).flush(VALID_DATA);
+  });
+
   it('should create the app and hydrate from the boot fetch', async () => {
     const fixture = TestBed.createComponent(App);
     void TestBed.inject(ApplicationInitStatus);

@@ -2,10 +2,10 @@
 title: 'Complete Epic 4: Swagger Contact Playground & Go-Live (Stories 4-1, 4-2, 4-3)'
 type: 'feature'
 created: '2026-08-22'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '8ed2bb0d57732f55a6c6b4db92080baf07ccc84b'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context: []
 warnings: ['multiple-goals', 'oversized']
 deferred: []
@@ -113,6 +113,21 @@ Story 4-3 — GitHub Pages Deployment Pipeline (commit 3):
 
 ## Review Triage Log
 
+### 2026-08-22 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 7: (high 0, medium 4, low 3)
+- defer: 0
+- reject: 19
+- addressed_findings:
+  - `[medium]` `[patch]` EmailJS SDK `send()` can resolve without throwing even on provider failure; adapter now inspects the resolved response status and maps non-2xx to a typed `provider-error` result, with specs for 401-resolve and 201-receipt paths.
+  - `[medium]` `[patch]` Production `MESSAGE_DELIVERY` DI binding was never asserted under real app providers — deleting or misnaming the provider line shipped green; added an assertion in the real-providers suite that `TestBed.inject(MESSAGE_DELIVERY)` is an `EmailJsAdapter`.
+  - `[medium]` `[patch]` Required-field branches of `parseMessageBody` (missing/empty name, email, message) were never executed by any test; extended parametrized rejection coverage over object-shaped invalid bodies asserting inline error, zero port calls, zero logs.
+  - `[medium]` `[patch]` `actions/configure-pages@v5` lacked `enablement: true`, so the first push would fail unless Pages was pre-enabled manually; added enablement to the step.
+  - `[low]` `[patch]` `execute()` had no try/finally around the port await — an unexpected throw left Execute permanently disabled; wrapped in try/finally so `sending` always resets.
+  - `[low]` `[patch]` Toggling Try-it-out off left stale receipt/delivery-error visible into the next session; both signals now clear on toggle-off.
+  - `[low]` `[patch]` `DeliveryFailureReason` carried a dead `'invalid-request'` member produced by nothing; removed it from the union.
+
 ## Design Notes
 
 Credentials are deliberately placeholder constants in the delivery module: real EmailJS service/template/public-key values are builder-owned secrets that cannot be invented unattended (the PRD permits only the public key in the bundle, and the repo already ships placeholder contact data such as `you@example.com`). Structure the config as one clearly-marked constant file so Gokul swaps three strings to go truly live; SM-1's "actual email received" remains human verification after credentials exist. The base-href unknown is resolved dynamically: the workflow derives `/<repo>/` from `github.event.repository.name`, so the pipeline works regardless of final repo naming without hardcoding.
@@ -129,3 +144,40 @@ Receipt realism: `DeliveryReceipt` mirrors a Kafka producer ack (`topic: 'contac
 **Manual checks (if no CLI):**
 - Grep `src/` for `@emailjs`: matches only inside `src/app/delivery/emailjs/`
 - Inspect `.github/workflows/deploy.yml`: base-href flag present, no artifact paths committed, Pages deploy steps use official actions
+
+## Auto Run Result
+
+Status: done
+
+### Summary
+Epic 4 implemented in full as three ticket-ordered commits — `[4-1]` mock Swagger UI request editor (typed `MessageDelivery` port contracts, endpoint listing, Try-it-out toggle, editable JSON body with inline validation), `[4-2]` contact execution and real delivery (`@emailjs/browser` adapter behind the port, ingestion logs through the store, mock 200 OK headers + Kafka receipt, typed failure banner), `[4-3]` GitHub Pages deployment pipeline (push-to-main workflow, repo-derived base-href, Pages enablement) closing sprint tracking — plus a closing docs commit. Review pass applied 7 patches (provider status check, DI-binding assertion, field-validation coverage, Pages enablement, try/finally, stale-state clearing, dead union member removal) and deferred none.
+
+### Files changed
+- `src/app/delivery/message-delivery.port.ts` -- `MessagePayload`, `DeliveryReceipt`, `DeliveryFailure`/`DeliveryResult`, `MessageDelivery` interface, `MESSAGE_DELIVERY` token; review patch removed the dead `'invalid-request'` reason.
+- `src/app/delivery/emailjs/emailjs.{adapter,config}.ts` + adapter spec -- EmailJS adapter (SDK confined here), placeholder credential constants; review patch added resolved-response status checking mapped to typed failure.
+- `src/app/features/swagger-playground/swagger-playground.{ts,html,css}` + spec -- Swagger-style panel with Try-it-out editor, JSON validation, Execute flow (ingestion logs, receipt render, error banner, busy state); review patches: try/finally around send, stale receipt/error cleared on toggle-off.
+- `src/app/app.ts`, `src/app/app.html`, `src/app/app.spec.ts` -- playground registered under `swagger-playground` tab; review patch asserts real-provider binding resolves to `EmailJsAdapter`.
+- `src/app/app.config.ts` -- binds `{ provide: MESSAGE_DELIVERY, useClass: EmailJsAdapter }`.
+- `package.json`, `package-lock.json` -- added `@emailjs/browser@^4.4.1`.
+- `.github/workflows/deploy.yml` -- push-to-main pipeline: npm ci, `ng test`, production build with base-href `/<repo>/` derived from `github.event.repository.name`, Pages upload/deploy; review patch added `enablement: true`.
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` -- 4-1/4-2/4-3 and epic-4 flipped to done (in `[4-3]` commit).
+- `_bmad-output/implementation-artifacts/deferred-work.md` -- appended epic-4-retrospective human-owned decision entry (in `[4-3]` commit).
+- `_bmad-output/implementation-artifacts/spec-epic-4-swagger-contact-playground-go-live.md`, `epic-4-context.md` -- this spec and the compiled epic context (committed at finalize).
+
+### Review findings breakdown
+- Patches applied: 7 (medium 4, low 3) — see Review Triage Log 2026-08-22.
+- Items deferred: 0.
+- Items rejected: 19.
+
+### Follow-up review recommendation
+true — patched counts by severity: medium 4, low 3; score = 3×4 + 1×3 = 15 ≥ 5.
+
+### Verification performed
+- Per-commit gates: `npx ng test` + `npx ng build` green before each of `[4-1]` (11 files/133 tests), `[4-2]`/`[4-3]` (12 files/140 tests).
+- Post-review: `npx ng test` — 12 files / 144 tests pass; `npx ng build` — production build succeeds (208.79 kB initial).
+- Manual greps: `@emailjs` matches only inside `src/app/delivery/emailjs/`; deploy.yml inspected for base-href derivation, enablement flag, and absence of committed artifacts.
+- I/O matrix audit: all five rows covered by running tests (try-it-out prefill/toggle, malformed JSON rejection, valid execute → headers/receipt/logs, typed-failure banner, empty/array/null body rejection).
+
+### Residual risks
+- EmailJS ships placeholder credentials by design; real delivery (SM-1 "actual email received") requires Gokul to swap three strings in `emailjs.config.ts` and is human verification.
+- The Pages pipeline is unexecuted until pushed to a GitHub remote with Pages available (`enablement: true` now handles first-run enablement); artifact path assumes the Angular project stays named `portfolio`.

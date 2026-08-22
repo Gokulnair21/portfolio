@@ -83,17 +83,33 @@ describe('SwaggerPlayground', () => {
     expect(compiled.querySelector('.request-preview')).toBeNull();
   });
 
-  it('should restore defaults when try-it-out is toggled back off', () => {
+  it('should restore defaults and clear stale delivery results when try-it-out is toggled back off', async () => {
     const data = parsePortfolioData(portfolioDataJson)!;
+    sendSpy.mockResolvedValue({
+      ok: true,
+      receipt: {
+        topic: 'contact-ingest',
+        partition: 0,
+        offset: 0,
+        timestamp: new Date().toISOString(),
+        messageId: 'contact-0-1',
+        status: 'QUEUED',
+      },
+    } satisfies DeliveryResult);
     const fixture = render();
 
     openEditor(fixture);
-    setBody(fixture, '{"name":"tampered"}');
+    setBody(fixture, VALID_BODY);
+    await execute(fixture);
+    expect(fixture.nativeElement.querySelector('.response-section')).toBeTruthy();
+
     (fixture.nativeElement.querySelector('.try-button') as HTMLButtonElement).click();
     fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.response-section')).toBeNull();
 
-    const preview = fixture.nativeElement.querySelector('.request-preview')?.textContent ?? '';
-    expect(JSON.parse(preview)).toEqual({ name: '', email: data.contact.email, message: '' });
+    openEditor(fixture);
+    const editor = fixture.nativeElement.querySelector('.request-editor') as HTMLTextAreaElement;
+    expect(JSON.parse(editor.value)).toEqual({ name: '', email: data.contact.email, message: '' });
   });
 
   it('should reject malformed JSON inline without sending or logging anything', async () => {
@@ -125,6 +141,32 @@ describe('SwaggerPlayground', () => {
 
     expect(sendSpy).not.toHaveBeenCalled();
     expect(store.logs().length).toBe(0);
+  });
+
+  it('should reject syntactically valid JSON objects that fail field validation', async () => {
+    const fixture = render();
+
+    openEditor(fixture);
+
+    const cases: ReadonlyArray<readonly [string, string]> = [
+      ['{}', "'name' is required"],
+      [JSON.stringify({ name: '', email: 'a@b.c', message: 'hi' }), "'name' is required"],
+      [JSON.stringify({ name: '   ', email: 'a@b.c', message: 'hi' }), "'name' is required"],
+      [JSON.stringify({ name: 'Gokul', message: 'hi' }), "'email' is required"],
+      [JSON.stringify({ name: 'Gokul', email: 'a@b.c' }), "'message' is required"],
+    ];
+
+    for (const [body, expectedError] of cases) {
+      setBody(fixture, body);
+      await execute(fixture);
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.validation-error')?.textContent).toContain(expectedError);
+    }
+
+    expect(sendSpy).not.toHaveBeenCalled();
+    expect(store.logs().length).toBe(0);
+    expect(fixture.nativeElement.querySelector('.response-section')).toBeNull();
   });
 
   it('should deliver through the port and render mock 200 OK headers plus a Kafka receipt with ingestion logs', async () => {

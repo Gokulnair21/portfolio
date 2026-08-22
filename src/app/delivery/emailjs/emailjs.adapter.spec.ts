@@ -75,6 +75,28 @@ describe('EmailJsAdapter', () => {
       failure: { reason: 'provider-error', detail: 'headless request blocked' },
     });
   });
+
+  it('should map a resolved non-2xx SDK response to a typed provider-error result', async () => {
+    sdkSend.mockResolvedValue({ status: 401, text: 'Unauthorized' });
+
+    const result = await adapter.send(PAYLOAD);
+
+    expect(result).toEqual({
+      ok: false,
+      failure: { reason: 'provider-error', detail: 'EmailJS responded with 401: Unauthorized' },
+    });
+  });
+
+  it('should treat a resolved 2xx response as success and queue a receipt', async () => {
+    sdkSend.mockResolvedValue({ status: 201, text: 'Created' });
+
+    const result = await adapter.send(PAYLOAD);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.receipt.status).toBe('QUEUED');
+    }
+  });
 });
 
 describe('MessageDelivery port binding', () => {

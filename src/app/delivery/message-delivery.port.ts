@@ -22,7 +22,7 @@ export interface DeliveryReceipt {
   readonly status: 'QUEUED';
 }
 
-export type DeliveryFailureReason = 'invalid-request' | 'provider-error';
+export type DeliveryFailureReason = 'provider-error';
 
 export interface DeliveryFailure {
   readonly reason: DeliveryFailureReason;
