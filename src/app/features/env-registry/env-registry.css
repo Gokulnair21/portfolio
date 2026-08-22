@@ -1,0 +1,91 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: inherit;
+}
+
+.registry-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 48rem;
+  padding: var(--space-6);
+}
+
+.registry-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.registry-endpoint {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.125em;
+  color: var(--status-info);
+}
+
+.filter-input {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background-color: var(--bg-header);
+  border: var(--border-width) solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  min-width: 14rem;
+}
+
+.filter-input::placeholder {
+  color: var(--text-muted);
+}
+
+.property-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.property-table th {
+  text-align: left;
+  font-size: var(--text-xs);
+  letter-spacing: 0.125em;
+  color: var(--text-muted);
+  border-bottom: var(--border-width) solid var(--border-dim);
+  padding: var(--space-2) var(--space-3);
+}
+
+.property-table td {
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--border-dim);
+}
+
+.property-row:last-child td {
+  border-bottom: none;
+}
+
+.cell-key {
+  color: var(--text-muted);
+}
+
+.cell-value {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.registry-empty {
+  font-size: var(--text-md);
+  color: var(--text-muted);
+  letter-spacing: 0.125em;
+  text-align: center;
+  padding: var(--space-6);
+}

@@ -244,6 +244,31 @@ describe('ClusterStateService', () => {
     });
   });
 
+  describe('career pod selection', () => {
+    it('should default selectedPodIndex to null', () => {
+      expect(store.selectedPodIndex()).toBeNull();
+      expect((store as { selectedPodIndex: unknown }).selectedPodIndex).not.toHaveProperty(
+        'set',
+      );
+    });
+
+    it('should store exactly one selected pod index at a time', () => {
+      store.selectPod(0);
+      expect(store.selectedPodIndex()).toBe(0);
+
+      store.selectPod(1);
+      expect(store.selectedPodIndex()).toBe(1);
+    });
+
+    it('should allow clearing the pod selection', () => {
+      store.selectPod(2);
+
+      store.selectPod(null);
+
+      expect(store.selectedPodIndex()).toBeNull();
+    });
+  });
+
   describe('topology outage degradation', () => {
     it('should report no active outage or degraded nodes before any transition', () => {
       store.hydrate(VALID_DATA);

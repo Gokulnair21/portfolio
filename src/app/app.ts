@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { PortfolioDataLoader } from './core/data/portfolio-data-loader.service';
 import { ClusterStateService } from './core/state/cluster-state.service';
 import { TABS } from './core/state/tabs';
+import { CareerPods } from './features/career-pods/career-pods';
+import { EnvRegistry } from './features/env-registry/env-registry';
 import { HealthDashboard } from './features/health-dashboard/health-dashboard';
 import { ServiceTopology } from './features/topology/service-topology';
 import { TerminalConsole } from './features/terminal-console/terminal-console';
@@ -9,7 +11,7 @@ import { TerminalConsole } from './features/terminal-console/terminal-console';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
-  imports: [HealthDashboard, ServiceTopology, TerminalConsole],
+  imports: [CareerPods, EnvRegistry, HealthDashboard, ServiceTopology, TerminalConsole],
   styleUrl: './app.css',
   templateUrl: './app.html',
 })

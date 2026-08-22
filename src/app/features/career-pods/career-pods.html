@@ -1,0 +1,36 @@
+<section class="panel" aria-label="Career replica pods">
+  <div class="pods-layout">
+    <div class="pods-grid">
+      @for (pod of pods(); track pod.name) {
+        <button
+          type="button"
+          class="pod-card"
+          [class.pod-selected]="store.selectedPodIndex() === pod.index"
+          (click)="selectPod(pod.index)"
+        >
+          <span class="pod-name">{{ pod.name }}</span>
+          <span class="pod-status"><span class="status-dot" aria-hidden="true"></span>Running</span>
+          <span class="pod-meta">{{ pod.entry.role }} — {{ pod.entry.company }}</span>
+        </button>
+      }
+    </div>
+    @if (selectedPod(); as pod) {
+      <article class="detail-card">
+        <div class="timeline-row">
+          <span class="timeline-label">TIMELINE</span>
+          <span class="timeline-value">{{ pod.entry.period }}</span>
+        </div>
+        <h2 class="detail-role">{{ pod.entry.role }}</h2>
+        <p class="detail-company">{{ pod.entry.company }}</p>
+        <h3 class="detail-heading">RESPONSIBILITIES</h3>
+        <ul class="highlights-list">
+          @for (highlight of pod.entry.highlights; track highlight) {
+            <li class="highlight-item">{{ highlight }}</li>
+          }
+        </ul>
+      </article>
+    } @else {
+      <p class="detail-placeholder">SELECT A POD TO INSPECT</p>
+    }
+  </div>
+</section>

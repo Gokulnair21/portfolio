@@ -40,6 +40,7 @@ export class ClusterStateService {
   readonly #logs = signal<LogEntry[]>([]);
   readonly #outage = signal<OutageOverlay | null>(null);
   readonly #selectedNodeId = signal<string | null>(NO_NODE_ID);
+  readonly #selectedPodIndex = signal<number | null>(null);
 
   readonly selectedTab = this.#tab.asReadonly();
   readonly dataStatus = this.#dataStatus.asReadonly();
@@ -47,6 +48,7 @@ export class ClusterStateService {
   readonly logs = this.#logs.asReadonly();
   readonly outage = this.#outage.asReadonly();
   readonly selectedNodeId = this.#selectedNodeId.asReadonly();
+  readonly selectedPodIndex = this.#selectedPodIndex.asReadonly();
 
   readonly topologyNodes = computed<TopologyNode[]>(
     () => this.#content()?.topology?.nodes ?? [],
@@ -95,6 +97,10 @@ export class ClusterStateService {
 
   selectNode(id: string | null): void {
     this.#selectedNodeId.set(id);
+  }
+
+  selectPod(index: number | null): void {
+    this.#selectedPodIndex.set(index);
   }
 
   hydrate(data: PortfolioData): void {

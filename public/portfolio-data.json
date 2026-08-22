@@ -112,7 +112,13 @@
   "envProperties": [
     { "key": "spring.profiles.active", "value": "portfolio-prod" },
     { "key": "management.endpoints.web.exposure.include", "value": "health,info,metrics" },
-    { "key": "cluster.region", "value": "eu-central-1" }
+    { "key": "cluster.region", "value": "eu-central-1" },
+    { "key": "gokul.skills.languages", "value": "Java 17" },
+    { "key": "gokul.skills.frameworks", "value": "Spring Boot" },
+    { "key": "gokul.skills.messaging", "value": "Kafka, RabbitMQ" },
+    { "key": "gokul.skills.persistence", "value": "PostgreSQL, Redis" },
+    { "key": "gokul.skills.observability", "value": "Prometheus, Grafana" },
+    { "key": "gokul.skills.practices", "value": "TDD, contract testing" }
   ],
   "health": {
     "liveness": "UP",

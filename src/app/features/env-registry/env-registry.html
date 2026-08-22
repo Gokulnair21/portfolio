@@ -1,0 +1,35 @@
+<section class="panel" aria-label="Environment registry">
+  <div class="registry-layout">
+    <div class="registry-header">
+      <span class="registry-endpoint">/actuator/env</span>
+      <input
+        type="text"
+        class="filter-input"
+        placeholder="FILTER BY KEY OR VALUE"
+        aria-label="Filter environment properties by key or value"
+        [value]="filterText()"
+        (input)="onFilterInput($event)"
+      />
+    </div>
+    @if (filteredProperties().length === 0) {
+      <p class="registry-empty">NO MATCHING PROPERTIES</p>
+    } @else {
+      <table class="property-table">
+        <thead>
+          <tr>
+            <th class="col-key">PROPERTY KEY</th>
+            <th class="col-value">VALUE</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (property of filteredProperties(); track property.key) {
+            <tr class="property-row">
+              <td class="cell-key">{{ property.key }}</td>
+              <td class="cell-value">{{ property.value }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</section>
