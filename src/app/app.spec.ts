@@ -4,6 +4,8 @@ import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { appConfig } from './app.config';
+import { EmailJsAdapter } from './delivery/emailjs/emailjs.adapter';
+import { MESSAGE_DELIVERY, MessageDelivery } from './delivery/message-delivery.port';
 import { PortfolioData } from './core/data/portfolio-data';
 import { PortfolioDataLoader } from './core/data/portfolio-data-loader.service';
 import { SimulationEngine } from './core/simulation/simulation-engine';
@@ -43,6 +45,10 @@ const VALID_DATA: PortfolioData = {
 
 const DATA_URL = '/portfolio-data.json';
 
+const FAKE_DELIVERY: MessageDelivery = {
+  send: () => Promise.resolve({ ok: false, failure: { reason: 'provider-error', detail: 'unused' } }),
+};
+
 describe('App', () => {
   let http: HttpTestingController;
   let store: ClusterStateService;
@@ -54,6 +60,7 @@ describe('App', () => {
         ClusterStateService,
         PortfolioDataLoader,
         SimulationEngine,
+        { provide: MESSAGE_DELIVERY, useValue: FAKE_DELIVERY },
         provideHttpClient(),
         provideHttpClientTesting(),
       ],

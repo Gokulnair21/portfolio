@@ -107,7 +107,8 @@
   overflow-x: auto;
 }
 
-.validation-error {
+.validation-error,
+.delivery-error {
   font-size: var(--text-sm);
   color: var(--status-degraded);
   background-color: color-mix(in srgb, var(--status-degraded) 12%, transparent);
@@ -115,6 +116,16 @@
   border-radius: var(--radius-sm);
   padding: var(--space-2) var(--space-4);
   margin: 0;
+}
+
+.response-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.response-headers {
+  color: var(--status-up);
 }
 
 .execute-row {

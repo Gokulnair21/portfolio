@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ClusterStateService } from '../../core/state/cluster-state.service';
-import { MessagePayload } from '../../delivery/message-delivery.port';
+import {
+  MESSAGE_DELIVERY,
+  DeliveryReceipt,
+  MessagePayload,
+} from '../../delivery/message-delivery.port';
 
 type BodyParseResult =
   | { readonly ok: true; readonly value: MessagePayload }
@@ -8,6 +12,10 @@ type BodyParseResult =
 
 const HTTP_METHOD = 'POST';
 const ENDPOINT_PATH = '/api/v1/contact';
+const LOG_SOURCE_CONTROLLER = 'ContactController';
+const LOG_SOURCE_PRODUCER = 'ContactKafkaProducer';
+
+const RESPONSE_HEADERS = ['HTTP/1.1 200 OK', 'Content-Type: application/json', 'X-Mock-Mode: true'];
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
@@ -38,12 +46,17 @@ function parseMessageBody(text: string): BodyParseResult {
 })
 export class SwaggerPlayground {
   protected readonly store = inject(ClusterStateService);
+  protected readonly delivery = inject(MESSAGE_DELIVERY);
 
   protected readonly httpMethod = HTTP_METHOD;
   protected readonly endpointPath = ENDPOINT_PATH;
+  protected readonly responseHeadersText = RESPONSE_HEADERS.join('\n');
 
   protected readonly tryItOut = signal(false);
   protected readonly validationError = signal<string | null>(null);
+  protected readonly sending = signal(false);
+  protected readonly receipt = signal<DeliveryReceipt | null>(null);
+  protected readonly deliveryError = signal<string | null>(null);
 
   protected readonly defaultBody = computed(() =>
     JSON.stringify(
@@ -58,6 +71,8 @@ export class SwaggerPlayground {
   );
 
   protected readonly bodyText = signal('');
+
+  #lastTimestampMs = 0;
 
   constructor() {
     this.bodyText.set(this.defaultBody());
@@ -76,12 +91,48 @@ export class SwaggerPlayground {
     this.validationError.set(null);
   }
 
-  protected execute(): void {
+  protected async execute(): Promise<void> {
+    if (this.sending()) return;
     const result = parseMessageBody(this.bodyText());
     if (!result.ok) {
       this.validationError.set(result.reason);
       return;
     }
     this.validationError.set(null);
+    this.receipt.set(null);
+    this.deliveryError.set(null);
+
+    this.#appendLog(
+      LOG_SOURCE_CONTROLLER,
+      `${HTTP_METHOD} ${ENDPOINT_PATH}: controller received contact POST from ${result.value.email}`,
+    );
+    this.sending.set(true);
+    const deliveryResult = await this.delivery.send(result.value);
+    this.sending.set(false);
+
+    if (deliveryResult.ok) {
+      this.#appendLog(
+        LOG_SOURCE_PRODUCER,
+        `Published contact message to topic ${deliveryResult.receipt.topic} partition ${deliveryResult.receipt.partition} offset ${deliveryResult.receipt.offset}`,
+      );
+      this.receipt.set(deliveryResult.receipt);
+    } else {
+      this.deliveryError.set(deliveryResult.failure.detail);
+    }
+  }
+
+  protected formatReceipt(receipt: DeliveryReceipt): string {
+    return JSON.stringify(receipt, null, 2);
+  }
+
+  #appendLog(source: string, message: string): void {
+    const timestampMs = Math.max(Date.now(), this.#lastTimestampMs + 1);
+    this.#lastTimestampMs = timestampMs;
+    this.store.appendLog({
+      source,
+      level: 'INFO',
+      message,
+      timestamp: new Date(timestampMs).toISOString(),
+    });
   }
 }

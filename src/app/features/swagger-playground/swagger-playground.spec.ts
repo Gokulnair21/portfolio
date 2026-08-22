@@ -2,15 +2,33 @@ import { TestBed } from '@angular/core/testing';
 import portfolioDataJson from '../../../../public/portfolio-data.json';
 import { parsePortfolioData } from '../../core/data/portfolio-data';
 import { ClusterStateService } from '../../core/state/cluster-state.service';
+import {
+  MESSAGE_DELIVERY,
+  DeliveryReceipt,
+  DeliveryResult,
+  MessageDelivery,
+  MessagePayload,
+} from '../../delivery/message-delivery.port';
 import { SwaggerPlayground } from './swagger-playground';
+
+const VALID_BODY = JSON.stringify({
+  name: 'Gokul',
+  email: 'you@example.com',
+  message: 'Hello from the playground.',
+});
 
 describe('SwaggerPlayground', () => {
   let store: ClusterStateService;
+  let sendSpy: ReturnType<typeof vi.fn<MessageDelivery['send']>>;
 
   beforeEach(() => {
+    sendSpy = vi.fn();
     TestBed.configureTestingModule({
       imports: [SwaggerPlayground],
-      providers: [ClusterStateService],
+      providers: [
+        ClusterStateService,
+        { provide: MESSAGE_DELIVERY, useValue: { send: sendSpy } satisfies MessageDelivery },
+      ],
     });
     store = TestBed.inject(ClusterStateService);
     store.hydrate(parsePortfolioData(portfolioDataJson)!);
@@ -22,6 +40,11 @@ describe('SwaggerPlayground', () => {
     return fixture;
   }
 
+  function openEditor(fixture: ReturnType<typeof render>): void {
+    (fixture.nativeElement.querySelector('.try-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+  }
+
   function setBody(fixture: ReturnType<typeof render>, text: string): void {
     const editor = fixture.nativeElement.querySelector('.request-editor') as HTMLTextAreaElement;
     editor.value = text;
@@ -29,8 +52,11 @@ describe('SwaggerPlayground', () => {
     fixture.detectChanges();
   }
 
-  function execute(fixture: ReturnType<typeof render>): void {
+  async function execute(fixture: ReturnType<typeof render>): Promise<void> {
     (fixture.nativeElement.querySelector('.execute-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await Promise.resolve();
+    await Promise.resolve();
     fixture.detectChanges();
   }
 
@@ -50,8 +76,7 @@ describe('SwaggerPlayground', () => {
     const fixture = render();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    (compiled.querySelector('.try-button') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    openEditor(fixture);
 
     expect(compiled.querySelector('.request-editor')).toBeTruthy();
     expect(compiled.querySelector('.execute-button')?.textContent?.trim()).toBe('EXECUTE');
@@ -61,48 +86,137 @@ describe('SwaggerPlayground', () => {
   it('should restore defaults when try-it-out is toggled back off', () => {
     const data = parsePortfolioData(portfolioDataJson)!;
     const fixture = render();
-    const compiled = fixture.nativeElement as HTMLElement;
 
-    (compiled.querySelector('.try-button') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    openEditor(fixture);
     setBody(fixture, '{"name":"tampered"}');
-    (compiled.querySelector('.try-button') as HTMLButtonElement).click();
-    fixture.detectChanges();
-
-    const preview = compiled.querySelector('.request-preview')?.textContent ?? '';
-    expect(JSON.parse(preview)).toEqual({ name: '', email: data.contact.email, message: '' });
-  });
-
-  it('should reject malformed JSON inline without producing logs or a response', () => {
-    const fixture = render();
-    const compiled = fixture.nativeElement as HTMLElement;
-
-    (compiled.querySelector('.try-button') as HTMLButtonElement).click();
-    fixture.detectChanges();
-    setBody(fixture, '{not json');
-    execute(fixture);
-
-    expect(compiled.querySelector('.validation-error')?.textContent).toContain(
-      'not valid JSON',
-    );
-    expect(store.logs().length).toBe(0);
-    expect(compiled.querySelector('.response-viewer')).toBeNull();
-  });
-
-  it('should reject empty, array, and null bodies as non-object payloads', () => {
-    const fixture = render();
-
     (fixture.nativeElement.querySelector('.try-button') as HTMLButtonElement).click();
     fixture.detectChanges();
 
+    const preview = fixture.nativeElement.querySelector('.request-preview')?.textContent ?? '';
+    expect(JSON.parse(preview)).toEqual({ name: '', email: data.contact.email, message: '' });
+  });
+
+  it('should reject malformed JSON inline without sending or logging anything', async () => {
+    const fixture = render();
+
+    openEditor(fixture);
+    setBody(fixture, '{not json');
+    await execute(fixture);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.validation-error')?.textContent).toContain('not valid JSON');
+    expect(sendSpy).not.toHaveBeenCalled();
+    expect(store.logs().length).toBe(0);
+    expect(compiled.querySelector('.response-section')).toBeNull();
+  });
+
+  it('should reject empty, array, and null bodies as non-object payloads', async () => {
+    const fixture = render();
+
+    openEditor(fixture);
+
     for (const body of ['', '[]', 'null']) {
       setBody(fixture, body);
-      execute(fixture);
+      await execute(fixture);
 
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.validation-error')).toBeTruthy();
     }
 
+    expect(sendSpy).not.toHaveBeenCalled();
     expect(store.logs().length).toBe(0);
+  });
+
+  it('should deliver through the port and render mock 200 OK headers plus a Kafka receipt with ingestion logs', async () => {
+    const receipt: DeliveryReceipt = {
+      topic: 'contact-ingest',
+      partition: 0,
+      offset: 4,
+      timestamp: new Date('2026-08-22T00:00:00Z').toISOString(),
+      messageId: 'contact-4-1770000000000',
+      status: 'QUEUED',
+    };
+    let capturedPayload: MessagePayload | undefined;
+    sendSpy.mockImplementation(async (payload: MessagePayload) => {
+      capturedPayload = payload;
+      return { ok: true, receipt } satisfies DeliveryResult;
+    });
+    const fixture = render();
+
+    openEditor(fixture);
+    setBody(fixture, VALID_BODY);
+    await execute(fixture);
+
+    expect(capturedPayload).toEqual({ name: 'Gokul', email: 'you@example.com', message: 'Hello from the playground.' });
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const headers = compiled.querySelector('.response-headers')?.textContent ?? '';
+    expect(headers).toContain('HTTP/1.1 200 OK');
+    const receiptText = Array.from(compiled.querySelectorAll('.response-viewer'))
+      .map((node) => node.textContent ?? '')
+      .join('');
+    expect(JSON.parse(receiptText.replace(headers, ''))).toEqual(receipt);
+
+    const sources = store.logs().map((entry) => entry.source);
+    expect(sources[0]).toBe('ContactController');
+    expect(store.logs()[0].message).toContain('/api/v1/contact');
+    expect(sources[sources.length - 1]).toBe('ContactKafkaProducer');
+    expect(store.logs()[store.logs().length - 1].message).toContain('partition 0 offset 4');
+  });
+
+  it('should show a themed error banner on typed failure without escaping an exception', async () => {
+    sendSpy.mockResolvedValue({
+      ok: false,
+      failure: { reason: 'provider-error', detail: 'headless request blocked' },
+    } satisfies DeliveryResult);
+    const fixture = render();
+
+    openEditor(fixture);
+    setBody(fixture, VALID_BODY);
+    await execute(fixture);
+
+    const banner = fixture.nativeElement.querySelector('.delivery-error') as HTMLElement | null;
+    expect(banner?.textContent).toContain('DELIVERY FAILED');
+    expect(banner?.textContent).toContain('headless request blocked');
+    expect(banner?.getAttribute('role')).toBe('alert');
+    expect(store.logs().length).toBe(1);
+  });
+
+  it('should disable execute while a send is in flight and restore it afterwards', async () => {
+    let releaseSend: ((result: DeliveryResult) => void) | undefined;
+    sendSpy.mockImplementation(
+      () =>
+        new Promise<DeliveryResult>((resolve) => {
+          releaseSend = resolve;
+        }),
+    );
+    const fixture = render();
+
+    openEditor(fixture);
+    setBody(fixture, VALID_BODY);
+    (fixture.nativeElement.querySelector('.execute-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('.execute-button') as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    expect(button.textContent?.trim()).toBe('SENDING…');
+
+    releaseSend!({
+      ok: true,
+      receipt: {
+        topic: 'contact-ingest',
+        partition: 0,
+        offset: 0,
+        timestamp: new Date().toISOString(),
+        messageId: 'contact-0-1',
+        status: 'QUEUED',
+      } satisfies DeliveryReceipt,
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(button.disabled).toBe(false);
+    expect(button.textContent?.trim()).toBe('EXECUTE');
   });
 });

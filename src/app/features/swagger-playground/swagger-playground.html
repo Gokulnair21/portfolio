@@ -25,11 +25,29 @@
       @if (validationError(); as error) {
         <p class="validation-error" role="alert">{{ error }}</p>
       }
+      @if (deliveryError(); as error) {
+        <p class="delivery-error" role="alert">DELIVERY FAILED: {{ error }}</p>
+      }
       <div class="execute-row">
-        <button type="button" class="execute-button" (click)="execute()">EXECUTE</button>
+        <button
+          type="button"
+          class="execute-button"
+          [disabled]="sending()"
+          (click)="execute()"
+        >
+          {{ sending() ? 'SENDING…' : 'EXECUTE' }}
+        </button>
       </div>
     } @else {
       <pre class="request-preview">{{ bodyText() }}</pre>
+    }
+    @if (receipt(); as confirmed) {
+      <div class="response-section">
+        <span class="body-label">SERVER RESPONSE</span>
+        <pre class="response-viewer response-headers">{{ responseHeadersText }}</pre>
+        <span class="body-label">KAFKA RECEIPT</span>
+        <pre class="response-viewer">{{ formatReceipt(confirmed) }}</pre>
+      </div>
     }
   </div>
 </section>
