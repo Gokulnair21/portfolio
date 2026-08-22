@@ -1,11 +1,19 @@
 <section class="panel">
   <div class="probe-grid">
+    @if (store.livenessStatus() === 'HALF-OPEN') {
+      <div class="fallback-banner" role="status">
+        Circuit half-open &mdash; serving stale cached reads while the connection recovers
+      </div>
+    }
     <div class="probe-row">
       <span class="probe-label">Liveness Probe</span>
       <span
         class="probe-value"
         [class.status-up]="store.livenessUp()"
-        [class.status-degraded]="!store.livenessUp()"
+        [class.status-half-open]="store.livenessStatus() === 'HALF-OPEN'"
+        [class.status-degraded]="
+          store.livenessStatus() !== 'UP' && store.livenessStatus() !== 'HALF-OPEN'
+        "
         >{{ store.livenessStatus() }}</span
       >
     </div>
@@ -23,13 +31,24 @@
       >
     </div>
   </div>
-  <button
-    type="button"
-    class="outage-button"
-    aria-label="Simulate Network Outage"
-    [disabled]="outageActive || store.dataStatus() !== 'ready'"
-    (click)="engine.triggerNetworkOutage()"
-  >
-    SIMULATE NETWORK OUTAGE
-  </button>
+  <div class="control-row">
+    <button
+      type="button"
+      class="outage-button"
+      aria-label="Simulate Network Outage"
+      [disabled]="outageActive || store.dataStatus() !== 'ready'"
+      (click)="engine.triggerNetworkOutage()"
+    >
+      SIMULATE NETWORK OUTAGE
+    </button>
+    <button
+      type="button"
+      class="recovery-button"
+      aria-label="Trigger Auto-Recovery"
+      [disabled]="store.livenessStatus() !== 'DEGRADED' || store.dataStatus() !== 'ready'"
+      (click)="engine.triggerAutoRecovery()"
+    >
+      TRIGGER AUTO-RECOVERY
+    </button>
+  </div>
 </section>

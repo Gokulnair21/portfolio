@@ -46,7 +46,7 @@ export interface PortfolioData {
   health: HealthConfig;
 }
 
-export type ClusterStatus = 'UP' | 'DEGRADED';
+export type ClusterStatus = 'UP' | 'DEGRADED' | 'HALF-OPEN';
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR';
 

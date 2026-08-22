@@ -70,6 +70,16 @@ export class ClusterStateService {
     return true;
   }
 
+  markHalfOpen(): boolean {
+    let changed = false;
+    this.#outage.update((overlay) => {
+      if (overlay?.status !== 'DEGRADED') return overlay;
+      changed = true;
+      return { ...overlay, status: 'HALF-OPEN' };
+    });
+    return changed;
+  }
+
   clearOutage(): boolean {
     if (this.#outage() === null) return false;
     this.#outage.set(null);

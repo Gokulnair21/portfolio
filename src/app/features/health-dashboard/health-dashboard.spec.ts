@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import portfolioDataJson from '../../../../public/portfolio-data.json';
 import { PortfolioData, parsePortfolioData } from '../../core/data/portfolio-data';
-import { SimulationEngine } from '../../core/simulation/simulation-engine';
+import { AUTO_RECOVERY_DELAY_MS, SimulationEngine } from '../../core/simulation/simulation-engine';
 import { ClusterStateService } from '../../core/state/cluster-state.service';
+import { vi } from 'vitest';
 import { HealthDashboard } from './health-dashboard';
 
 const SEEDED_DATA: PortfolioData = {
@@ -154,6 +155,122 @@ describe('HealthDashboard', () => {
 
       expect(store.logs().length).toBe(logCount);
       expect(store.livenessStatus()).toBe('DEGRADED');
+    });
+  });
+
+  describe('recovery trigger', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('should render the Trigger Auto-Recovery button', () => {
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.recovery-button');
+
+      expect(button?.textContent?.trim()).toBe('TRIGGER AUTO-RECOVERY');
+      expect(button?.getAttribute('aria-label')).toBe('Trigger Auto-Recovery');
+    });
+
+    it('should disable the recovery button while UP even when data is ready', () => {
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.recovery-button');
+
+      expect(button).not.toBeNull();
+      expect(button!.disabled).toBe(true);
+    });
+
+    it('should enable the recovery button during an active outage', () => {
+      engine.triggerNetworkOutage();
+
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.recovery-button');
+
+      expect(button!.disabled).toBe(false);
+    });
+
+    it('should disable the recovery button when data is not ready', () => {
+      store.markLoadFailed();
+
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.recovery-button');
+
+      expect(button!.disabled).toBe(true);
+    });
+
+    it('should disable the recovery button during the HALF-OPEN window and after recovery', () => {
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.recovery-button')!;
+
+      engine.triggerNetworkOutage();
+      fixture.detectChanges();
+      expect(store.livenessStatus()).toBe('DEGRADED');
+      expect(button.disabled).toBe(false);
+
+      engine.triggerAutoRecovery();
+      fixture.detectChanges();
+      expect(store.livenessStatus()).toBe('HALF-OPEN');
+      expect(button.disabled).toBe(true);
+
+      vi.advanceTimersByTime(AUTO_RECOVERY_DELAY_MS);
+      fixture.detectChanges();
+      expect(store.livenessStatus()).toBe('UP');
+      expect(button.disabled).toBe(true);
+    });
+
+    it('should render the HALF-OPEN warning banner and warn styling when clicked mid-outage', () => {
+      engine.triggerNetworkOutage();
+
+      const compiled = render();
+      const bannerBefore = compiled.querySelector('.fallback-banner');
+      expect(bannerBefore).toBeNull();
+
+      const button = compiled.querySelector<HTMLButtonElement>('.recovery-button')!;
+      button.click();
+      fixture.detectChanges();
+
+      const banner = compiled.querySelector<HTMLElement>('.fallback-banner');
+      expect(banner).not.toBeNull();
+      expect(banner!.getAttribute('role')).toBe('status');
+
+      const values = Array.from(compiled.querySelectorAll<HTMLElement>('.probe-value'));
+      expect(values[0].textContent?.trim()).toBe('HALF-OPEN');
+      expect(values[0].classList.contains('status-half-open')).toBe(true);
+      expect(values[0].classList.contains('status-up')).toBe(false);
+      expect(Number.parseFloat(values[2].textContent!.trim())).toBeGreaterThan(0);
+
+      const logCountAfterStage1 = store.logs().length;
+      button.click();
+      fixture.detectChanges();
+      expect(store.logs().length).toBe(logCountAfterStage1);
+      expect(store.livenessStatus()).toBe('HALF-OPEN');
+    });
+
+    it('should restore the UP render after the staged completion elapses', () => {
+      engine.triggerNetworkOutage();
+
+      const compiled = render();
+      compiled.querySelector<HTMLButtonElement>('.recovery-button')!.click();
+      fixture.detectChanges();
+      expect(compiled.querySelector('.fallback-banner')).not.toBeNull();
+
+      vi.advanceTimersByTime(AUTO_RECOVERY_DELAY_MS);
+      fixture.detectChanges();
+
+      expect(compiled.querySelector('.fallback-banner')).toBeNull();
+
+      const values = Array.from(compiled.querySelectorAll<HTMLElement>('.probe-value'));
+      expect(values[0].textContent?.trim()).toBe('UP');
+      expect(values[0].classList.contains('status-up')).toBe(true);
+      expect(values[2].textContent?.trim()).toBe('0.00%');
+      expect(values[2].classList.contains('status-up')).toBe(true);
+
+      const recoveryButton =
+        compiled.querySelector<HTMLButtonElement>('.recovery-button');
+      expect(recoveryButton!.disabled).toBe(true);
     });
   });
 });

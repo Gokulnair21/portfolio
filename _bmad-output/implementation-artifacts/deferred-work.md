@@ -18,3 +18,9 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-sprint-status-review-reconciliation.md`
   summary: Draft story 2-3-auto-recovery-sequence so it becomes ready-for-dev following its completed predecessors.
   evidence: Sprint workflow notes say the next story is typically created after the previous ones finish; 2-3 remains backlog while 2-1 and 2-2 are done.
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-auto-recovery-sequence.md`
+  summary: Add `:focus-visible` styling to the new recovery button (and verify parity with `.outage-button`) as part of the project-wide focus-visible pass.
+  evidence: Review found the recovery button styles hover/disabled but no keyboard focus indicator, extending the focus-visible gap already deferred from stories 1-1/1-2 to a newly shipped control.
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-auto-recovery-sequence.md`
+  summary: Announce recovery completion to assistive tech — the HALF-OPEN banner uses `role="status"` on appearance, but its removal and the return-to-UP transition have no live-region cue.
+  evidence: Review found assistive-tech users get no "recovered" announcement; consistent with the project-wide i18n/a11y audit pass already deferred in this file.

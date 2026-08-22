@@ -56,6 +56,48 @@
   color: var(--status-degraded);
 }
 
+.status-half-open {
+  color: var(--status-warn);
+}
+
+.fallback-banner {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.125em;
+  color: var(--status-warn);
+  background-color: color-mix(in srgb, var(--status-warn) 12%, transparent);
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+}
+
+.control-row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.recovery-button {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.125em;
+  color: var(--status-warn);
+  background-color: transparent;
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+}
+
+.recovery-button:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.recovery-button:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
 .outage-button {
   font-family: var(--font-mono);
   font-size: var(--text-sm);

@@ -238,5 +238,47 @@ describe('ClusterStateService', () => {
       expect(store.clearOutage()).toBe(false);
       expect(store.livenessStatus()).toBe('UP');
     });
+
+    it('should advance an active DEGRADED overlay to HALF-OPEN via markHalfOpen', () => {
+      store.beginOutage(41.37);
+
+      expect(store.markHalfOpen()).toBe(true);
+
+      expect(store.outage()!.status).toBe('HALF-OPEN');
+      expect(store.outage()!.errorRate).toBe(41.37);
+      expect(store.livenessStatus()).toBe('HALF-OPEN');
+      expect(store.livenessUp()).toBe(false);
+    });
+
+    it('should return false from markHalfOpen when no outage is active', () => {
+      store.hydrate(VALID_DATA);
+
+      expect(store.markHalfOpen()).toBe(false);
+      expect(store.livenessStatus()).toBe('UP');
+    });
+
+    it('should return false from markHalfOpen when the overlay is already HALF-OPEN', () => {
+      store.beginOutage(41.37);
+      store.markHalfOpen();
+
+      expect(store.markHalfOpen()).toBe(false);
+      expect(store.livenessStatus()).toBe('HALF-OPEN');
+    });
+
+    it('should restore UP and zero error rate after HALF-OPEN once the overlay clears', () => {
+      store.hydrate({
+        ...VALID_DATA,
+        health: { liveness: 'UP', brokerTotal: 2, brokerActive: 2, errorRate: 0 },
+      });
+      store.beginOutage(41.37);
+      store.markHalfOpen();
+
+      expect(store.clearOutage()).toBe(true);
+
+      expect(store.outage()).toBeNull();
+      expect(store.livenessStatus()).toBe('UP');
+      expect(store.errorRate()).toBe('0.00%');
+      expect(store.errorRateIsZero()).toBe(true);
+    });
   });
 });
