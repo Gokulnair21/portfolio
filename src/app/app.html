@@ -8,5 +8,32 @@
       >{{ statusLabel() }}</span
     >
   </header>
-  <main class="panel-area" aria-label="Dashboard panels"></main>
+  <nav class="tab-bar" role="tablist" aria-label="Dashboard sections">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        class="tab-button"
+        [class.tab-active]="store.selectedTab() === tab.id"
+        [attr.aria-selected]="store.selectedTab() === tab.id"
+        (click)="store.selectTab(tab.id)"
+      >
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+  <main class="panel-area" aria-label="Dashboard panels">
+    @switch (store.selectedTab()) {
+      @case ('health-dashboard') {
+        <section class="panel">
+          <p class="panel-placeholder panel-placeholder-info">HEALTH MODULE DEPLOYING</p>
+        </section>
+      }
+      @default {
+        <section class="panel">
+          <p class="panel-placeholder">MODULE NOT DEPLOYED</p>
+        </section>
+      }
+    }
+  </main>
 </div>
