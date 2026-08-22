@@ -6,12 +6,20 @@ import { CareerPods } from './features/career-pods/career-pods';
 import { EnvRegistry } from './features/env-registry/env-registry';
 import { HealthDashboard } from './features/health-dashboard/health-dashboard';
 import { ServiceTopology } from './features/topology/service-topology';
+import { SwaggerPlayground } from './features/swagger-playground/swagger-playground';
 import { TerminalConsole } from './features/terminal-console/terminal-console';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
-  imports: [CareerPods, EnvRegistry, HealthDashboard, ServiceTopology, TerminalConsole],
+  imports: [
+    CareerPods,
+    EnvRegistry,
+    HealthDashboard,
+    ServiceTopology,
+    SwaggerPlayground,
+    TerminalConsole,
+  ],
   styleUrl: './app.css',
   templateUrl: './app.html',
 })

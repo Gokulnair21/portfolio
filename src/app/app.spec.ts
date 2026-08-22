@@ -168,6 +168,7 @@ describe('App', () => {
         ['service-topology', 'app-service-topology'],
         ['env-registry', 'app-env-registry'],
         ['career-pods', 'app-career-pods'],
+        ['swagger-playground', 'app-swagger-playground'],
       ];
 
       for (const [tabId, selector] of expected) {

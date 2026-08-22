@@ -1,0 +1,35 @@
+<section class="panel" aria-label="Swagger playground">
+  <div class="playground-layout">
+    <div class="endpoint-header">
+      <span class="method-badge">{{ httpMethod }}</span>
+      <span class="endpoint-path">{{ endpointPath }}</span>
+      <button
+        type="button"
+        class="try-button"
+        [class.try-active]="tryItOut()"
+        (click)="toggleTryItOut()"
+      >
+        {{ tryItOut() ? 'CANCEL' : 'TRY IT OUT' }}
+      </button>
+    </div>
+    @if (tryItOut()) {
+      <label class="body-label" for="request-body">REQUEST BODY</label>
+      <textarea
+        id="request-body"
+        class="request-editor"
+        aria-label="Contact request JSON body"
+        spellcheck="false"
+        [value]="bodyText()"
+        (input)="onBodyInput($event)"
+      ></textarea>
+      @if (validationError(); as error) {
+        <p class="validation-error" role="alert">{{ error }}</p>
+      }
+      <div class="execute-row">
+        <button type="button" class="execute-button" (click)="execute()">EXECUTE</button>
+      </div>
+    } @else {
+      <pre class="request-preview">{{ bodyText() }}</pre>
+    }
+  </div>
+</section>
