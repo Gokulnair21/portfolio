@@ -1,6 +1,7 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import portfolioDataJson from '../../../../public/portfolio-data.json';
 import { PortfolioData, parsePortfolioData } from '../../core/data/portfolio-data';
+import { SimulationEngine } from '../../core/simulation/simulation-engine';
 import { ClusterStateService } from '../../core/state/cluster-state.service';
 import { HealthDashboard } from './health-dashboard';
 
@@ -18,18 +19,21 @@ const SEEDED_DATA: PortfolioData = {
 
 describe('HealthDashboard', () => {
   let store: ClusterStateService;
+  let engine: SimulationEngine;
+  let fixture: ComponentFixture<HealthDashboard>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HealthDashboard],
-      providers: [ClusterStateService],
+      providers: [ClusterStateService, SimulationEngine],
     });
     store = TestBed.inject(ClusterStateService);
+    engine = TestBed.inject(SimulationEngine);
     store.hydrate(SEEDED_DATA);
   });
 
   function render() {
-    const fixture = TestBed.createComponent(HealthDashboard);
+    fixture = TestBed.createComponent(HealthDashboard);
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
   }
@@ -81,5 +85,75 @@ describe('HealthDashboard', () => {
     expect(spans[0].classList.contains('status-degraded')).toBe(true);
     expect(spans[2].classList.contains('status-up')).toBe(false);
     expect(spans[2].classList.contains('status-degraded')).toBe(true);
+  });
+
+  describe('outage trigger', () => {
+    it('should render the Simulate Network Outage button', () => {
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.outage-button');
+
+      expect(button?.textContent?.trim()).toBe('SIMULATE NETWORK OUTAGE');
+    });
+
+    it('should enable the button while UP and data is ready', () => {
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.outage-button');
+
+      expect(button).not.toBeNull();
+      expect(button!.disabled).toBe(false);
+    });
+
+    it('should transition the rendered probes to DEGRADED when clicked', () => {
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.outage-button')!;
+
+      button.click();
+      fixture.detectChanges();
+
+      const values = Array.from(compiled.querySelectorAll<HTMLElement>('.probe-value'));
+      expect(values[0].textContent?.trim()).toBe('DEGRADED');
+      expect(values[0].classList.contains('status-degraded')).toBe(true);
+      expect(values[0].classList.contains('status-up')).toBe(false);
+
+      expect(Number.parseFloat(values[2].textContent!.trim())).toBeGreaterThan(0);
+      expect(values[2].classList.contains('status-degraded')).toBe(true);
+    });
+
+    it('should disable the button once an outage is active', () => {
+      engine.triggerNetworkOutage();
+
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.outage-button');
+
+      expect(button!.disabled).toBe(true);
+    });
+
+    it('should disable the button and no-op clicks when data is not ready', () => {
+      store.markLoadFailed();
+
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.outage-button')!;
+      expect(button.disabled).toBe(true);
+
+      const logCount = store.logs().length;
+      button.click();
+      fixture.detectChanges();
+
+      expect(store.logs().length).toBe(logCount);
+      expect(store.livenessStatus()).toBe('UP');
+    });
+
+    it('should ignore clicks on the disabled button without duplicating the script', () => {
+      engine.triggerNetworkOutage();
+      const logCount = store.logs().length;
+
+      const compiled = render();
+      const button = compiled.querySelector<HTMLButtonElement>('.outage-button')!;
+      button.click();
+      fixture.detectChanges();
+
+      expect(store.logs().length).toBe(logCount);
+      expect(store.livenessStatus()).toBe('DEGRADED');
+    });
   });
 });

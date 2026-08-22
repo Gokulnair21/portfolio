@@ -175,4 +175,68 @@ describe('ClusterStateService', () => {
   it('should expose logs as read-only', () => {
     expect((store as { logs: unknown }).logs).not.toHaveProperty('set');
   });
+
+  describe('outage overlay', () => {
+    it('should expose outage as null before any transition', () => {
+      expect(store.outage()).toBeNull();
+      expect((store as { outage: unknown }).outage).not.toHaveProperty('set');
+    });
+
+    it('should layer degraded selectors over hydrated JSON defaults during an outage', () => {
+      store.hydrate({
+        ...VALID_DATA,
+        health: { liveness: 'UP', brokerTotal: 4, brokerActive: 3, errorRate: 0.5 },
+      });
+
+      expect(store.beginOutage(41.37)).toBe(true);
+
+      expect(store.livenessStatus()).toBe('DEGRADED');
+      expect(store.livenessUp()).toBe(false);
+      expect(store.errorRate()).toBe('41.37%');
+      expect(store.errorRateIsZero()).toBe(false);
+    });
+
+    it('should win over JSON defaults even when content reports DOWN and a nonzero rate', () => {
+      store.hydrate({
+        ...VALID_DATA,
+        health: { liveness: 'DOWN', brokerTotal: 2, brokerActive: 1, errorRate: 7.5 },
+      });
+
+      store.beginOutage(12.5);
+
+      expect(store.livenessStatus()).toBe('DEGRADED');
+      expect(store.errorRate()).toBe('12.50%');
+    });
+
+    it('should guard beginOutage idempotently so repeat writes are ignored', () => {
+      expect(store.beginOutage(41.37)).toBe(true);
+      const rate = store.errorRate();
+
+      expect(store.beginOutage(99.99)).toBe(false);
+
+      expect(store.errorRate()).toBe(rate);
+      expect(store.livenessStatus()).toBe('DEGRADED');
+    });
+
+    it('should fall back to JSON-derived defaults once the overlay clears', () => {
+      store.hydrate({
+        ...VALID_DATA,
+        health: { liveness: 'UP', brokerTotal: 2, brokerActive: 2, errorRate: 0 },
+      });
+      store.beginOutage(41.37);
+
+      expect(store.clearOutage()).toBe(true);
+
+      expect(store.outage()).toBeNull();
+      expect(store.livenessStatus()).toBe('UP');
+      expect(store.livenessUp()).toBe(true);
+      expect(store.errorRate()).toBe('0.00%');
+      expect(store.errorRateIsZero()).toBe(true);
+    });
+
+    it('should ignore clearOutage when no outage is active', () => {
+      expect(store.clearOutage()).toBe(false);
+      expect(store.livenessStatus()).toBe('UP');
+    });
+  });
 });

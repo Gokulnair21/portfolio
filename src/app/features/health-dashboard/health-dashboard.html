@@ -23,4 +23,13 @@
       >
     </div>
   </div>
+  <button
+    type="button"
+    class="outage-button"
+    aria-label="Simulate Network Outage"
+    [disabled]="outageActive || store.dataStatus() !== 'ready'"
+    (click)="engine.triggerNetworkOutage()"
+  >
+    SIMULATE NETWORK OUTAGE
+  </button>
 </section>

@@ -6,6 +6,7 @@ import { App } from './app';
 import { appConfig } from './app.config';
 import { PortfolioData } from './core/data/portfolio-data';
 import { PortfolioDataLoader } from './core/data/portfolio-data-loader.service';
+import { SimulationEngine } from './core/simulation/simulation-engine';
 import { ClusterStateService } from './core/state/cluster-state.service';
 import { TABS } from './core/state/tabs';
 
@@ -40,6 +41,7 @@ describe('App', () => {
       providers: [
         ClusterStateService,
         PortfolioDataLoader,
+        SimulationEngine,
         provideHttpClient(),
         provideHttpClientTesting(),
       ],

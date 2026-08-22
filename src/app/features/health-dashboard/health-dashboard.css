@@ -55,3 +55,25 @@
 .status-degraded {
   color: var(--status-degraded);
 }
+
+.outage-button {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.125em;
+  color: var(--status-degraded);
+  background-color: transparent;
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+}
+
+.outage-button:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.outage-button:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
