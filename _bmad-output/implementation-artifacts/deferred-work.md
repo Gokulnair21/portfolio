@@ -27,3 +27,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-epic-3-cluster-exploration-panels.md`
   summary: Run or explicitly skip the Epic 3 retrospective now that all three of its stories are done.
   evidence: Review found `epic-3-retrospective: optional` left undecided after epic-3 flipped to done; the run/skip decision is human-owned, same as the epic-1/epic-2 precedent.
+- source_spec: `_bmad-output/implementation-artifacts/spec-epic-4-swagger-contact-playground-go-live.md`
+  summary: Run or explicitly skip the Epic 4 retrospective now that all three of its stories are done.
+  evidence: Review found `epic-4-retrospective: optional` left undecided after epic-4 flipped to done; the run/skip decision is human-owned, same as the epic-1/epic-2/epic-3 precedent.
