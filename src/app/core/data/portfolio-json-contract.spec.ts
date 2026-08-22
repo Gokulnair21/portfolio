@@ -1,5 +1,9 @@
 import portfolioDataJson from '../../../../public/portfolio-data.json';
-import { parsePortfolioDataDetailed, parsePortfolioData } from './portfolio-data';
+import {
+  MAX_TOPOLOGY_NODES,
+  parsePortfolioDataDetailed,
+  parsePortfolioData,
+} from './portfolio-data';
 
 describe('public/portfolio-data.json contract', () => {
   it('should be valid JSON satisfying an object root', () => {
@@ -151,6 +155,62 @@ describe('public/portfolio-data.json contract', () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) expect(result.reason).toContain("unknown node id 'ghost-node'");
+    });
+
+    it('should fail when two topology nodes share the same id', () => {
+      const node = {
+        id: 'api-gateway',
+        label: 'api-gateway',
+        description: 'Gateway.',
+        techStack: [],
+        metrics: [],
+      };
+      const topology = { nodes: [node, { ...node }], links: [] };
+
+      const result = parseWithTopology(topology);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reason).toContain("duplicate node id 'api-gateway'");
+    });
+
+    it('should fail when a topology link references its own source node', () => {
+      const topology = {
+        nodes: [
+          {
+            id: 'api-gateway',
+            label: 'api-gateway',
+            description: 'Gateway.',
+            techStack: [],
+            metrics: [],
+          },
+        ],
+        links: [{ source: 'api-gateway', target: 'api-gateway' }],
+      };
+
+      const result = parseWithTopology(topology);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reason).toContain("self-referencing link 'api-gateway'");
+    });
+
+    it('should fail when the topology catalog exceeds the layout-supported node maximum', () => {
+      function makeNode(id: string) {
+        return {
+          id,
+          label: id,
+          description: `${id} description.`,
+          techStack: [],
+          metrics: [],
+        };
+      }
+      const ids = Array.from({ length: MAX_TOPOLOGY_NODES + 1 }, (_, i) => `node-${i}`);
+      const topology = { nodes: ids.map(makeNode), links: [] };
+
+      const result = parseWithTopology(topology);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(result.reason).toContain(`expected at most ${MAX_TOPOLOGY_NODES} entries`);
     });
   });
 });

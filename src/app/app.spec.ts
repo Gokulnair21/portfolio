@@ -8,7 +8,7 @@ import { PortfolioData } from './core/data/portfolio-data';
 import { PortfolioDataLoader } from './core/data/portfolio-data-loader.service';
 import { SimulationEngine } from './core/simulation/simulation-engine';
 import { ClusterStateService } from './core/state/cluster-state.service';
-import { TABS } from './core/state/tabs';
+import { TABS, TabId } from './core/state/tabs';
 
 const VALID_DATA: PortfolioData = {
   projects: [
@@ -157,6 +157,27 @@ describe('App', () => {
       expect(activeButtons.length).toBe(1);
       expect(activeButtons[0].textContent?.trim()).toBe('Health Dashboard');
       expect(compiled.querySelectorAll('.panel-area .panel').length).toBe(1);
+    });
+
+    it('should wire each exploration tab to its feature component instead of the placeholder', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+
+      const expected: ReadonlyArray<readonly [TabId, string]> = [
+        ['service-topology', 'app-service-topology'],
+        ['env-registry', 'app-env-registry'],
+        ['career-pods', 'app-career-pods'],
+      ];
+
+      for (const [tabId, selector] of expected) {
+        store.selectTab(tabId);
+        fixture.detectChanges();
+
+        const panelArea = compiled.querySelector('.panel-area')!;
+        expect(panelArea.querySelector(selector)).toBeTruthy();
+        expect(panelArea.querySelector('.panel-placeholder')).toBeNull();
+      }
     });
   });
 

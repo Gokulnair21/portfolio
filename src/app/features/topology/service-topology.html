@@ -21,14 +21,14 @@
           <g
             class="topo-node"
             [class.node-selected]="store.selectedNodeId() === node.id"
-            [class.node-degraded]="store.outageDegradedNodeIds().has(node.id)"
+            [class.node-degraded]="isNodeDegraded(node.id)"
             (click)="selectNode(node.id)"
           >
             <rect
               class="node-body"
               [attr.x]="rectX(node.id)"
               [attr.y]="rectY(node.id)"
-              [attr.width]="132"
+              [attr.width]="nodeWidth"
               [attr.height]="40"
               [attr.rx]="2"
             />
@@ -45,13 +45,13 @@
         <p class="detail-description">{{ node.description }}</p>
         <h3 class="detail-heading">CORE TECH STACK</h3>
         <ul class="tech-list">
-          @for (tech of node.techStack; track tech) {
+          @for (tech of node.techStack; track $index) {
             <li class="tech-item">{{ tech }}</li>
           }
         </ul>
         <h3 class="detail-heading">METRICS</h3>
         <dl class="metric-list">
-          @for (metric of store.selectedNodeMetrics(); track metric.label) {
+          @for (metric of store.selectedNodeMetrics(); track $index) {
             <div class="metric-row">
               <dt class="metric-label">{{ metric.label }}</dt>
               <dd class="metric-value">{{ metric.value }}</dd>

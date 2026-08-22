@@ -54,6 +54,9 @@ export interface TopologySection {
   links: TopologyLink[];
 }
 
+/** Maximum number of topology nodes the SVG layout supports. */
+export const MAX_TOPOLOGY_NODES = 5;
+
 export interface HealthConfig {
   liveness: string;
   brokerTotal: number;
@@ -194,12 +197,25 @@ function parseTopologySection(value: unknown): ParseResult<TopologySection> {
   const nodes = parseEntries(value['nodes'], 'topology.nodes', parseTopologyNode);
   if (!nodes.ok) return nodes;
 
+  if (nodes.value.length > MAX_TOPOLOGY_NODES)
+    return fail(
+      'topology.nodes',
+      `expected at most ${MAX_TOPOLOGY_NODES} entries, received ${nodes.value.length}`,
+    );
+
+  const nodeIds = new Set<string>();
+  for (const node of nodes.value) {
+    if (nodeIds.has(node.id)) return fail('topology.nodes', `duplicate node id '${node.id}'`);
+    nodeIds.add(node.id);
+  }
+
   const links = parseEntries(value['links'], 'topology.links', parseTopologyLink);
   if (!links.ok) return links;
 
-  const nodeIds = new Set(nodes.value.map((node) => node.id));
   for (let index = 0; index < links.value.length; index++) {
     const link = links.value[index];
+    if (link.source === link.target)
+      return fail(`topology.links[${index}]`, `self-referencing link '${link.source}'`);
     if (!nodeIds.has(link.source))
       return fail(`topology.links[${index}].source`, `unknown node id '${link.source}'`);
     if (!nodeIds.has(link.target))

@@ -50,10 +50,8 @@ export class ClusterStateService {
   readonly selectedNodeId = this.#selectedNodeId.asReadonly();
   readonly selectedPodIndex = this.#selectedPodIndex.asReadonly();
 
-  readonly topologyNodes = computed<TopologyNode[]>(
-    () => this.#content()?.topology?.nodes ?? [],
-  );
-  readonly topologyLinks = computed(() => this.#content()?.topology?.links ?? []);
+  readonly topologyNodes = computed<TopologyNode[]>(() => this.#content()?.topology.nodes ?? []);
+  readonly topologyLinks = computed(() => this.#content()?.topology.links ?? []);
   readonly selectedNode = computed<TopologyNode | null>(() => {
     const id = this.#selectedNodeId();
     return this.topologyNodes().find((node) => node.id === id) ?? null;

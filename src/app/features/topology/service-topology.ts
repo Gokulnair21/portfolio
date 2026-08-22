@@ -29,6 +29,7 @@ export class ServiceTopology {
 
   protected readonly nodes = this.store.topologyNodes;
   protected readonly links = this.store.topologyLinks;
+  protected readonly nodeWidth = NODE_WIDTH;
 
   protected readonly layouts = computed(() => {
     const layout = new Map<string, NodeLayoutSlot>();
