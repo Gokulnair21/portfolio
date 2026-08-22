@@ -29,6 +29,7 @@ const VALID_PAYLOAD = {
     linkedin: 'https://www.linkedin.com/in/your-handle',
   },
   envProperties: [{ key: 'cluster.region', value: 'eu-central-1' }],
+  health: { liveness: 'UP', brokerTotal: 2, brokerActive: 2, errorRate: 0 },
 };
 
 describe('PortfolioDataLoader', () => {
@@ -136,6 +137,45 @@ describe('PortfolioDataLoader', () => {
     });
 
     expect(store.dataStatus()).toBe('failed');
+  });
+
+  it('should fail when the health section is absent from an otherwise valid payload', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    loader.load();
+    const withoutHealth: Record<string, unknown> = { ...VALID_PAYLOAD };
+    delete withoutHealth['health'];
+    http.expectOne(DATA_URL).flush(withoutHealth);
+
+    expect(store.dataStatus()).toBe('failed');
+    expect(store.content()).toBeNull();
+  });
+
+  it('should fail when health brokerActive exceeds brokerTotal', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    loader.load();
+    http.expectOne(DATA_URL).flush({
+      ...VALID_PAYLOAD,
+      health: { ...VALID_PAYLOAD.health, brokerActive: VALID_PAYLOAD.health.brokerTotal + 1 },
+    });
+
+    expect(store.dataStatus()).toBe('failed');
+    expect(store.content()).toBeNull();
+  });
+
+  it('should fail when the health section has malformed values', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    loader.load();
+    const invalid = {
+      ...VALID_PAYLOAD,
+      health: { ...VALID_PAYLOAD.health, brokerActive: 'two' },
+    };
+    http.expectOne(DATA_URL).flush(invalid);
+
+    expect(store.dataStatus()).toBe('failed');
+    expect(store.content()).toBeNull();
   });
 
   it('should fail on malformed JSON body', () => {

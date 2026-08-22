@@ -1,0 +1,26 @@
+<section class="panel">
+  <div class="probe-grid">
+    <div class="probe-row">
+      <span class="probe-label">Liveness Probe</span>
+      <span
+        class="probe-value"
+        [class.status-up]="store.livenessUp()"
+        [class.status-degraded]="!store.livenessUp()"
+        >{{ store.livenessStatus() }}</span
+      >
+    </div>
+    <div class="probe-row">
+      <span class="probe-label">Active Broker Connections</span>
+      <span class="probe-value status-info">{{ store.brokerConnections() }}</span>
+    </div>
+    <div class="probe-row">
+      <span class="probe-label">Error Rate</span>
+      <span
+        class="probe-value"
+        [class.status-up]="store.errorRateIsZero()"
+        [class.status-degraded]="!store.errorRateIsZero()"
+        >{{ store.errorRate() }}</span
+      >
+    </div>
+  </div>
+</section>

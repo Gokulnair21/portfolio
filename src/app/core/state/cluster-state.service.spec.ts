@@ -19,6 +19,7 @@ const VALID_DATA: PortfolioData = {
     linkedin: 'https://www.linkedin.com/in/your-handle',
   },
   envProperties: [{ key: 'cluster.region', value: 'eu-central-1' }],
+  health: { liveness: 'UP', brokerTotal: 2, brokerActive: 2, errorRate: 0 },
 };
 
 describe('ClusterStateService', () => {
@@ -64,6 +65,32 @@ describe('ClusterStateService', () => {
   it('should default dataStatus to loading and content to null', () => {
     expect(store.dataStatus()).toBe('loading');
     expect(store.content()).toBeNull();
+  });
+
+  it('should expose FR1 health defaults before hydration', () => {
+    expect(store.livenessStatus()).toBe('UP');
+    expect(store.brokerConnections()).toBe('2 / 2');
+    expect(store.errorRate()).toBe('0.00%');
+  });
+
+  it('should derive health selectors from hydrated JSON values', () => {
+    store.hydrate({
+      ...VALID_DATA,
+      health: { liveness: 'DOWN', brokerTotal: 4, brokerActive: 3, errorRate: 0.5 },
+    });
+
+    expect(store.livenessStatus()).toBe('DOWN');
+    expect(store.brokerConnections()).toBe('3 / 4');
+    expect(store.errorRate()).toBe('0.50%');
+  });
+
+  it('should fall back to FR1 health defaults after markLoadFailed', () => {
+    store.hydrate(VALID_DATA);
+    store.markLoadFailed();
+
+    expect(store.livenessStatus()).toBe('UP');
+    expect(store.brokerConnections()).toBe('2 / 2');
+    expect(store.errorRate()).toBe('0.00%');
   });
 
   it('should transition loading to ready and set content on hydrate', () => {

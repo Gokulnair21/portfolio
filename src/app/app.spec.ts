@@ -25,6 +25,7 @@ const VALID_DATA: PortfolioData = {
     linkedin: 'https://www.linkedin.com/in/your-handle',
   },
   envProperties: [{ key: 'cluster.region', value: 'eu-central-1' }],
+  health: { liveness: 'UP', brokerTotal: 2, brokerActive: 2, errorRate: 0 },
 };
 
 const DATA_URL = '/portfolio-data.json';

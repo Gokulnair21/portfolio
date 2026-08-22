@@ -48,5 +48,11 @@
     { "key": "spring.profiles.active", "value": "portfolio-prod" },
     { "key": "management.endpoints.web.exposure.include", "value": "health,info,metrics" },
     { "key": "cluster.region", "value": "eu-central-1" }
-  ]
+  ],
+  "health": {
+    "liveness": "UP",
+    "brokerTotal": 2,
+    "brokerActive": 2,
+    "errorRate": 0
+  }
 }

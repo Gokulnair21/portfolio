@@ -17,6 +17,12 @@ describe('public/portfolio-data.json contract', () => {
     expect(data!.contact.email.length).toBeGreaterThan(0);
     expect(data!.envProperties.length).toBeGreaterThan(0);
 
+    expect(typeof data!.health.liveness).toBe('string');
+    expect(data!.health.liveness.length).toBeGreaterThan(0);
+    expect(Number.isInteger(data!.health.brokerTotal)).toBe(true);
+    expect(Number.isInteger(data!.health.brokerActive)).toBe(true);
+    expect(typeof data!.health.errorRate).toBe('number');
+
     for (const project of data!.projects) {
       expect(project.stack.length).toBeGreaterThan(0);
       expect(project.repoUrl).toMatch(/^https?:\/\//);
@@ -33,5 +39,15 @@ describe('public/portfolio-data.json contract', () => {
         repoUrl: p.repoUrl,
       })),
     );
+  });
+
+  it('should round-trip the shipped health section', () => {
+    const data = parsePortfolioData(portfolioDataJson)!;
+    expect(data.health).toEqual({
+      liveness: portfolioDataJson.health.liveness,
+      brokerTotal: portfolioDataJson.health.brokerTotal,
+      brokerActive: portfolioDataJson.health.brokerActive,
+      errorRate: portfolioDataJson.health.errorRate,
+    });
   });
 });

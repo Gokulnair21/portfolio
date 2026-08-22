@@ -2,10 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { PortfolioDataLoader } from './core/data/portfolio-data-loader.service';
 import { ClusterStateService } from './core/state/cluster-state.service';
 import { TABS } from './core/state/tabs';
+import { HealthDashboard } from './features/health-dashboard/health-dashboard';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
+  imports: [HealthDashboard],
   styleUrl: './app.css',
   templateUrl: './app.html',
 })

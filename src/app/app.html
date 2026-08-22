@@ -26,9 +26,7 @@
       @case ('ready') {
         @switch (store.selectedTab()) {
           @case ('health-dashboard') {
-            <section class="panel">
-              <p class="panel-placeholder panel-placeholder-info">HEALTH MODULE DEPLOYING</p>
-            </section>
+            <app-health-dashboard />
           }
           @default {
             <section class="panel">

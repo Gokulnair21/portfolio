@@ -31,11 +31,19 @@ export interface EnvProperty {
   value: string;
 }
 
+export interface HealthConfig {
+  liveness: string;
+  brokerTotal: number;
+  brokerActive: number;
+  errorRate: number;
+}
+
 export interface PortfolioData {
   projects: ProjectEntry[];
   experience: ExperienceEntry[];
   contact: ContactInfo;
   envProperties: EnvProperty[];
+  health: HealthConfig;
 }
 
 export type ParseResult<T> =
@@ -51,6 +59,14 @@ function isString(value: unknown): value is string {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(isString);
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isNonNegativeInteger(value: unknown): value is number {
+  return isFiniteNumber(value) && Number.isInteger(value) && value >= 0;
 }
 
 function fail(section: string, detail: string): { ok: false; reason: string } {
@@ -98,6 +114,25 @@ function parseEnvProperty(value: unknown): ParseResult<EnvProperty> {
   return { ok: true, value: { key, value: propertyValue } };
 }
 
+function parseHealthConfig(value: unknown): ParseResult<HealthConfig> {
+  if (!isRecord(value)) return fail('health', 'not an object');
+
+  const { liveness, brokerTotal, brokerActive, errorRate } = value;
+  if (!isString(liveness) || liveness.length === 0)
+    return fail('health.liveness', 'expected non-empty string');
+  if (!isNonNegativeInteger(brokerTotal))
+    return fail('health.brokerTotal', 'expected non-negative integer');
+  if (!isNonNegativeInteger(brokerActive))
+    return fail('health.brokerActive', 'expected non-negative integer');
+  if (!isFiniteNumber(errorRate) || errorRate < 0)
+    return fail('health.errorRate', 'expected finite non-negative number');
+
+  if (brokerActive > brokerTotal)
+    return fail('health.brokerActive', 'cannot exceed brokerTotal');
+
+  return { ok: true, value: { liveness, brokerTotal, brokerActive, errorRate } };
+}
+
 function parseEntries<T>(
   values: unknown,
   section: string,
@@ -129,6 +164,9 @@ export function parsePortfolioDataDetailed(value: unknown): ParseResult<Portfoli
   const envProperties = parseEntries(value['envProperties'], 'envProperties', parseEnvProperty);
   if (!envProperties.ok) return envProperties;
 
+  const health = parseHealthConfig(value['health']);
+  if (!health.ok) return health;
+
   return {
     ok: true,
     value: {
@@ -136,6 +174,7 @@ export function parsePortfolioDataDetailed(value: unknown): ParseResult<Portfoli
       experience: experience.value,
       contact: contact.value,
       envProperties: envProperties.value,
+      health: health.value,
     },
   };
 }
