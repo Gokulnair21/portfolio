@@ -1,5 +1,5 @@
 import portfolioDataJson from '../../../../public/portfolio-data.json';
-import { parsePortfolioData } from './portfolio-data';
+import { parsePortfolioDataDetailed, parsePortfolioData } from './portfolio-data';
 
 describe('public/portfolio-data.json contract', () => {
   it('should be valid JSON satisfying an object root', () => {
@@ -48,6 +48,109 @@ describe('public/portfolio-data.json contract', () => {
       brokerTotal: portfolioDataJson.health.brokerTotal,
       brokerActive: portfolioDataJson.health.brokerActive,
       errorRate: portfolioDataJson.health.errorRate,
+    });
+  });
+
+  describe('topology section', () => {
+    it('should round-trip the shipped topology nodes and links', () => {
+      const data = parsePortfolioData(portfolioDataJson)!;
+
+      expect(data.topology.nodes.map((node) => node.id)).toEqual([
+        'api-gateway',
+        'auth-service',
+        'notify-service',
+        'payment-service',
+        'postgresql-db',
+      ]);
+      expect(data.topology.links).toEqual(
+        portfolioDataJson.topology.links.map((link) => ({
+          source: link.source,
+          target: link.target,
+        })),
+      );
+    });
+
+    it('should include the payment-service to postgresql-db link', () => {
+      const data = parsePortfolioData(portfolioDataJson)!;
+
+      expect(data.topology.links).toContainEqual({
+        source: 'payment-service',
+        target: 'postgresql-db',
+      });
+    });
+
+    function parseWithTopology(topology: unknown) {
+      return parsePortfolioDataDetailed({ ...portfolioDataJson, topology });
+    }
+
+    it('should fail when the topology section is absent', () => {
+      const payload: Record<string, unknown> = { ...portfolioDataJson };
+      delete payload['topology'];
+
+      const result = parsePortfolioDataDetailed(payload);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reason).toContain('topology');
+    });
+
+    it('should fail when a topology node is malformed', () => {
+      const topology = {
+        nodes: [
+          {
+            id: 'api-gateway',
+            label: 'api-gateway',
+            description: 'Gateway.',
+            techStack: ['Java'],
+            metrics: [{ label: 'RPS', value: 10 }],
+          },
+        ],
+        links: [],
+      };
+
+      const result = parseWithTopology(topology);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reason).toContain('metrics');
+    });
+
+    it('should fail when a topology link is missing fields', () => {
+      const topology = {
+        nodes: [
+          {
+            id: 'api-gateway',
+            label: 'api-gateway',
+            description: 'Gateway.',
+            techStack: [],
+            metrics: [],
+          },
+        ],
+        links: [{ source: 'api-gateway' }],
+      };
+
+      const result = parseWithTopology(topology);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reason).toContain('topology.links[0]');
+    });
+
+    it('should fail when a topology link references an unknown node id', () => {
+      const topology = {
+        nodes: [
+          {
+            id: 'api-gateway',
+            label: 'api-gateway',
+            description: 'Gateway.',
+            techStack: [],
+            metrics: [],
+          },
+        ],
+        links: [{ source: 'api-gateway', target: 'ghost-node' }],
+      };
+
+      const result = parseWithTopology(topology);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reason).toContain("unknown node id 'ghost-node'");
     });
   });
 });

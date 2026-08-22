@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { LogEntry, PortfolioData } from '../data/portfolio-data';
+import { LogEntry, PortfolioData, TopologyNode } from '../data/portfolio-data';
 import { ClusterStateService, LOG_CAP } from './cluster-state.service';
 import { TabId } from './tabs';
 
@@ -9,6 +9,16 @@ function makeLog(index: number): LogEntry {
     source: 'test-source',
     level: index % 3 === 2 ? 'ERROR' : index % 3 === 1 ? 'WARN' : 'INFO',
     message: `entry-${index}`,
+  };
+}
+
+export function makeTopologyNode(id: string): TopologyNode {
+  return {
+    id,
+    label: id,
+    description: `${id} description`,
+    techStack: ['Java'],
+    metrics: [{ label: 'Error Rate', value: '0.01%' }],
   };
 }
 
@@ -22,6 +32,10 @@ const VALID_DATA: PortfolioData = {
     },
   ],
   experience: [],
+  topology: {
+    nodes: [makeTopologyNode('payment-service'), makeTopologyNode('postgresql-db')],
+    links: [{ source: 'payment-service', target: 'postgresql-db' }],
+  },
   contact: {
     email: 'you@example.com',
     github: 'https://github.com/your-handle',
@@ -174,6 +188,60 @@ describe('ClusterStateService', () => {
 
   it('should expose logs as read-only', () => {
     expect((store as { logs: unknown }).logs).not.toHaveProperty('set');
+  });
+
+  describe('topology node selection', () => {
+    it('should default selectedNodeId to null with no selected node', () => {
+      store.hydrate(VALID_DATA);
+
+      expect(store.selectedNodeId()).toBeNull();
+      expect(store.selectedNode()).toBeNull();
+      expect((store as { selectedNodeId: unknown }).selectedNodeId).not.toHaveProperty('set');
+    });
+
+    it('should expose empty topology lists before hydration', () => {
+      expect(store.topologyNodes()).toEqual([]);
+      expect(store.topologyLinks()).toEqual([]);
+    });
+
+    it('should expose the shipped topology nodes and links from hydrated content', () => {
+      store.hydrate(VALID_DATA);
+
+      expect(store.topologyNodes().map((node) => node.id)).toEqual([
+        'payment-service',
+        'postgresql-db',
+      ]);
+      expect(store.topologyLinks()).toEqual([
+        { source: 'payment-service', target: 'postgresql-db' },
+      ]);
+    });
+
+    it('should resolve the selected node to its typed content entry', () => {
+      store.hydrate(VALID_DATA);
+
+      store.selectNode('postgresql-db');
+
+      expect(store.selectedNode()?.id).toBe('postgresql-db');
+      expect(store.selectedNode()?.description).toBe('postgresql-db description');
+    });
+
+    it('should resolve to null when the selection does not match any node id', () => {
+      store.hydrate(VALID_DATA);
+
+      store.selectNode('does-not-exist');
+
+      expect(store.selectedNode()).toBeNull();
+    });
+
+    it('should keep exactly one node selected when switching selections', () => {
+      store.hydrate(VALID_DATA);
+      store.selectNode('payment-service');
+
+      store.selectNode('postgresql-db');
+
+      expect(store.selectedNodeId()).toBe('postgresql-db');
+      expect(store.selectedNode()?.id).toBe('postgresql-db');
+    });
   });
 
   describe('outage overlay', () => {

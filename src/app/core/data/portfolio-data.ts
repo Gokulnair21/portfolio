@@ -31,6 +31,29 @@ export interface EnvProperty {
   value: string;
 }
 
+export interface TopologyMetric {
+  label: string;
+  value: string;
+}
+
+export interface TopologyNode {
+  id: string;
+  label: string;
+  description: string;
+  techStack: string[];
+  metrics: TopologyMetric[];
+}
+
+export interface TopologyLink {
+  source: string;
+  target: string;
+}
+
+export interface TopologySection {
+  nodes: TopologyNode[];
+  links: TopologyLink[];
+}
+
 export interface HealthConfig {
   liveness: string;
   brokerTotal: number;
@@ -41,6 +64,7 @@ export interface HealthConfig {
 export interface PortfolioData {
   projects: ProjectEntry[];
   experience: ExperienceEntry[];
+  topology: TopologySection;
   contact: ContactInfo;
   envProperties: EnvProperty[];
   health: HealthConfig;
@@ -125,6 +149,66 @@ function parseEnvProperty(value: unknown): ParseResult<EnvProperty> {
   return { ok: true, value: { key, value: propertyValue } };
 }
 
+function parseTopologyMetric(value: unknown): ParseResult<TopologyMetric> {
+  if (!isRecord(value)) return fail('topology.nodes[].metrics[]', 'entry is not an object');
+
+  const { label, value: metricValue } = value;
+  if (!isString(label)) return fail('topology.nodes[].metrics[].label', 'expected string');
+  if (!isString(metricValue)) return fail('topology.nodes[].metrics[].value', 'expected string');
+  return { ok: true, value: { label, value: metricValue } };
+}
+
+function parseTopologyNode(value: unknown): ParseResult<TopologyNode> {
+  if (!isRecord(value)) return fail('topology.nodes[]', 'entry is not an object');
+
+  const { id, label, description, techStack, metrics } = value;
+  if (!isString(id) || id.length === 0) return fail('topology.nodes[].id', 'expected non-empty string');
+  if (!isString(label) || label.length === 0)
+    return fail('topology.nodes[].label', 'expected non-empty string');
+  if (!isString(description)) return fail('topology.nodes[].description', 'expected string');
+  if (!isStringArray(techStack)) return fail('topology.nodes[].techStack', 'expected string array');
+
+  const parsedMetrics = parseEntries(metrics, 'topology.nodes[].metrics', parseTopologyMetric);
+  if (!parsedMetrics.ok) return parsedMetrics;
+
+  return {
+    ok: true,
+    value: { id, label, description, techStack, metrics: parsedMetrics.value },
+  };
+}
+
+function parseTopologyLink(value: unknown): ParseResult<TopologyLink> {
+  if (!isRecord(value)) return fail('topology.links[]', 'entry is not an object');
+
+  const { source, target } = value;
+  if (!isString(source) || source.length === 0)
+    return fail('topology.links[].source', 'expected non-empty string');
+  if (!isString(target) || target.length === 0)
+    return fail('topology.links[].target', 'expected non-empty string');
+  return { ok: true, value: { source, target } };
+}
+
+function parseTopologySection(value: unknown): ParseResult<TopologySection> {
+  if (!isRecord(value)) return fail('topology', 'not an object');
+
+  const nodes = parseEntries(value['nodes'], 'topology.nodes', parseTopologyNode);
+  if (!nodes.ok) return nodes;
+
+  const links = parseEntries(value['links'], 'topology.links', parseTopologyLink);
+  if (!links.ok) return links;
+
+  const nodeIds = new Set(nodes.value.map((node) => node.id));
+  for (let index = 0; index < links.value.length; index++) {
+    const link = links.value[index];
+    if (!nodeIds.has(link.source))
+      return fail(`topology.links[${index}].source`, `unknown node id '${link.source}'`);
+    if (!nodeIds.has(link.target))
+      return fail(`topology.links[${index}].target`, `unknown node id '${link.target}'`);
+  }
+
+  return { ok: true, value: { nodes: nodes.value, links: links.value } };
+}
+
 function parseHealthConfig(value: unknown): ParseResult<HealthConfig> {
   if (!isRecord(value)) return fail('health', 'not an object');
 
@@ -172,6 +256,9 @@ export function parsePortfolioDataDetailed(value: unknown): ParseResult<Portfoli
   const contact = parseContactInfo(value['contact']);
   if (!contact.ok) return contact;
 
+  const topology = parseTopologySection(value['topology']);
+  if (!topology.ok) return topology;
+
   const envProperties = parseEntries(value['envProperties'], 'envProperties', parseEnvProperty);
   if (!envProperties.ok) return envProperties;
 
@@ -183,6 +270,7 @@ export function parsePortfolioDataDetailed(value: unknown): ParseResult<Portfoli
     value: {
       projects: projects.value,
       experience: experience.value,
+      topology: topology.value,
       contact: contact.value,
       envProperties: envProperties.value,
       health: health.value,

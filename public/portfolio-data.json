@@ -39,6 +39,71 @@
       ]
     }
   ],
+  "topology": {
+    "nodes": [
+      {
+        "id": "api-gateway",
+        "label": "api-gateway",
+        "description": "Edge gateway terminating external traffic, enforcing per-client rate limits and routing to downstream services.",
+        "techStack": ["Spring Cloud Gateway", "Java 17", "Resilience4j"],
+        "metrics": [
+          { "label": "Throughput", "value": "1,240 req/s" },
+          { "label": "P99 Latency", "value": "42 ms" },
+          { "label": "Error Rate", "value": "0.01%" }
+        ]
+      },
+      {
+        "id": "auth-service",
+        "label": "auth-service",
+        "description": "Issues and validates short-lived access tokens and rotates refresh credentials for all client sessions.",
+        "techStack": ["Spring Boot", "Java 17", "JWT"],
+        "metrics": [
+          { "label": "Token Issues/min", "value": "310" },
+          { "label": "P99 Latency", "value": "28 ms" },
+          { "label": "Error Rate", "value": "0.00%" }
+        ]
+      },
+      {
+        "id": "notify-service",
+        "label": "notify-service",
+        "description": "Fans out transactional notifications over email and push channels with idempotent delivery retries.",
+        "techStack": ["Spring Boot", "Java 17", "Kafka"],
+        "metrics": [
+          { "label": "Events/min", "value": "540" },
+          { "label": "Delivery Success", "value": "99.9%" },
+          { "label": "Error Rate", "value": "0.04%" }
+        ]
+      },
+      {
+        "id": "payment-service",
+        "label": "payment-service",
+        "description": "Processes card and transfer settlements through a circuit-breaker-guarded payment pipeline.",
+        "techStack": ["Spring Boot", "Java 21", "Resilience4j"],
+        "metrics": [
+          { "label": "Throughput", "value": "180 txn/s" },
+          { "label": "P99 Latency", "value": "95 ms" },
+          { "label": "Error Rate", "value": "0.02%" }
+        ]
+      },
+      {
+        "id": "postgresql-db",
+        "label": "postgresql-db",
+        "description": "Primary relational store holding settlement ledgers with synchronous standby replication.",
+        "techStack": ["PostgreSQL 16", "Patroni"],
+        "metrics": [
+          { "label": "Connections", "value": "64 / 100" },
+          { "label": "Replication Lag", "value": "0.4 s" },
+          { "label": "Error Rate", "value": "0.00%" }
+        ]
+      }
+    ],
+    "links": [
+      { "source": "api-gateway", "target": "auth-service" },
+      { "source": "api-gateway", "target": "notify-service" },
+      { "source": "api-gateway", "target": "payment-service" },
+      { "source": "payment-service", "target": "postgresql-db" }
+    ]
+  },
   "contact": {
     "email": "you@example.com",
     "github": "https://github.com/your-handle",

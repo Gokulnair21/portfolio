@@ -1,0 +1,64 @@
+<section class="panel" aria-label="Service topology">
+  <div class="topology-layout">
+    <div class="map-frame">
+      <svg
+        class="topology-svg"
+        viewBox="0 0 640 360"
+        role="img"
+        aria-label="Cluster service topology map"
+      >
+        @for (link of links(); track linkKey(link)) {
+          <line
+            class="topo-link"
+            [attr.x1]="x(link.source)"
+            [attr.y1]="y(link.source)"
+            [attr.x2]="x(link.target)"
+            [attr.y2]="y(link.target)"
+          />
+        }
+        @for (node of nodes(); track node.id) {
+          <g
+            class="topo-node"
+            [class.node-selected]="store.selectedNodeId() === node.id"
+            (click)="selectNode(node.id)"
+          >
+            <rect
+              class="node-body"
+              [attr.x]="rectX(node.id)"
+              [attr.y]="rectY(node.id)"
+              [attr.width]="132"
+              [attr.height]="40"
+              [attr.rx]="2"
+            />
+            <text class="node-label" [attr.x]="x(node.id)" [attr.y]="y(node.id) + 4" text-anchor="middle">
+              {{ node.label }}
+            </text>
+          </g>
+        }
+      </svg>
+    </div>
+    @if (store.selectedNode(); as node) {
+      <div class="detail-card">
+        <h2 class="detail-title">{{ node.label }}</h2>
+        <p class="detail-description">{{ node.description }}</p>
+        <h3 class="detail-heading">CORE TECH STACK</h3>
+        <ul class="tech-list">
+          @for (tech of node.techStack; track tech) {
+            <li class="tech-item">{{ tech }}</li>
+          }
+        </ul>
+        <h3 class="detail-heading">METRICS</h3>
+        <dl class="metric-list">
+          @for (metric of node.metrics; track metric.label) {
+            <div class="metric-row">
+              <dt class="metric-label">{{ metric.label }}</dt>
+              <dd class="metric-value">{{ metric.value }}</dd>
+            </div>
+          }
+        </dl>
+      </div>
+    } @else {
+      <p class="detail-placeholder">SELECT A SERVICE NODE TO INSPECT</p>
+    }
+  </div>
+</section>

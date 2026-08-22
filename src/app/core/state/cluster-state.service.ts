@@ -1,5 +1,10 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { ClusterStatus, LogEntry, PortfolioData } from '../data/portfolio-data';
+import {
+  ClusterStatus,
+  LogEntry,
+  PortfolioData,
+  TopologyNode,
+} from '../data/portfolio-data';
 import { DEFAULT_TAB, TabId } from './tabs';
 
 export type DataStatus = 'loading' | 'ready' | 'failed';
@@ -15,6 +20,8 @@ const DEFAULT_BROKER_TOTAL = 2;
 const DEFAULT_ERROR_RATE = 0;
 export const LOG_CAP = 200;
 
+const NO_NODE_ID = null;
+
 @Injectable()
 export class ClusterStateService {
   readonly #tab = signal<TabId>(DEFAULT_TAB);
@@ -22,12 +29,23 @@ export class ClusterStateService {
   readonly #content = signal<PortfolioData | null>(null);
   readonly #logs = signal<LogEntry[]>([]);
   readonly #outage = signal<OutageOverlay | null>(null);
+  readonly #selectedNodeId = signal<string | null>(NO_NODE_ID);
 
   readonly selectedTab = this.#tab.asReadonly();
   readonly dataStatus = this.#dataStatus.asReadonly();
   readonly content = this.#content.asReadonly();
   readonly logs = this.#logs.asReadonly();
   readonly outage = this.#outage.asReadonly();
+  readonly selectedNodeId = this.#selectedNodeId.asReadonly();
+
+  readonly topologyNodes = computed<TopologyNode[]>(
+    () => this.#content()?.topology?.nodes ?? [],
+  );
+  readonly topologyLinks = computed(() => this.#content()?.topology?.links ?? []);
+  readonly selectedNode = computed<TopologyNode | null>(() => {
+    const id = this.#selectedNodeId();
+    return this.topologyNodes().find((node) => node.id === id) ?? null;
+  });
 
   readonly livenessStatus = computed<ClusterStatus>(() => {
     if (this.#outage() !== null) return this.#outage()!.status;
@@ -48,6 +66,10 @@ export class ClusterStateService {
 
   selectTab(id: TabId): void {
     this.#tab.set(id);
+  }
+
+  selectNode(id: string | null): void {
+    this.#selectedNodeId.set(id);
   }
 
   hydrate(data: PortfolioData): void {

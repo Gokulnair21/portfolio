@@ -23,6 +23,18 @@ const VALID_PAYLOAD = {
       highlights: ['Led event-driven migration.'],
     },
   ],
+  topology: {
+    nodes: [
+      {
+        id: 'payment-service',
+        label: 'payment-service',
+        description: 'Payments.',
+        techStack: ['Java'],
+        metrics: [{ label: 'Error Rate', value: '0.02%' }],
+      },
+    ],
+    links: [],
+  },
   contact: {
     email: 'you@example.com',
     github: 'https://github.com/your-handle',

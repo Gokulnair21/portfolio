@@ -16,6 +16,18 @@ const RECOVERY_STAGE_2_SOURCES = ['ConnectionValidator', 'PaymentCircuitBreaker'
 const VALID_DATA: PortfolioData = {
   projects: [],
   experience: [],
+  topology: {
+    nodes: [
+      {
+        id: 'payment-service',
+        label: 'payment-service',
+        description: 'Payments.',
+        techStack: ['Java'],
+        metrics: [{ label: 'Error Rate', value: '0.02%' }],
+      },
+    ],
+    links: [],
+  },
   contact: {
     email: 'you@example.com',
     github: 'https://github.com/your-handle',

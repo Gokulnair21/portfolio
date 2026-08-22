@@ -9,6 +9,7 @@ import { HealthDashboard } from './health-dashboard';
 const SEEDED_DATA: PortfolioData = {
   projects: [],
   experience: [],
+  topology: parsePortfolioData(portfolioDataJson)!.topology,
   contact: {
     email: 'you@example.com',
     github: 'https://github.com/your-handle',
