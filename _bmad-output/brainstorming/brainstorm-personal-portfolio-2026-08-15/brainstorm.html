@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gokul's Portfolio - Brainstorming Keepsake</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-green: #10b981;
+            --accent-green-glow: rgba(16, 185, 129, 0.2);
+            --accent-red: #ef4444;
+            --accent-red-glow: rgba(239, 68, 68, 0.2);
+            --accent-amber: #f59e0b;
+            --accent-blue: #3b82f6;
+            --border-color: #475569;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-icon {
+            font-size: 1.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .header-title p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.8rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--bg-primary);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .status-dot.degraded {
+            background-color: var(--accent-red);
+            box-shadow: 0 0 8px var(--accent-red);
+            animation: pulse-red 1s infinite alternate;
+        }
+
+        @keyframes pulse-red {
+            from { box-shadow: 0 0 4px var(--accent-red); }
+            to { box-shadow: 0 0 12px var(--accent-red); }
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        sidebar {
+            width: 240px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem 0;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-blue);
+            color: var(--text-primary);
+        }
+
+        .sidebar-footer {
+            padding: 0 1.5rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Main Content Panel */
+        main {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            background-color: var(--bg-primary);
+        }
+
+        .panel-header {
+            margin-bottom: 0.5rem;
+        }
+
+        .panel-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .panel-header p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Cards & Grid Layouts */
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        /* Dashboard specific styles */
+        .health-metric {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: var(--accent-green);
+        }
+
+        .health-metric.degraded {
+            color: var(--accent-red);
+        }
+
+        .bio-section {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .action-button {
+            background-color: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+        }
+
+        .action-button.resolve {
+            background-color: var(--accent-green);
+        }
+
+        /* Topology Map (Interactive Node Graph) */
+        .topology-container {
+            position: relative;
+            background-color: #0b0f19;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            height: 380px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .topology-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .node:hover {
+            filter: brightness(1.2) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+        }
+
+        .node circle {
+            fill: var(--bg-secondary);
+            stroke: var(--border-color);
+            stroke-width: 2;
+        }
+
+        .node.active circle {
+            stroke: var(--accent-blue);
+            stroke-width: 3;
+        }
+
+        .node.degraded circle {
+            stroke: var(--accent-red);
+            animation: stroke-pulse 1s infinite alternate;
+        }
+
+        @keyframes stroke-pulse {
+            from { stroke-width: 2; }
+            to { stroke-width: 5; }
+        }
+
+        .node text {
+            fill: var(--text-primary);
+            font-size: 11px;
+            font-family: var(--font-mono);
+            text-anchor: middle;
+            pointer-events: none;
+        }
+
+        .node-details {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            bottom: 1rem;
+            width: 280px;
+            background-color: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            display: none;
+            flex-direction: column;
+            gap: 0.75rem;
+            overflow-y: auto;
+            z-index: 5;
+        }
+
+        /* Config Table */
+        .properties-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .properties-table th, .properties-table td {
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .properties-table th {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .properties-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .prop-key {
+            font-family: var(--font-mono);
+            color: var(--accent-amber);
+            font-size: 0.8rem;
+        }
+
+        .prop-val {
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+        }
+
+        /* Swagger Form styling */
+        .swagger-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.5rem;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .json-editor {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            background-color: #0b0f19;
+            color: #38bdf8;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            resize: vertical;
+            min-height: 120px;
+            width: 100%;
+        }
+
+        .swagger-execute {
+            background-color: #49cc90;
+            color: white;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: filter 0.2s;
+            text-align: center;
+        }
+
+        .swagger-execute:hover {
+            filter: brightness(1.1);
+        }
+
+        .swagger-response {
+            background-color: #0b0f19;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        /* Live Log terminal */
+        .terminal-panel {
+            background-color: #0b0f19;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            height: 160px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .log-line {
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        .log-info { color: #38bdf8; }
+        .log-warn { color: var(--accent-amber); }
+        .log-error { color: var(--accent-red); }
+        .log-timestamp { color: #64748b; }
+
+        /* Dialogs / Modals */
+        .synthesis-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .synthesis-tag {
+            position: absolute;
+            top: -10px;
+            left: 1rem;
+            background-color: var(--accent-blue);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .replica-pod {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .replica-pod:hover {
+            border-color: var(--accent-blue);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .replica-pod.active {
+            border-color: var(--accent-blue);
+            background-color: rgba(59, 130, 246, 0.15);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-title-container">
+            <span class="header-icon">📊</span>
+            <div class="header-title">
+                <h1>Gokul's Portfolio Console</h1>
+                <p>Spring Boot Actuator Dashboard Simulator v1.0</p>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span>System Status:</span>
+                <span id="system-status-dot" class="status-dot"></span>
+                <span id="system-status-text" style="color: var(--accent-green); font-weight: 600;">UP</span>
+            </div>
+            <div class="stat-item">
+                <span>JVM Memory:</span>
+                <span id="jvm-memory-text" style="font-family: var(--font-mono);">128MB / 512MB</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <sidebar>
+            <ul class="nav-list">
+                <li class="nav-item active" onclick="switchTab('dashboard')">
+                    <span>🏠</span> System Health
+                </li>
+                <li class="nav-item" onclick="switchTab('topology')">
+                    <span>🕸️</span> Microservices Map
+                </li>
+                <li class="nav-item" onclick="switchTab('config')">
+                    <span>⚙️</span> Env Configuration
+                </li>
+                <li class="nav-item" onclick="switchTab('replicas')">
+                    <span>📦</span> Active Replicas (Career)
+                </li>
+                <li class="nav-item" onclick="switchTab('swagger')">
+                    <span>🔌</span> Swagger UI Playground
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>Designed for $0</p>
+                <p>Hosted on GitHub Pages</p>
+            </div>
+        </sidebar>
+
+        <!-- Main Workspace -->
+        <main>
+            <!-- DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="panel-header">
+                    <h2>Actuator Health Status</h2>
+                    <p>Overview of core node metrics and system invariants.</p>
+                </div>
+                
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-title">🟢 Liveness Probe</div>
+                        <div id="card-liveness" class="health-metric">UP</div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">System responding with healthy heartbeat</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">🔌 Active Broker Connections</div>
+                        <div class="health-metric" style="color: var(--accent-blue);">2 / 2</div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">Kafka cluster online, Zookeeper sync OK</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">🔥 Error Rate (Last 100 req)</div>
+                        <div id="card-error-rate" class="health-metric" style="color: var(--accent-green);">0.00%</div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">Zero dropped events on API gateway</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">ℹ️ System Profile</div>
+                    <div class="bio-section">
+                        <p><strong>Gokul</strong> is a <strong>Senior Java Backend Engineer</strong> specializing in designing high-throughput API gateways, microservices integration, and JVM tuning. Highly proficient in Spring Boot, PostgreSQL, Kafka, and Redis caching architectures. Strives to build fault-tolerant, resilient backend architectures that stay up even under severe network distress.</p>
+                        <div style="margin-top: 1.25rem; display: flex; gap: 1rem;">
+                            <button id="outage-btn" class="action-button" onclick="triggerOutage()">
+                                ⚠️ Simulate Network Outage
+                            </button>
+                            <button id="resolve-btn" class="action-button resolve" style="display: none;" onclick="resolveOutage()">
+                                ✅ Trigger Auto-Recovery
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="synthesis-card">
+                    <span class="synthesis-tag">Synthesis Insight</span>
+                    <p style="font-size: 0.85rem; line-height: 1.5; color: #93c5fd;">
+                        <strong>Architectural Unity:</strong> Notice how the mock environment config parameters (in the Env Configuration tab) serve as the underlying data registry dynamically feeding the REST endpoints in the Swagger interface. All state updates—such as simulated outages—propagate through our mock system broker logs below!
+                    </p>
+                </div>
+            </div>
+
+            <!-- TOPOLOGY TAB -->
+            <div id="tab-topology" class="tab-content">
+                <div class="panel-header">
+                    <h2>Cluster Service Topology</h2>
+                    <p>Live network connectivity graph of project services. Click nodes to inspect metrics.</p>
+                </div>
+
+                <div class="topology-container">
+                    <svg class="topology-svg">
+                        <defs>
+                            <marker id="arrow" viewBox="0 0 10 10" refX="18" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569" />
+                            </marker>
+                            <marker id="arrow-error" viewBox="0 0 10 10" refX="18" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
+                            </marker>
+                        </defs>
+                        <!-- Lines connecting gateway to other services -->
+                        <line x1="120" y1="190" x2="280" y2="100" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+                        <line x1="120" y1="190" x2="280" y2="190" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+                        <line x1="120" y1="190" x2="280" y2="280" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+                        <!-- Line connecting services to DB -->
+                        <line id="line-payment-db" x1="420" y1="190" x2="560" y2="190" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+                    </svg>
+
+                    <!-- API Gateway Node -->
+                    <div class="node" style="position: absolute; left: 70px; top: 165px;" onclick="showNodeDetails('api-gateway')">
+                        <svg width="100" height="50">
+                            <rect x="5" y="5" width="90" height="40" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="2" />
+                            <text x="50" y="28">api-gateway</text>
+                        </svg>
+                    </div>
+
+                    <!-- Auth Service Node -->
+                    <div class="node" style="position: absolute; left: 330px; top: 75px;" onclick="showNodeDetails('auth-service')">
+                        <svg width="100" height="50">
+                            <rect x="5" y="5" width="90" height="40" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2" />
+                            <text x="50" y="28">auth-service</text>
+                        </svg>
+                    </div>
+
+                    <!-- Payment Service Node -->
+                    <div id="node-payment" class="node" style="position: absolute; left: 330px; top: 165px;" onclick="showNodeDetails('payment-service')">
+                        <svg width="100" height="50">
+                            <rect x="5" y="5" width="90" height="40" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2" />
+                            <text x="50" y="28">payment-service</text>
+                        </svg>
+                    </div>
+
+                    <!-- Notification Service Node -->
+                    <div class="node" style="position: absolute; left: 330px; top: 255px;" onclick="showNodeDetails('notification-service')">
+                        <svg width="100" height="50">
+                            <rect x="5" y="5" width="90" height="40" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2" />
+                            <text x="50" y="28">notify-service</text>
+                        </svg>
+                    </div>
+
+                    <!-- PostgreSQL Database Node -->
+                    <div id="node-db" class="node" style="position: absolute; left: 610px; top: 165px;" onclick="showNodeDetails('postgres-db')">
+                        <svg width="100" height="50">
+                            <rect x="5" y="5" width="90" height="40" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+                            <text x="50" y="28">postgresql-db</text>
+                        </svg>
+                    </div>
+
+                    <!-- Side detail panel -->
+                    <div id="topology-node-details" class="node-details">
+                        <h3 id="node-name" style="font-family: var(--font-mono); font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem;">service-name</h3>
+                        <div>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">Description:</span>
+                            <p id="node-desc" style="font-size: 0.8rem; margin-top: 0.2rem;"></p>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">Core Tech Stack:</span>
+                            <p id="node-tech" style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--accent-amber); margin-top: 0.2rem;"></p>
+                        </div>
+                        <div id="node-metrics-group">
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">Metrics:</span>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 0.2rem; font-family: var(--font-mono);">
+                                <span>Throughput:</span> <span id="node-tps">120 rps</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 0.1rem; font-family: var(--font-mono);">
+                                <span>Errors:</span> <span id="node-err" style="color: var(--accent-green);">0.0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ENV TAB -->
+            <div id="tab-config" class="tab-content">
+                <div class="panel-header">
+                    <h2>Environment Configuration (/actuator/env)</h2>
+                    <p>System configuration registry loaded from bundled projects.json. Fully filterable.</p>
+                </div>
+                
+                <div class="card" style="padding: 0.75rem 1rem; display: flex; gap: 1rem; align-items: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono);">Filter properties:</span>
+                    <input type="text" id="config-search" class="form-input" style="flex: 1; padding: 0.35rem;" placeholder="Search keys or values..." oninput="filterConfig()">
+                </div>
+
+                <div class="card" style="flex: 1; overflow-y: auto;">
+                    <table class="properties-table">
+                        <thead>
+                            <tr>
+                                <th>Property Key</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="config-table-body">
+                            <!-- populated by js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- REPLICAS TAB -->
+            <div id="tab-replicas" class="tab-content">
+                <div class="panel-header">
+                    <h2>Cluster Pod Replicas</h2>
+                    <p>Deployments mapping Gokul's career history. Select a replica to check tasks completed during execution.</p>
+                </div>
+
+                <div class="card" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <div id="pod-1" class="replica-pod active" onclick="showReplica(1)">
+                        <span class="status-dot"></span> pod-experience-senior-neosoft-0
+                    </div>
+                    <div id="pod-2" class="replica-pod" onclick="showReplica(2)">
+                        <span class="status-dot"></span> pod-experience-software-eng-1
+                    </div>
+                    <div id="pod-3" class="replica-pod" onclick="showReplica(3)">
+                        <span class="status-dot"></span> pod-experience-analyst-intern-2
+                    </div>
+                </div>
+
+                <div class="card" id="replica-details-card">
+                    <div class="card-title" id="replica-name">pod-experience-senior-neosoft-0</div>
+                    <div style="font-size: 0.85rem; line-height: 1.6; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div><strong>Role:</strong> <span id="replica-role">Senior Software Engineer</span></div>
+                        <div><strong>Timeline:</strong> <span id="replica-time">2024 - Present</span></div>
+                        <div><strong>Achievements & Responsibilities:</strong></div>
+                        <ul id="replica-tasks" style="padding-left: 1.25rem;">
+                            <li>Designed high-throughput payment processing APIs handling 5,000+ daily actions.</li>
+                            <li>Integrated resilience frameworks (Resilience4j) to shield core transactions from third-party gateway failures.</li>
+                            <li>Tuned PostgreSQL database indexes to speed up heavy customer transaction queries by 45%.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SWAGGER TAB -->
+            <div id="tab-swagger" class="tab-content">
+                <div class="panel-header">
+                    <h2>Swagger UI v3.3 - API Client</h2>
+                    <p>Endpoint playground to test interactive mock endpoints. Send a mock message to Gokul.</p>
+                </div>
+
+                <div class="card">
+                    <div style="border: 1px solid #49cc90; border-radius: 4px; overflow: hidden; background-color: rgba(73, 204, 144, 0.05);">
+                        <!-- Swagger Method Bar -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background-color: rgba(73, 204, 144, 0.1); cursor: pointer;" onclick="toggleSwaggerForm()">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; font-family: var(--font-mono); font-size: 0.85rem;">
+                                <span style="background-color: #49cc90; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; font-weight: bold;">POST</span>
+                                <strong>/api/v1/contact</strong>
+                                <span style="color: var(--text-secondary);">Send message to Gokul</span>
+                            </div>
+                            <span style="font-size: 0.75rem; font-family: var(--font-mono);">[ Try it out ]</span>
+                        </div>
+
+                        <!-- Swagger Expanded Form -->
+                        <div id="swagger-form-body" style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid #49cc90;">
+                            <div class="form-group">
+                                <label>Request JSON Body:</label>
+                                <textarea id="swagger-json" class="json-editor">{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "message": "Hey Gokul, checked your Spring Boot portfolio dashboard and wanted to chat backend roles!"
+}</textarea>
+                            </div>
+                            <button class="swagger-execute" onclick="executeSwaggerPost()">Execute</button>
+
+                            <div id="swagger-response" class="swagger-response">
+                                <p style="color: #49cc90; font-weight: bold; margin-bottom: 0.5rem;">Response Headers: HTTP/1.1 200 OK</p>
+                                <pre id="swagger-response-json" style="color: #cbd5e1;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Log Window (Fixed at bottom of Workspace) -->
+            <div class="terminal-panel" id="terminal-console">
+                <div class="log-line"><span class="log-timestamp">22:55:01</span> <span class="log-info">INFO</span> [main] c.g.p.PortfolioApplication: Starting PortfolioApplication on host gokul-backend-0...</div>
+                <div class="log-line"><span class="log-timestamp">22:55:02</span> <span class="log-info">INFO</span> [main] c.g.p.PortfolioApplication: Loaded profile: 'production'</div>
+                <div class="log-line"><span class="log-timestamp">22:55:03</span> <span class="log-info">INFO</span> [main] c.g.p.EnvConfigRegistry: Parsed 10 project environment attributes from projects.json database.</div>
+                <div class="log-line"><span class="log-timestamp">22:55:04</span> <span class="log-info">INFO</span> [main] c.g.p.PortfolioApplication: Tomcat started on port 8080 (http) with context path ''</div>
+                <div class="log-line"><span class="log-timestamp">22:55:04</span> <span class="log-info">INFO</span> [main] c.g.p.PortfolioApplication: Started PortfolioApplication in 2.85 seconds (JVM running for 3.42)</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Core Config state (matches Environment Config)
+        const configData = {
+            "server.port": "8080",
+            "spring.application.name": "gokul-portfolio-backend",
+            "caching.provider": "Redis (Cluster mode)",
+            "message-broker.type": "Apache Kafka (Apache License v2.0)",
+            "database.driver-class-name": "org.postgresql.Driver",
+            "database.connection-pool": "HikariCP",
+            "resilience.circuitbreaker.failureRateThreshold": "50.0%",
+            "resilience.circuitbreaker.slowCallRateThreshold": "75.0%",
+            "resilience.circuitbreaker.waitDurationInOpenState": "15s",
+            "gokul.skills.languages": "Java 17, SQL, Bash",
+            "gokul.skills.frameworks": "Spring Boot 3.x, Spring Cloud, Hibernate, JUnit5",
+            "gokul.skills.infrastructure": "Docker, Kubernetes, AWS (EC2, S3, RDS), GitHub Actions"
+        };
+
+        // Node metrics map
+        const nodeMetrics = {
+            "api-gateway": {
+                name: "api-gateway",
+                desc: "Acts as the single point of entry for all API traffic, managing routing, security filters, and basic rate limiting.",
+                tech: "Spring Cloud Gateway, Netty",
+                tps: "245 rps",
+                err: "0.00%"
+            },
+            "auth-service": {
+                name: "auth-service",
+                desc: "Handles user authentication, JWT signing, token validation, and authorization roles verification.",
+                tech: "Spring Security OAuth2, Spring Boot",
+                tps: "42 rps",
+                err: "0.00%"
+            },
+            "payment-service": {
+                name: "payment-service",
+                desc: "Handles critical payment gateway transaction routing. Protected by Resilience4j circuit breakers to guarantee graceful degradation if payment partner API goes offline.",
+                tech: "Spring Boot, Resilience4j, Kafka",
+                tps: "128 rps",
+                err: "0.00%"
+            },
+            "notification-service": {
+                name: "notification-service",
+                desc: "Asynchronous processing worker that consumes event streams from Kafka broker to dispatch emails/SMS updates.",
+                tech: "Spring Boot, Apache Kafka Consumer",
+                tps: "85 rps",
+                err: "0.00%"
+            },
+            "postgres-db": {
+                name: "postgresql-db",
+                desc: "Core transactional relational database storage containing application, project, and experience details.",
+                tech: "PostgreSQL 15, Hikari Connection Pool",
+                tps: "310 transactions/sec",
+                err: "0.00%"
+            }
+        };
+
+        // Replica pod details
+        const replicaData = {
+            1: {
+                name: "pod-experience-senior-neosoft-0",
+                role: "Senior Software Engineer (NeoSoft)",
+                time: "2024 - Present",
+                tasks: [
+                    "Designed high-throughput payment processing APIs handling 5,000+ daily actions.",
+                    "Integrated resilience frameworks (Resilience4j) to shield core transactions from third-party gateway failures.",
+                    "Tuned PostgreSQL database indexes to speed up heavy customer transaction queries by 45%."
+                ]
+            },
+            2: {
+                name: "pod-experience-software-eng-1",
+                role: "Backend Developer (Mid-Level)",
+                time: "2021 - 2024",
+                tasks: [
+                    "Developed and maintained RESTful microservices for e-commerce client handling peak traffic loads.",
+                    "Configured Redis cache layers reducing response latencies on catalog pages by 120ms.",
+                    "Written comprehensive JUnit integration tests covering 85%+ application logic."
+                ]
+            },
+            3: {
+                name: "pod-experience-analyst-intern-2",
+                role: "Software Intern",
+                time: "2020 - 2021",
+                tasks: [
+                    "Assisted backend team in rewriting legacy Java SOAP APIs to modern REST microservices.",
+                    "Written SQL migration scripts for database normalization patches.",
+                    "Automated integration deployments utilizing Git pipelines."
+                ]
+            }
+        };
+
+        let systemOutageActive = false;
+
+        // Tab switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activate selected tab
+            const activeItemIndex = ['dashboard', 'topology', 'config', 'replicas', 'swagger'].indexOf(tabId);
+            document.querySelectorAll('.nav-list .nav-item')[activeItemIndex].classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            if (tabId === 'topology') {
+                showNodeDetails('api-gateway'); // default node details
+            }
+        }
+
+        // Populating Environment Config properties
+        function renderConfig(filter = "") {
+            const tableBody = document.getElementById('config-table-body');
+            tableBody.innerHTML = "";
+            for (const [key, val] of Object.entries(configData)) {
+                if (filter && !key.toLowerCase().includes(filter.toLowerCase()) && !val.toLowerCase().includes(filter.toLowerCase())) {
+                    continue;
+                }
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="prop-key">${key}</td>
+                    <td class="prop-val">${val}</td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+
+        function filterConfig() {
+            const filterVal = document.getElementById('config-search').value;
+            renderConfig(filterVal);
+        }
+
+        // Populating initial config
+        renderConfig();
+
+        // Node details showing in Topology Tab
+        function showNodeDetails(nodeId) {
+            const detailsPanel = document.getElementById('topology-node-details');
+            detailsPanel.style.display = "flex";
+
+            const data = nodeMetrics[nodeId];
+            document.getElementById('node-name').innerText = data.name;
+            document.getElementById('node-desc').innerText = data.desc;
+            document.getElementById('node-tech').innerText = data.tech;
+            document.getElementById('node-tps').innerText = data.tps;
+            
+            const errSpan = document.getElementById('node-err');
+            errSpan.innerText = data.err;
+            if (data.err !== "0.00%") {
+                errSpan.style.color = "var(--accent-red)";
+            } else {
+                errSpan.style.color = "var(--accent-green)";
+            }
+        }
+
+        // Career Replica displayer
+        function showReplica(podNum) {
+            document.querySelectorAll('.replica-pod').forEach(pod => pod.classList.remove('active'));
+            document.getElementById(`pod-${podNum}`).classList.add('active');
+
+            const data = replicaData[podNum];
+            document.getElementById('replica-name').innerText = data.name;
+            document.getElementById('replica-role').innerText = data.role;
+            document.getElementById('replica-time').innerText = data.time;
+
+            const taskList = document.getElementById('replica-tasks');
+            taskList.innerHTML = "";
+            data.tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.innerText = task;
+                taskList.appendChild(li);
+            });
+        }
+
+        // Toggle swagger drawer
+        let swaggerOpen = true;
+        function toggleSwaggerForm() {
+            const body = document.getElementById('swagger-form-body');
+            swaggerOpen = !swaggerOpen;
+            body.style.display = swaggerOpen ? "flex" : "none";
+        }
+
+        // Execute Swagger Post message
+        function executeSwaggerPost() {
+            const reqJsonText = document.getElementById('swagger-json').value;
+            let reqData;
+            try {
+                reqData = JSON.parse(reqJsonText);
+            } catch (err) {
+                alert("Invalid JSON format in Request Body!");
+                return;
+            }
+
+            const responsePanel = document.getElementById('swagger-response');
+            responsePanel.style.display = "block";
+            
+            const responseJsonText = document.getElementById('swagger-response-json');
+            responseJsonText.innerText = "... Posting message to broker pipeline ...";
+
+            setTimeout(() => {
+                const responseData = {
+                    "status": "QUEUED",
+                    "transactionId": "tx-" + Math.floor(Math.random() * 900000 + 100000),
+                    "message": "Message successfully published to Kafka topic 'visitor-messages'",
+                    "payload": {
+                        "sender": reqData.name || "Anonymous",
+                        "email": reqData.email || "unknown@domain.com",
+                        "timestamp": new Date().toISOString()
+                    }
+                };
+                responseJsonText.innerText = JSON.stringify(responseData, null, 2);
+                
+                // Print in log terminal
+                appendTerminalLog("INFO", "c.g.p.api.ContactController", `Received Swagger HTTP POST /api/v1/contact from ${reqData.name || "Anonymous"}`);
+                appendTerminalLog("INFO", "c.g.p.producer.KafkaProducer", `Published payload successfully to topic 'visitor-messages' partition 0, offset ${Math.floor(Math.random() * 500)}`);
+            }, 1000);
+        }
+
+        // Terminal Log Appender
+        function appendTerminalLog(level, clazz, text) {
+            const consoleEl = document.getElementById('terminal-console');
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            const line = document.createElement('div');
+            line.className = "log-line";
+            
+            let levelClass = "log-info";
+            if (level === "WARN") levelClass = "log-warn";
+            if (level === "ERROR") levelClass = "log-error";
+
+            line.innerHTML = `<span class="log-timestamp">${timeStr}</span> <span class="${levelClass}">${level}</span> [http-nio-8080-exec-1] ${clazz}: ${text}`;
+            consoleEl.appendChild(line);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        // Outage simulator functions
+        function triggerOutage() {
+            systemOutageActive = true;
+            
+            // Header health indicator update
+            const statusDot = document.getElementById('system-status-dot');
+            statusDot.className = "status-dot degraded";
+            const statusText = document.getElementById('system-status-text');
+            statusText.innerText = "DEGRADED";
+            statusText.style.color = "var(--accent-red)";
+            
+            // Card health indicator update
+            document.getElementById('card-liveness').innerText = "DEGRADED";
+            document.getElementById('card-liveness').className = "health-metric degraded";
+            document.getElementById('card-error-rate').innerText = "18.52%";
+            document.getElementById('card-error-rate').style.color = "var(--accent-red)";
+
+            // Update Topology nodes status
+            document.getElementById('node-payment').querySelector('rect').setAttribute('stroke', '#ef4444');
+            document.getElementById('node-db').querySelector('rect').setAttribute('stroke', '#ef4444');
+            document.getElementById('line-payment-db').setAttribute('stroke', '#ef4444');
+            
+            // Update node metrics info
+            nodeMetrics["payment-service"].err = "100.00%";
+            nodeMetrics["payment-service"].tps = "0 rps";
+            nodeMetrics["postgres-db"].err = "85.0%";
+            
+            // Update UI buttons
+            document.getElementById('outage-btn').style.display = "none";
+            document.getElementById('resolve-btn').style.display = "inline-flex";
+
+            // Print incident console logs
+            appendTerminalLog("ERROR", "o.h.engine.jdbc.spi.SqlExceptionHelper", "FATAL: connection pool limit exceeded while querying postgresql-db!");
+            appendTerminalLog("WARN", "c.g.p.resilience.PaymentCircuitBreaker", "Resilience4j CircuitBreaker 'payment-service-breaker' failure rate reached 100% threshold!");
+            appendTerminalLog("ERROR", "c.g.p.resilience.PaymentCircuitBreaker", "CircuitBreaker STATE TRANSITION: CLOSED -> OPEN. Downstream database connections blocked.");
+            appendTerminalLog("WARN", "c.g.p.service.PaymentService", "Executing fallback method 'fallbackCachedPaymentHistory()' to serve read-only data gracefully for $0.");
+        }
+
+        function resolveOutage() {
+            systemOutageActive = false;
+            
+            // Header health indicator update
+            const statusDot = document.getElementById('system-status-dot');
+            statusDot.className = "status-dot";
+            const statusText = document.getElementById('system-status-text');
+            statusText.innerText = "UP";
+            statusText.style.color = "var(--accent-green)";
+            
+            // Card health indicator update
+            document.getElementById('card-liveness').innerText = "UP";
+            document.getElementById('card-liveness').className = "health-metric";
+            document.getElementById('card-error-rate').innerText = "0.00%";
+            document.getElementById('card-error-rate').style.color = "var(--accent-green)";
+
+            // Update Topology nodes status
+            document.getElementById('node-payment').querySelector('rect').setAttribute('stroke', '#10b981');
+            document.getElementById('node-db').querySelector('rect').setAttribute('stroke', '#f59e0b');
+            document.getElementById('line-payment-db').setAttribute('stroke', '#475569');
+            
+            // Reset node metrics info
+            nodeMetrics["payment-service"].err = "0.00%";
+            nodeMetrics["payment-service"].tps = "128 rps";
+            nodeMetrics["postgres-db"].err = "0.00%";
+
+            // Update UI buttons
+            document.getElementById('outage-btn').style.display = "inline-flex";
+            document.getElementById('resolve-btn').style.display = "none";
+
+            // Print recovery console logs
+            appendTerminalLog("INFO", "o.h.engine.jdbc.spi.SqlExceptionHelper", "Re-established connection to postgresql-db successfully. Hikari pool active.");
+            appendTerminalLog("INFO", "c.g.p.resilience.PaymentCircuitBreaker", "Resilience4j CircuitBreaker STATE TRANSITION: OPEN -> HALF-OPEN. Probing downstream endpoint.");
+            appendTerminalLog("INFO", "c.g.p.resilience.PaymentCircuitBreaker", "Success rate of half-open requests 100%. CircuitBreaker STATE TRANSITION: HALF-OPEN -> CLOSED. System restored to normal state.");
+        }
+    </script>
+</body>
+</html>

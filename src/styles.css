@@ -1,0 +1,71 @@
+/* ============================================================
+   Actuator Theme — Design Tokens (single source of visual truth)
+   All colors, fonts, and spacing are defined ONLY here.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* Status palette */
+  --status-up: #22c55e;
+  --status-degraded: #ef4444;
+  --status-info: #38bdf8;
+
+  /* Surfaces & chrome (derived dashboard palette) */
+  --bg-base: #0b0f14;
+  --bg-panel: #11161d;
+  --bg-header: #0e1319;
+  --border-dim: #1f2933;
+  --text-primary: #e6edf3;
+  --text-muted: #768390;
+
+  /* Monospace font stack */
+  --font-mono:
+    ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  /* Type scale */
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Shape */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.1875rem;
+  --border-width: 1px;
+}
+
+/* Base resets */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
