@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-22-2026 09:00
-last_updated: 08-22-2026 19:10
+last_updated: 08-22-2026 21:43
 project: Portfolio
 project_key: NOKEY
 tracking_system: file-system
@@ -42,10 +42,10 @@ development_status:
   1-4-live-system-health-probes-display: done
   epic-1-retrospective: optional
 
-  epic-2: in-progress
+  epic-2: done
   2-1-terminal-console-log-pane: done
   2-2-simulationengine-outage-trigger: done
-  2-3-auto-recovery-sequence: review
+  2-3-auto-recovery-sequence: done
   epic-2-retrospective: optional
 
   epic-3: backlog
