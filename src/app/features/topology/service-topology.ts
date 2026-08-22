@@ -43,6 +43,15 @@ export class ServiceTopology {
     this.store.selectNode(id);
   }
 
+  protected isNodeDegraded(id: string): boolean {
+    return this.store.outageDegradedNodeIds().has(id);
+  }
+
+  protected isLinkDegraded(link: TopologyLink): boolean {
+    const degraded = this.store.outageDegradedNodeIds();
+    return degraded.has(link.source) && degraded.has(link.target);
+  }
+
   protected x(id: string): number {
     return this.layouts().get(id)?.x ?? 0;
   }

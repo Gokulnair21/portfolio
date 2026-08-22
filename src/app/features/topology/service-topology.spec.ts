@@ -96,4 +96,43 @@ describe('ServiceTopology', () => {
       expected.metrics.map((metric) => [metric.label, metric.value]),
     );
   });
+
+  it('should render degraded red link and borders only for the outage pair while active', () => {
+    const fixture = render();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    store.beginOutage(41.37);
+    fixture.detectChanges();
+
+    const degradedLinks = Array.from(compiled.querySelectorAll('line.link-degraded'));
+    expect(degradedLinks.length).toBe(1);
+
+    const degradedNodes = Array.from(compiled.querySelectorAll('.topo-node.node-degraded'));
+    const labels = degradedNodes.map(
+      (node) => node.querySelector('.node-label')?.textContent?.trim(),
+    );
+    expect(labels.sort()).toEqual(['payment-service', 'postgresql-db']);
+
+    store.clearOutage();
+    fixture.detectChanges();
+
+    expect(compiled.querySelectorAll('line.link-degraded').length).toBe(0);
+    expect(compiled.querySelectorAll('.topo-node.node-degraded').length).toBe(0);
+  });
+
+  it('should show a 100% error rate in open payment details during an outage', () => {
+    store.selectNode('payment-service');
+    const fixture = render();
+
+    store.beginOutage(41.37);
+    fixture.detectChanges();
+
+    const rows = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.metric-row'),
+    ).map((row) => [
+      row.querySelector('.metric-label')?.textContent?.trim(),
+      row.querySelector('.metric-value')?.textContent?.trim(),
+    ]);
+    expect(rows).toContainEqual(['Error Rate', '100%']);
+  });
 });

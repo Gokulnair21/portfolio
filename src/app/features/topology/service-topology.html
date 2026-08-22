@@ -10,6 +10,7 @@
         @for (link of links(); track linkKey(link)) {
           <line
             class="topo-link"
+            [class.link-degraded]="isLinkDegraded(link)"
             [attr.x1]="x(link.source)"
             [attr.y1]="y(link.source)"
             [attr.x2]="x(link.target)"
@@ -20,6 +21,7 @@
           <g
             class="topo-node"
             [class.node-selected]="store.selectedNodeId() === node.id"
+            [class.node-degraded]="store.outageDegradedNodeIds().has(node.id)"
             (click)="selectNode(node.id)"
           >
             <rect
@@ -49,7 +51,7 @@
         </ul>
         <h3 class="detail-heading">METRICS</h3>
         <dl class="metric-list">
-          @for (metric of node.metrics; track metric.label) {
+          @for (metric of store.selectedNodeMetrics(); track metric.label) {
             <div class="metric-row">
               <dt class="metric-label">{{ metric.label }}</dt>
               <dd class="metric-value">{{ metric.value }}</dd>

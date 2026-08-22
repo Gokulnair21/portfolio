@@ -38,6 +38,10 @@
   stroke-width: 2;
 }
 
+.link-degraded {
+  stroke: var(--status-degraded);
+}
+
 .topo-node {
   cursor: pointer;
 }
@@ -62,6 +66,15 @@
 
 .node-selected .node-label {
   fill: var(--status-info);
+}
+
+.node-degraded .node-body {
+  stroke: var(--status-degraded);
+  stroke-width: 2;
+}
+
+.node-degraded .node-label {
+  fill: var(--status-degraded);
 }
 
 .detail-card {

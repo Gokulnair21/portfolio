@@ -244,6 +244,66 @@ describe('ClusterStateService', () => {
     });
   });
 
+  describe('topology outage degradation', () => {
+    it('should report no active outage or degraded nodes before any transition', () => {
+      store.hydrate(VALID_DATA);
+
+      expect(store.outageActive()).toBe(false);
+      expect(store.outageDegradedNodeIds().size).toBe(0);
+    });
+
+    it('should expose payment-service and postgresql-db as degraded while an outage is active', () => {
+      store.hydrate(VALID_DATA);
+
+      store.beginOutage(41.37);
+
+      expect(store.outageActive()).toBe(true);
+      expect([...store.outageDegradedNodeIds()].sort()).toEqual([
+        'payment-service',
+        'postgresql-db',
+      ]);
+    });
+
+    it('should overlay a 100% error rate on selected payment-service metrics during an outage', () => {
+      store.hydrate(VALID_DATA);
+      store.selectNode('payment-service');
+      expect(store.selectedNodeMetrics()[0]!.value).toBe('0.01%');
+
+      store.beginOutage(41.37);
+
+      const errorMetric = store
+        .selectedNodeMetrics()
+        .find((metric) => metric.label.toLowerCase().includes('error'));
+      expect(errorMetric!.value).toBe('100%');
+    });
+
+    it('should leave non-error metrics and other nodes untouched during an outage', () => {
+      store.hydrate(VALID_DATA);
+      store.selectNode('postgresql-db');
+
+      store.beginOutage(41.37);
+
+      expect(store.selectedNodeMetrics().map((metric) => metric.value)).toEqual(['0.01%']);
+      expect(store.selectedNodeMetrics()).toEqual(
+        VALID_DATA.topology.nodes.find((node) => node.id === 'postgresql-db')!.metrics,
+      );
+    });
+
+    it('should restore normal styling inputs automatically once the outage clears', () => {
+      store.hydrate(VALID_DATA);
+      store.selectNode('payment-service');
+      store.beginOutage(41.37);
+
+      store.clearOutage();
+
+      expect(store.outageActive()).toBe(false);
+      expect(store.outageDegradedNodeIds().size).toBe(0);
+      expect(store.selectedNodeMetrics()).toEqual(
+        VALID_DATA.topology.nodes.find((node) => node.id === 'payment-service')!.metrics,
+      );
+    });
+  });
+
   describe('outage overlay', () => {
     it('should expose outage as null before any transition', () => {
       expect(store.outage()).toBeNull();

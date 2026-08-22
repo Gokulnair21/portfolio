@@ -3,6 +3,7 @@ import {
   ClusterStatus,
   LogEntry,
   PortfolioData,
+  TopologyMetric,
   TopologyNode,
 } from '../data/portfolio-data';
 import { DEFAULT_TAB, TabId } from './tabs';
@@ -21,6 +22,15 @@ const DEFAULT_ERROR_RATE = 0;
 export const LOG_CAP = 200;
 
 const NO_NODE_ID = null;
+
+const OUTAGE_PAYMENT_NODE_ID = 'payment-service';
+export const OUTAGE_DEGRADED_NODE_IDS: readonly string[] = [
+  OUTAGE_PAYMENT_NODE_ID,
+  'postgresql-db',
+];
+const OUTAGE_METRIC_KEYWORD = 'error';
+const OUTAGE_ERROR_RATE_DISPLAY = '100%';
+const EMPTY_NODE_ID_SET: ReadonlySet<string> = new Set<string>();
 
 @Injectable()
 export class ClusterStateService {
@@ -45,6 +55,21 @@ export class ClusterStateService {
   readonly selectedNode = computed<TopologyNode | null>(() => {
     const id = this.#selectedNodeId();
     return this.topologyNodes().find((node) => node.id === id) ?? null;
+  });
+
+  readonly outageActive = computed(() => this.#outage() !== null);
+  readonly outageDegradedNodeIds = computed<ReadonlySet<string>>(() =>
+    this.outageActive() ? new Set(OUTAGE_DEGRADED_NODE_IDS) : EMPTY_NODE_ID_SET,
+  );
+  readonly selectedNodeMetrics = computed<readonly TopologyMetric[]>(() => {
+    const node = this.selectedNode();
+    if (!node) return [];
+    if (!this.outageActive() || node.id !== OUTAGE_PAYMENT_NODE_ID) return node.metrics;
+    return node.metrics.map((metric) =>
+      metric.label.toLowerCase().includes(OUTAGE_METRIC_KEYWORD)
+        ? { ...metric, value: OUTAGE_ERROR_RATE_DISPLAY }
+        : metric,
+    );
   });
 
   readonly livenessStatus = computed<ClusterStatus>(() => {
