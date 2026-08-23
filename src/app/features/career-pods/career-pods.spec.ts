@@ -60,6 +60,40 @@ describe('CareerPods', () => {
     expect(cards()[0]!.classList.contains('pod-selected')).toBe(true);
   });
 
+  it('should deselect the previous pod when selecting a non-first pod', () => {
+    const data = parsePortfolioData(portfolioDataJson)!;
+    store.hydrate({
+      ...data,
+      experience: [
+        data.experience[0]!,
+        {
+          company: 'Fixture Systems Ltd',
+          role: 'Senior Backend Engineer',
+          period: '2018-06 — 2022-02',
+          highlights: ['Synthetic second entry for selection coverage.'],
+        },
+      ],
+    });
+
+    const fixture = render();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    const cards = () => Array.from(compiled.querySelectorAll('.pod-card'));
+
+    cards()[0]!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(store.selectedPodIndex()).toBe(0);
+    expect(cards()[0]!.classList.contains('pod-selected')).toBe(true);
+
+    cards()[1]!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(store.selectedPodIndex()).toBe(1);
+    expect(cards()[0]!.classList.contains('pod-selected')).toBe(false);
+    expect(cards()[1]!.classList.contains('pod-selected')).toBe(true);
+  });
+
   it('should show timeline, role, company, and bulleted responsibilities for the selected entry', () => {
     const data = parsePortfolioData(portfolioDataJson)!;
     const expected = data.experience[0]!;

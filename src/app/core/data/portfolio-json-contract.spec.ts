@@ -19,6 +19,7 @@ describe('public/portfolio-data.json contract', () => {
     expect(data!.experience.length).toBeGreaterThan(0);
     expect(typeof data!.contact.email).toBe('string');
     expect(data!.contact.email.length).toBeGreaterThan(0);
+    expect(data!.contact.email).toBe('gokul.nairmurali@gmail.com');
     expect(data!.envProperties.length).toBeGreaterThan(0);
 
     expect(typeof data!.health.liveness).toBe('string');
@@ -29,6 +30,32 @@ describe('public/portfolio-data.json contract', () => {
 
     for (const project of data!.projects) {
       expect(project.stack.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('should pin the shipped experience entry to the real CV values', () => {
+    const data = parsePortfolioData(portfolioDataJson)!;
+
+    expect(data.experience.length).toBe(1);
+    expect(data.experience[0]!.company).toBe('Neosoft Technologies');
+    expect(data.experience[0]!.role).toBe('Associate Team Lead — Java Backend Engineer');
+    expect(data.experience[0]!.period).toBe('Jun 2021 — Present');
+    expect(data.experience[0]!.highlights.length).toBe(5);
+  });
+
+  it('should ship zero placeholder strings in rendered content', () => {
+    const serialized = JSON.stringify(portfolioDataJson).toLowerCase();
+
+    const placeholders = [
+      'example.com',
+      'your-handle',
+      'example corp',
+      'cluster-control',
+      'ledger-stream',
+      'probe-mesh',
+    ];
+    for (const placeholder of placeholders) {
+      expect(serialized).not.toContain(placeholder);
     }
   });
 
