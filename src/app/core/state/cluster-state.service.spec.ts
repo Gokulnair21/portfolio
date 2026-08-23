@@ -282,10 +282,7 @@ describe('ClusterStateService', () => {
       store.beginOutage(41.37);
 
       expect(store.outageActive()).toBe(true);
-      expect([...store.outageDegradedNodeIds()].sort()).toEqual([
-        'payment-service',
-        'postgresql-db',
-      ]);
+      expect([...store.outageDegradedNodeIds()].sort()).toEqual(['core-bank-db', 'payment-service']);
     });
 
     it('should overlay a 100% error rate on selected payment-service metrics during an outage', () => {

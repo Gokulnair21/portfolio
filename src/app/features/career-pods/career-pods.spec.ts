@@ -30,10 +30,7 @@ describe('CareerPods', () => {
     expect(cards.length).toBe(data.experience.length);
 
     const names = cards.map((card) => card.querySelector('.pod-name')?.textContent?.trim());
-    expect(names).toEqual([
-      'pod-experience-example-corp-0',
-      'pod-experience-previous-systems-ltd-1',
-    ]);
+    expect(names).toEqual(['pod-experience-neosoft-technologies-0']);
 
     for (const card of cards) {
       expect(card.querySelector('.pod-status')?.textContent?.trim()).toContain('Running');
@@ -55,24 +52,18 @@ describe('CareerPods', () => {
 
     const cards = () => Array.from(compiled.querySelectorAll('.pod-card'));
 
-    cards()[1]!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    fixture.detectChanges();
-
-    expect(store.selectedPodIndex()).toBe(1);
-    expect(cards()[0]!.classList.contains('pod-selected')).toBe(false);
-    expect(cards()[1]!.classList.contains('pod-selected')).toBe(true);
-
     cards()[0]!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     fixture.detectChanges();
 
     expect(store.selectedPodIndex()).toBe(0);
     expect(cards().filter((card) => card.classList.contains('pod-selected')).length).toBe(1);
+    expect(cards()[0]!.classList.contains('pod-selected')).toBe(true);
   });
 
   it('should show timeline, role, company, and bulleted responsibilities for the selected entry', () => {
     const data = parsePortfolioData(portfolioDataJson)!;
-    const expected = data.experience[1]!;
-    store.selectPod(1);
+    const expected = data.experience[0]!;
+    store.selectPod(0);
     const compiled = render().nativeElement as HTMLElement;
 
     const card = compiled.querySelector('.detail-card')!;

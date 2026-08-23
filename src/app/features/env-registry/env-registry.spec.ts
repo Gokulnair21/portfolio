@@ -51,7 +51,7 @@ describe('EnvRegistry', () => {
     setFilter(fixture, 'JAVA');
 
     expect(rows(fixture.nativeElement as HTMLElement)).toEqual([
-      ['gokul.skills.languages', 'Java 17'],
+      ['gokul.skills.languages', 'Java 8/17/21, Kotlin'],
     ]);
   });
 
@@ -61,12 +61,14 @@ describe('EnvRegistry', () => {
     setFilter(fixture, 'gokul.skills');
 
     expect(rows(fixture.nativeElement as HTMLElement)).toEqual([
-      ['gokul.skills.languages', 'Java 17'],
-      ['gokul.skills.frameworks', 'Spring Boot'],
-      ['gokul.skills.messaging', 'Kafka, RabbitMQ'],
-      ['gokul.skills.persistence', 'PostgreSQL, Redis'],
-      ['gokul.skills.observability', 'Prometheus, Grafana'],
-      ['gokul.skills.practices', 'TDD, contract testing'],
+      ['gokul.skills.languages', 'Java 8/17/21, Kotlin'],
+      ['gokul.skills.frameworks', 'Spring Boot, Spring MVC, Spring Security, Spring Cloud, Hibernate, JPA'],
+      ['gokul.skills.architecture', 'Microservices, REST API Design, Event-Driven, Saga, CQRS, Circuit Breaker'],
+      ['gokul.skills.messaging', 'Apache Kafka (multi consumer groups)'],
+      ['gokul.skills.security', 'mTLS, JWT, OAuth2, RBAC, AES Encryption'],
+      ['gokul.skills.persistence', 'MySQL, PostgreSQL, Redis'],
+      ['gokul.skills.observability', 'Dynatrace, Docker, Jenkins, AWS'],
+      ['gokul.skills.testing', 'JUnit, Mockito, Git, Bitbucket'],
     ]);
   });
 

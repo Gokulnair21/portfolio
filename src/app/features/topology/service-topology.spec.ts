@@ -35,11 +35,11 @@ describe('ServiceTopology', () => {
     const labels = groups.map((group) =>
       group.querySelector('.node-label')?.textContent?.trim(),
     );
-    expect(labels).toContain('api-gateway');
-    expect(labels).toContain('auth-service');
+    expect(labels).toContain('bff-gateway');
+    expect(labels).toContain('onboarding-service');
     expect(labels).toContain('payment-service');
-    expect(labels).toContain('notify-service');
-    expect(labels).toContain('postgresql-db');
+    expect(labels).toContain('deposit-service');
+    expect(labels).toContain('core-bank-db');
     expect(compiled.querySelector('svg.topology-svg')).not.toBeNull();
   });
 
@@ -71,14 +71,14 @@ describe('ServiceTopology', () => {
   });
 
   it('should show the selected node description, tech stack, and metrics from JSON', () => {
-    store.selectNode('api-gateway');
+    store.selectNode('bff-gateway');
     const compiled = render().nativeElement as HTMLElement;
 
     const card = compiled.querySelector('.detail-card')!;
-    expect(card.querySelector('.detail-title')?.textContent?.trim()).toBe('api-gateway');
+    expect(card.querySelector('.detail-title')?.textContent?.trim()).toBe('bff-gateway');
 
     const data = parsePortfolioData(portfolioDataJson)!;
-    const expected = data.topology.nodes.find((node) => node.id === 'api-gateway')!;
+    const expected = data.topology.nodes.find((node) => node.id === 'bff-gateway')!;
     expect(card.querySelector('.detail-description')?.textContent?.trim()).toBe(
       expected.description,
     );
@@ -111,7 +111,7 @@ describe('ServiceTopology', () => {
     const labels = degradedNodes.map(
       (node) => node.querySelector('.node-label')?.textContent?.trim(),
     );
-    expect(labels.sort()).toEqual(['payment-service', 'postgresql-db']);
+    expect(labels.sort()).toEqual(['core-bank-db', 'payment-service']);
 
     store.clearOutage();
     fixture.detectChanges();

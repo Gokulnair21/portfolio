@@ -58,11 +58,11 @@ describe('public/portfolio-data.json contract', () => {
       const data = parsePortfolioData(portfolioDataJson)!;
 
       expect(data.topology.nodes.map((node) => node.id)).toEqual([
-        'api-gateway',
-        'auth-service',
-        'notify-service',
+        'bff-gateway',
+        'onboarding-service',
         'payment-service',
-        'postgresql-db',
+        'deposit-service',
+        'core-bank-db',
       ]);
       expect(data.topology.links).toEqual(
         portfolioDataJson.topology.links.map((link) => ({
@@ -72,12 +72,12 @@ describe('public/portfolio-data.json contract', () => {
       );
     });
 
-    it('should include the payment-service to postgresql-db link', () => {
+    it('should include the payment-service to core-bank-db link', () => {
       const data = parsePortfolioData(portfolioDataJson)!;
 
       expect(data.topology.links).toContainEqual({
         source: 'payment-service',
-        target: 'postgresql-db',
+        target: 'core-bank-db',
       });
     });
 

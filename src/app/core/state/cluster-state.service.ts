@@ -26,7 +26,7 @@ const NO_NODE_ID = null;
 const OUTAGE_PAYMENT_NODE_ID = 'payment-service';
 export const OUTAGE_DEGRADED_NODE_IDS: readonly string[] = [
   OUTAGE_PAYMENT_NODE_ID,
-  'postgresql-db',
+  'core-bank-db',
 ];
 const OUTAGE_METRIC_KEYWORD = 'error';
 const OUTAGE_ERROR_RATE_DISPLAY = '100%';

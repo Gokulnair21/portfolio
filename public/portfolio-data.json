@@ -1,124 +1,118 @@
 {
   "projects": [
     {
-      "name": "cluster-control",
-      "description": "Self-service operations console for provisioning and inspecting Kafka clusters across environments.",
-      "stack": ["Angular", "TypeScript", "Spring Boot", "Kafka"],
-      "repoUrl": "https://github.com/example/cluster-control"
+      "name": "Bank ABC",
+      "description": "Multi-country core banking platform — idempotent payment APIs with zero double-debit incidents, Drools-based onboarding BRMS, and mTLS-secured communication across Algeria, Egypt, and Tunisia.",
+      "stack": ["Spring Boot", "Kafka", "Drools", "mTLS"]
     },
     {
-      "name": "ledger-stream",
-      "description": "Exactly-once transaction ledger pipeline with schema-registry governance and replay tooling.",
-      "stack": ["Java 21", "Kafka Streams", "Avro", "Postgres"],
-      "repoUrl": "https://github.com/example/ledger-stream"
+      "name": "TATA AIG",
+      "description": "Insurance BFF platform — webhook-driven event callbacks eliminating 80,000+ redundant API calls/day, Kafka multi-consumer-group sync pipeline, and circuit-breaker-guarded third-party integrations.",
+      "stack": ["Spring Boot", "Kafka", "Redis", "Circuit Breaker", "Dynatrace"]
     },
     {
-      "name": "probe-mesh",
-      "description": "Federated liveness/readiness probing with per-region rollups and pager escalation rules.",
-      "stack": ["Go", "gRPC", "Prometheus", "Grafana"],
-      "repoUrl": "https://github.com/example/probe-mesh"
+      "name": "EKAM — Union Bank of India",
+      "description": "Enterprise HR platform for 60,000+ employees — hierarchical RBAC (Branch/Region/Zone/Corporate), JWT auth with refresh rotation, and AES encryption for all PII fields.",
+      "stack": ["Spring Boot", "MySQL", "JWT", "RBAC", "AES"]
     }
   ],
   "experience": [
     {
-      "company": "Example Corp",
-      "role": "Staff Platform Engineer",
-      "period": "2022-03 — present",
+      "company": "Neosoft Technologies",
+      "role": "Associate Team Lead — Java Backend Engineer",
+      "period": "Jun 2021 — Present",
       "highlights": [
-        "Led migration of 40+ services to event-driven integration on Kafka.",
-        "Cut p99 deployment lead time from 3 days to under 2 hours."
-      ]
-    },
-    {
-      "company": "Previous Systems Ltd",
-      "role": "Senior Backend Engineer",
-      "period": "2018-06 — 2022-02",
-      "highlights": [
-        "Designed multi-tenant billing pipeline processing 10M events/day.",
-        "Introduced contract testing that reduced cross-team incidents by half."
+        "Owned end-to-end backend architecture for a multi-region core banking platform (Algeria, Egypt, Tunisia) built on Spring Boot microservices — onboarding, payments, term deposits, and loans.",
+        "Accelerated BFF performance from 7s to under 3s by decoupling static and dynamic data paths via Redis caching and async loading.",
+        "Secured all inter-service and client communication with Mutual TLS (mTLS) plus AES encryption for financial data in transit across three country deployments.",
+        "Scaled engineering quality across an 8–10 person team — code review standards and internal sessions on Kafka, CQRS, and resilience patterns drove a 35% reduction in recurring architecture defects.",
+        "Led technical hiring for mid-to-senior Java backend roles, defining the evaluation bar and screening pipeline."
       ]
     }
   ],
   "topology": {
     "nodes": [
       {
-        "id": "api-gateway",
-        "label": "api-gateway",
-        "description": "Edge gateway terminating external traffic, enforcing per-client rate limits and routing to downstream services.",
-        "techStack": ["Spring Cloud Gateway", "Java 17", "Resilience4j"],
+        "id": "bff-gateway",
+        "label": "bff-gateway",
+        "description": "BFF gateway serving three country deployments with a Redis cache and DB fallback decoupling static from async user data.",
+        "techStack": ["Spring Boot", "Spring Cloud", "Redis"],
         "metrics": [
-          { "label": "Throughput", "value": "1,240 req/s" },
-          { "label": "P99 Latency", "value": "42 ms" },
+          { "label": "Load Time", "value": "< 3 s" },
+          { "label": "P99 Latency", "value": "38 ms" },
           { "label": "Error Rate", "value": "0.01%" }
         ]
       },
       {
-        "id": "auth-service",
-        "label": "auth-service",
-        "description": "Issues and validates short-lived access tokens and rotates refresh credentials for all client sessions.",
-        "techStack": ["Spring Boot", "Java 17", "JWT"],
+        "id": "onboarding-service",
+        "label": "onboarding-service",
+        "description": "Rule-driven customer onboarding validation powered by a Drools BRMS decision engine.",
+        "techStack": ["Spring Boot", "Drools", "Kafka"],
         "metrics": [
-          { "label": "Token Issues/min", "value": "310" },
-          { "label": "P99 Latency", "value": "28 ms" },
+          { "label": "Onboarding/min", "value": "120" },
+          { "label": "Rule Eval P99", "value": "24 ms" },
           { "label": "Error Rate", "value": "0.00%" }
-        ]
-      },
-      {
-        "id": "notify-service",
-        "label": "notify-service",
-        "description": "Fans out transactional notifications over email and push channels with idempotent delivery retries.",
-        "techStack": ["Spring Boot", "Java 17", "Kafka"],
-        "metrics": [
-          { "label": "Events/min", "value": "540" },
-          { "label": "Delivery Success", "value": "99.9%" },
-          { "label": "Error Rate", "value": "0.04%" }
         ]
       },
       {
         "id": "payment-service",
         "label": "payment-service",
-        "description": "Processes card and transfer settlements through a circuit-breaker-guarded payment pipeline.",
-        "techStack": ["Spring Boot", "Java 21", "Resilience4j"],
+        "description": "Idempotent transaction APIs with zero double-debit incidents in production.",
+        "techStack": ["Spring Boot", "Kafka", "mTLS"],
         "metrics": [
-          { "label": "Throughput", "value": "180 txn/s" },
-          { "label": "P99 Latency", "value": "95 ms" },
+          { "label": "Throughput", "value": "210 txn/s" },
+          { "label": "Double-Debits", "value": "0" },
+          { "label": "Error Rate", "value": "0.00%" }
+        ]
+      },
+      {
+        "id": "deposit-service",
+        "label": "deposit-service",
+        "description": "TD/CD term deposits and loan calculator with per-country regulatory compliance.",
+        "techStack": ["Spring Boot", "Hibernate", "JPA"],
+        "metrics": [
+          { "label": "Bookings/day", "value": "4,800" },
+          { "label": "P99 Latency", "value": "51 ms" },
           { "label": "Error Rate", "value": "0.02%" }
         ]
       },
       {
-        "id": "postgresql-db",
-        "label": "postgresql-db",
-        "description": "Primary relational store holding settlement ledgers with synchronous standby replication.",
-        "techStack": ["PostgreSQL 16", "Patroni"],
+        "id": "core-bank-db",
+        "label": "core-bank-db",
+        "description": "Primary relational store replicated across regions.",
+        "techStack": ["MySQL", "Replication"],
         "metrics": [
-          { "label": "Connections", "value": "64 / 100" },
-          { "label": "Replication Lag", "value": "0.4 s" },
+          { "label": "Connections", "value": "72 / 100" },
+          { "label": "Replication Lag", "value": "0.3 s" },
           { "label": "Error Rate", "value": "0.00%" }
         ]
       }
     ],
     "links": [
-      { "source": "api-gateway", "target": "auth-service" },
-      { "source": "api-gateway", "target": "notify-service" },
-      { "source": "api-gateway", "target": "payment-service" },
-      { "source": "payment-service", "target": "postgresql-db" }
+      { "source": "bff-gateway", "target": "onboarding-service" },
+      { "source": "bff-gateway", "target": "payment-service" },
+      { "source": "bff-gateway", "target": "deposit-service" },
+      { "source": "payment-service", "target": "core-bank-db" },
+      { "source": "deposit-service", "target": "core-bank-db" }
     ]
   },
   "contact": {
-    "email": "you@example.com",
-    "github": "https://github.com/your-handle",
-    "linkedin": "https://www.linkedin.com/in/your-handle"
+    "email": "gokul.nairmurali@gmail.com",
+    "github": "https://github.com/Gokulnair21",
+    "linkedin": "https://www.linkedin.com/in/gokul-nair-7a5882195/"
   },
   "envProperties": [
     { "key": "spring.profiles.active", "value": "portfolio-prod" },
     { "key": "management.endpoints.web.exposure.include", "value": "health,info,metrics" },
-    { "key": "cluster.region", "value": "eu-central-1" },
-    { "key": "gokul.skills.languages", "value": "Java 17" },
-    { "key": "gokul.skills.frameworks", "value": "Spring Boot" },
-    { "key": "gokul.skills.messaging", "value": "Kafka, RabbitMQ" },
-    { "key": "gokul.skills.persistence", "value": "PostgreSQL, Redis" },
-    { "key": "gokul.skills.observability", "value": "Prometheus, Grafana" },
-    { "key": "gokul.skills.practices", "value": "TDD, contract testing" }
+    { "key": "cluster.region", "value": "ap-south-1" },
+    { "key": "gokul.skills.languages", "value": "Java 8/17/21, Kotlin" },
+    { "key": "gokul.skills.frameworks", "value": "Spring Boot, Spring MVC, Spring Security, Spring Cloud, Hibernate, JPA" },
+    { "key": "gokul.skills.architecture", "value": "Microservices, REST API Design, Event-Driven, Saga, CQRS, Circuit Breaker" },
+    { "key": "gokul.skills.messaging", "value": "Apache Kafka (multi consumer groups)" },
+    { "key": "gokul.skills.security", "value": "mTLS, JWT, OAuth2, RBAC, AES Encryption" },
+    { "key": "gokul.skills.persistence", "value": "MySQL, PostgreSQL, Redis" },
+    { "key": "gokul.skills.observability", "value": "Dynatrace, Docker, Jenkins, AWS" },
+    { "key": "gokul.skills.testing", "value": "JUnit, Mockito, Git, Bitbucket" }
   ],
   "health": {
     "liveness": "UP",
