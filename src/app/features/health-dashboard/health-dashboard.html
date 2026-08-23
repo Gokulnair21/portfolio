@@ -1,54 +1,181 @@
-<section class="panel">
-  <div class="probe-grid">
-    @if (store.livenessStatus() === 'HALF-OPEN') {
-      <div class="fallback-banner" role="status">
-        Circuit half-open &mdash; serving stale cached reads while the connection recovers
+<section class="health-dashboard" aria-label="System health dashboard">
+  <div class="health-dashboard__grid">
+    <!-- Left Column: Overview Cards + Bio/Profile + Chart -->
+    <div class="health-dashboard__main">
+      <!-- System Overview Stat Cards -->
+      <div class="health-dashboard__stats" role="region" aria-label="System overview">
+        <article class="stat-card stat-card--liveness" data-testid="liveness-card">
+          <div class="stat-card__header">
+            <span class="stat-card__label">Liveness Probe</span>
+            <div class="stat-card__badge stat-card__badge--up" role="status" aria-live="polite">
+              <span class="stat-card__dot" aria-hidden="true"></span>
+              <span class="stat-card__badge-text">{{ store.livenessStatus() }}</span>
+            </div>
+          </div>
+          <div class="stat-card__value">200 OK</div>
+          <div class="stat-card__sparkline" aria-hidden="true" role="img" aria-label="Liveness probe history">
+            <span class="stat-card__bar" style="height: 25%"></span>
+            <span class="stat-card__bar" style="height: 37%"></span>
+            <span class="stat-card__bar" style="height: 31%"></span>
+            <span class="stat-card__bar" style="height: 50%"></span>
+            <span class="stat-card__bar" style="height: 44%"></span>
+            <span class="stat-card__bar" style="height: 37%"></span>
+          </div>
+        </article>
+
+        <article class="stat-card stat-card--brokers" data-testid="brokers-card">
+          <div class="stat-card__header">
+            <span class="stat-card__label">Active Brokers</span>
+            <span class="material-symbols-outlined stat-card__icon" aria-hidden="true">hub</span>
+          </div>
+          <div class="stat-card__value">{{ store.brokerConnections() }}<span class="stat-card__value-suffix">/2</span></div>
+          <div class="stat-card__meta">Kafka Cluster Connected</div>
+        </article>
+
+        <article class="stat-card stat-card--error-rate" data-testid="error-rate-card">
+          <div class="stat-card__header">
+            <span class="stat-card__label">Error Rate</span>
+            <span class="material-symbols-outlined stat-card__icon stat-card__icon--error" aria-hidden="true">warning</span>
+          </div>
+          <div class="stat-card__value">{{ store.errorRate().replace('%', '') }}<span class="stat-card__value-suffix">%</span></div>
+          <div class="stat-card__meta">Last 24 hours</div>
+        </article>
       </div>
-    }
-    <div class="probe-row">
-      <span class="probe-label">Liveness Probe</span>
-      <span
-        class="probe-value"
-        [class.status-up]="store.livenessUp()"
-        [class.status-half-open]="store.livenessStatus() === 'HALF-OPEN'"
-        [class.status-degraded]="
-          store.livenessStatus() !== 'UP' && store.livenessStatus() !== 'HALF-OPEN'
-        "
-        >{{ store.livenessStatus() }}</span
-      >
+
+      <!-- Bio / JVM Profile Card -->
+      <div class="health-dashboard__profile" role="region" aria-label="Engineer profile">
+        <div class="profile-card">
+          <div class="profile-card__avatar" aria-hidden="true">
+            <span class="material-symbols-outlined">person</span>
+          </div>
+          <div class="profile-card__content">
+            <div class="profile-card__header">
+              <h2 class="profile-card__name">Gokul</h2>
+              <span class="profile-card__version">v1.8.0-RELEASE</span>
+            </div>
+            <h3 class="profile-card__role">> Senior Java Backend Engineer</h3>
+            <p class="profile-card__bio">
+              Architecting resilient, high-throughput microservices within the Spring Boot ecosystem. Specializing in JVM performance tuning, distributed systems observability, and building self-healing infrastructures.
+            </p>
+            <div class="profile-card__metrics">
+              <div class="profile-metric">
+                <div class="profile-metric__label">Heap Memory</div>
+                <div class="profile-metric__bar">
+                  <div class="profile-metric__fill" style="width: 45%"></div>
+                </div>
+                <div class="profile-metric__value">2.4GB / 8GB</div>
+              </div>
+              <div class="profile-metric">
+                <div class="profile-metric__label">Threads (Daemon)</div>
+                <div class="profile-metric__value-row">
+                  <span class="profile-metric__value">142</span>
+                  <span class="profile-metric__daemon">(89)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Throughput Chart Mockup -->
+      <div class="health-dashboard__chart" role="region" aria-label="Throughput metrics chart" aria-roledescription="chart">
+        <div class="chart-card">
+          <div class="chart-card__header">
+            <h3 class="chart-card__title">Throughput Metrics (Requests/sec)</h3>
+            <div class="chart-card__legend">
+              <span class="chart-card__dot" aria-hidden="true"></span>
+              <span class="chart-card__legend-label">HTTP/2</span>
+            </div>
+          </div>
+          <div class="chart-card__plot" role="img" aria-label="Line chart showing requests per second over the last hour">
+            <svg class="chart-card__svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="chart-gradient" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="var(--primary)" stop-opacity="1"></stop>
+                  <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"></stop>
+                </linearGradient>
+              </defs>
+              <!-- Grid lines -->
+              <g class="chart-card__grid" stroke="var(--outline-variant)" stroke-width="0.5" opacity="0.2">
+                <line x1="0" y1="20" x2="100" y2="20"></line>
+                <line x1="0" y1="40" x2="100" y2="40"></line>
+                <line x1="0" y1="60" x2="100" y2="60"></line>
+                <line x1="0" y1="80" x2="100" y2="80"></line>
+              </g>
+              <!-- Area fill -->
+              <path class="chart-card__area" d="M0,80 Q10,75 20,80 T40,60 T60,70 T80,30 T100,20 L100,100 L0,100 Z" fill="url(#chart-gradient)" opacity="0.2"></path>
+              <!-- Line path -->
+              <path class="chart-card__line" d="M0,80 Q10,75 20,80 T40,60 T60,70 T80,30 T100,20" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              <!-- Plot point -->
+              <circle class="chart-card__point" cx="100" cy="20" r="2" fill="var(--primary)"></circle>
+            </svg>
+          </div>
+          <div class="chart-card__time-labels" aria-hidden="true">
+            <span>-1h</span>
+            <span>-45m</span>
+            <span>-30m</span>
+            <span>-15m</span>
+            <span>Now</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="probe-row">
-      <span class="probe-label">Active Broker Connections</span>
-      <span class="probe-value status-info">{{ store.brokerConnections() }}</span>
-    </div>
-    <div class="probe-row">
-      <span class="probe-label">Error Rate</span>
-      <span
-        class="probe-value"
-        [class.status-up]="store.errorRateIsZero()"
-        [class.status-degraded]="!store.errorRateIsZero()"
-        >{{ store.errorRate() }}</span
-      >
-    </div>
-  </div>
-  <div class="control-row">
-    <button
-      type="button"
-      class="outage-button"
-      aria-label="Simulate Network Outage"
-      [disabled]="outageActive || store.dataStatus() !== 'ready'"
-      (click)="engine.triggerNetworkOutage()"
-    >
-      SIMULATE NETWORK OUTAGE
-    </button>
-    <button
-      type="button"
-      class="recovery-button"
-      aria-label="Trigger Auto-Recovery"
-      [disabled]="store.livenessStatus() !== 'DEGRADED' || store.dataStatus() !== 'ready'"
-      (click)="engine.triggerAutoRecovery()"
-    >
-      TRIGGER AUTO-RECOVERY
-    </button>
+
+    <!-- Right Column: Chaos Engineering Controls -->
+    <aside class="health-dashboard__controls" role="region" aria-label="Chaos engineering controls">
+      <div class="controls-card">
+        <div class="controls-card__header">
+          <span class="material-symbols-outlined controls-card__icon" aria-hidden="true">build</span>
+          <h3 class="controls-card__title">Chaos Engineering</h3>
+        </div>
+        <p class="controls-card__description">
+          Inject faults to verify system resilience and circuit breaker configurations.
+        </p>
+        <div class="controls-card__actions">
+          <button
+            type="button"
+            class="btn btn--outage"
+            aria-label="Simulate Network Outage"
+            [disabled]="outageActive || store.dataStatus() !== 'ready'"
+            (click)="engine.triggerNetworkOutage()"
+          >
+            <span class="material-symbols-outlined btn__icon" aria-hidden="true">power_off</span>
+            Simulate Network Outage
+          </button>
+          <button
+            type="button"
+            class="btn btn--recovery"
+            aria-label="Trigger Auto-Recovery"
+            [disabled]="store.livenessStatus() !== 'DEGRADED' || store.dataStatus() !== 'ready'"
+            (click)="engine.triggerAutoRecovery()"
+          >
+            <span class="material-symbols-outlined btn__icon" aria-hidden="true">restart_alt</span>
+            Trigger Auto-Recovery
+          </button>
+        </div>
+        <div class="controls-card__breakers">
+          <h4 class="controls-card__breakers-title">Circuit Breakers</h4>
+          <div class="controls-card__breaker">
+            <span class="controls-card__breaker-name">PaymentService</span>
+            <div class="toggle toggle--enabled" role="switch" aria-checked="true" aria-disabled="true" aria-label="PaymentService circuit breaker">
+              <div class="toggle__track"></div>
+              <div class="toggle__thumb"></div>
+            </div>
+          </div>
+          <div class="controls-card__breaker">
+            <span class="controls-card__breaker-name">InventoryDB</span>
+            <div class="toggle toggle--enabled" role="switch" aria-checked="true" aria-disabled="true" aria-label="InventoryDB circuit breaker">
+              <div class="toggle__track"></div>
+              <div class="toggle__thumb"></div>
+            </div>
+          </div>
+        </div>
+        @if (store.livenessStatus() === 'HALF-OPEN') {
+          <div class="fallback-banner" role="status" aria-live="polite">
+            Circuit half-open &mdash; serving stale cached reads while the connection recovers
+          </div>
+        }
+      </div>
+    </aside>
   </div>
 </section>

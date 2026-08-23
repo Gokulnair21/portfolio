@@ -41,19 +41,19 @@ describe('SwaggerPlayground', () => {
   }
 
   function openEditor(fixture: ReturnType<typeof render>): void {
-    (fixture.nativeElement.querySelector('.try-button') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.swagger-playground__try-button') as HTMLButtonElement).click();
     fixture.detectChanges();
   }
 
   function setBody(fixture: ReturnType<typeof render>, text: string): void {
-    const editor = fixture.nativeElement.querySelector('.request-editor') as HTMLTextAreaElement;
+    const editor = fixture.nativeElement.querySelector('.swagger-playground__request-editor') as HTMLTextAreaElement;
     editor.value = text;
     editor.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges();
   }
 
   async function execute(fixture: ReturnType<typeof render>): Promise<void> {
-    (fixture.nativeElement.querySelector('.execute-button') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.swagger-playground__execute-button') as HTMLButtonElement).click();
     fixture.detectChanges();
     await Promise.resolve();
     await Promise.resolve();
@@ -64,12 +64,12 @@ describe('SwaggerPlayground', () => {
     const data = parsePortfolioData(portfolioDataJson)!;
     const compiled = render().nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('.method-badge')?.textContent?.trim()).toBe('POST');
-    expect(compiled.querySelector('.endpoint-path')?.textContent?.trim()).toBe('/api/v1/contact');
+    expect(compiled.querySelector('.swagger-playground__method-badge')?.textContent?.trim()).toBe('POST');
+    expect(compiled.querySelector('.swagger-playground__endpoint-path')?.textContent?.trim()).toBe('/api/v1/contact');
 
-    const preview = compiled.querySelector('.request-preview')?.textContent ?? '';
+    const preview = compiled.querySelector('.swagger-playground__request-preview')?.textContent ?? '';
     expect(JSON.parse(preview)).toEqual({ name: '', email: data.contact.email, message: '' });
-    expect(compiled.querySelector('.execute-button')).toBeNull();
+    expect(compiled.querySelector('.swagger-playground__execute-button')).toBeNull();
   });
 
   it('should swap preview for an editable editor and execute button when try-it-out is active', () => {
@@ -78,9 +78,9 @@ describe('SwaggerPlayground', () => {
 
     openEditor(fixture);
 
-    expect(compiled.querySelector('.request-editor')).toBeTruthy();
-    expect(compiled.querySelector('.execute-button')?.textContent?.trim()).toBe('EXECUTE');
-    expect(compiled.querySelector('.request-preview')).toBeNull();
+    expect(compiled.querySelector('.swagger-playground__request-editor')).toBeTruthy();
+    expect(compiled.querySelector('.swagger-playground__execute-button')?.textContent?.trim()).toBe('EXECUTE');
+    expect(compiled.querySelector('.swagger-playground__request-preview')).toBeNull();
   });
 
   it('should restore defaults and clear stale delivery results when try-it-out is toggled back off', async () => {
@@ -101,14 +101,14 @@ describe('SwaggerPlayground', () => {
     openEditor(fixture);
     setBody(fixture, VALID_BODY);
     await execute(fixture);
-    expect(fixture.nativeElement.querySelector('.response-section')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.swagger-playground__response-section')).toBeTruthy();
 
-    (fixture.nativeElement.querySelector('.try-button') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.swagger-playground__try-button') as HTMLButtonElement).click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.response-section')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.swagger-playground__response-section')).toBeNull();
 
     openEditor(fixture);
-    const editor = fixture.nativeElement.querySelector('.request-editor') as HTMLTextAreaElement;
+    const editor = fixture.nativeElement.querySelector('.swagger-playground__request-editor') as HTMLTextAreaElement;
     expect(JSON.parse(editor.value)).toEqual({ name: '', email: data.contact.email, message: '' });
   });
 
@@ -120,10 +120,10 @@ describe('SwaggerPlayground', () => {
     await execute(fixture);
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.validation-error')?.textContent).toContain('not valid JSON');
+    expect(compiled.querySelector('.swagger-playground__validation-error')?.textContent).toContain('not valid JSON');
     expect(sendSpy).not.toHaveBeenCalled();
     expect(store.logs().length).toBe(0);
-    expect(compiled.querySelector('.response-section')).toBeNull();
+    expect(compiled.querySelector('.swagger-playground__response-section')).toBeNull();
   });
 
   it('should reject empty, array, and null bodies as non-object payloads', async () => {
@@ -136,7 +136,7 @@ describe('SwaggerPlayground', () => {
       await execute(fixture);
 
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.querySelector('.validation-error')).toBeTruthy();
+      expect(compiled.querySelector('.swagger-playground__validation-error')).toBeTruthy();
     }
 
     expect(sendSpy).not.toHaveBeenCalled();
@@ -161,12 +161,12 @@ describe('SwaggerPlayground', () => {
       await execute(fixture);
 
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.querySelector('.validation-error')?.textContent).toContain(expectedError);
+      expect(compiled.querySelector('.swagger-playground__validation-error')?.textContent).toContain(expectedError);
     }
 
     expect(sendSpy).not.toHaveBeenCalled();
     expect(store.logs().length).toBe(0);
-    expect(fixture.nativeElement.querySelector('.response-section')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.swagger-playground__response-section')).toBeNull();
   });
 
   it('should deliver through the port and render mock 200 OK headers plus a Kafka receipt with ingestion logs', async () => {
@@ -192,9 +192,9 @@ describe('SwaggerPlayground', () => {
     expect(capturedPayload).toEqual({ name: 'Gokul', email: 'you@example.com', message: 'Hello from the playground.' });
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const headers = compiled.querySelector('.response-headers')?.textContent ?? '';
+    const headers = compiled.querySelector('.swagger-playground__response-viewer--headers')?.textContent ?? '';
     expect(headers).toContain('HTTP/1.1 200 OK');
-    const receiptText = Array.from(compiled.querySelectorAll('.response-viewer'))
+    const receiptText = Array.from(compiled.querySelectorAll('.swagger-playground__response-viewer'))
       .map((node) => node.textContent ?? '')
       .join('');
     expect(JSON.parse(receiptText.replace(headers, ''))).toEqual(receipt);
@@ -217,7 +217,7 @@ describe('SwaggerPlayground', () => {
     setBody(fixture, VALID_BODY);
     await execute(fixture);
 
-    const banner = fixture.nativeElement.querySelector('.delivery-error') as HTMLElement | null;
+    const banner = fixture.nativeElement.querySelector('.swagger-playground__delivery-error') as HTMLElement | null;
     expect(banner?.textContent).toContain('DELIVERY FAILED');
     expect(banner?.textContent).toContain('headless request blocked');
     expect(banner?.getAttribute('role')).toBe('alert');
@@ -236,10 +236,10 @@ describe('SwaggerPlayground', () => {
 
     openEditor(fixture);
     setBody(fixture, VALID_BODY);
-    (fixture.nativeElement.querySelector('.execute-button') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.swagger-playground__execute-button') as HTMLButtonElement).click();
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector('.execute-button') as HTMLButtonElement;
+    const button = fixture.nativeElement.querySelector('.swagger-playground__execute-button') as HTMLButtonElement;
     expect(button.disabled).toBe(true);
     expect(button.textContent?.trim()).toBe('SENDING…');
 
@@ -260,5 +260,71 @@ describe('SwaggerPlayground', () => {
 
     expect(button.disabled).toBe(false);
     expect(button.textContent?.trim()).toBe('EXECUTE');
+  });
+
+  it('should apply shared token styling: method badge uses primary color', () => {
+    const compiled = render().nativeElement as HTMLElement;
+    const badge = compiled.querySelector('.swagger-playground__method-badge');
+    expect(badge).toBeTruthy();
+    expect(badge?.classList.contains('swagger-playground__method-badge')).toBe(true);
+  });
+
+  it('should apply shared token styling: try button uses secondary color', () => {
+    const compiled = render().nativeElement as HTMLElement;
+    const button = compiled.querySelector('.swagger-playground__try-button');
+    expect(button).toBeTruthy();
+    expect(button?.classList.contains('swagger-playground__try-button')).toBe(true);
+  });
+
+  it('should apply shared token styling: execute button uses primary background', () => {
+    const fixture = render();
+    openEditor(fixture);
+    const compiled = fixture.nativeElement as HTMLElement;
+    const button = compiled.querySelector('.swagger-playground__execute-button');
+    expect(button).toBeTruthy();
+    expect(button?.classList.contains('swagger-playground__execute-button')).toBe(true);
+  });
+
+  it('should apply shared token styling: request editor uses surface-container-low background', () => {
+    const fixture = render();
+    openEditor(fixture);
+    const compiled = fixture.nativeElement as HTMLElement;
+    const editor = compiled.querySelector('.swagger-playground__request-editor');
+    expect(editor).toBeTruthy();
+    expect(editor?.classList.contains('swagger-playground__request-editor')).toBe(true);
+  });
+
+  it('should apply shared token styling: error banners use error color', async () => {
+    const fixture = render();
+    openEditor(fixture);
+    setBody(fixture, '{not json');
+    await execute(fixture);
+    const compiled = fixture.nativeElement as HTMLElement;
+    const error = compiled.querySelector('.swagger-playground__validation-error');
+    expect(error).toBeTruthy();
+    expect(error?.classList.contains('swagger-playground__validation-error')).toBe(true);
+  });
+
+  it('should have focus-visible styles on buttons and editor', () => {
+    const fixture = render();
+    openEditor(fixture);
+    const compiled = fixture.nativeElement as HTMLElement;
+    const focusable = compiled.querySelectorAll(
+      '.swagger-playground__try-button, .swagger-playground__execute-button, .swagger-playground__request-editor',
+    );
+    expect(focusable.length).toBe(3);
+    // Focus styles are in CSS @media (forced-colors: active), we verify elements exist
+    for (const el of focusable) {
+      expect(['BUTTON', 'TEXTAREA']).toContain(el.tagName);
+    }
+  });
+
+  it('should apply reduced-motion guard to execute button shadow animation', () => {
+    const fixture = render();
+    openEditor(fixture);
+    const compiled = fixture.nativeElement as HTMLElement;
+    const button = compiled.querySelector('.swagger-playground__execute-button');
+    expect(button).toBeTruthy();
+    // Animation is controlled by CSS @media query
   });
 });

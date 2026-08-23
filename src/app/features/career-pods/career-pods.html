@@ -1,36 +1,141 @@
-<section class="panel" aria-label="Career replica pods">
-  <div class="pods-layout">
-    <div class="pods-grid">
-      @for (pod of pods(); track pod.name) {
-        <button
-          type="button"
-          class="pod-card"
-          [class.pod-selected]="store.selectedPodIndex() === pod.index"
-          (click)="selectPod(pod.index)"
-        >
-          <span class="pod-name">{{ pod.name }}</span>
-          <span class="pod-status"><span class="status-dot" aria-hidden="true"></span>Running</span>
-          <span class="pod-meta">{{ pod.entry.role }} — {{ pod.entry.company }}</span>
-        </button>
-      }
-    </div>
-    @if (selectedPod(); as pod) {
-      <article class="detail-card">
-        <div class="timeline-row">
-          <span class="timeline-label">TIMELINE</span>
-          <span class="timeline-value">{{ pod.entry.period }}</span>
+<section class="career-pods" aria-label="Career replica pods">
+  <div class="career-pods__layout">
+    <!-- Sidebar: Pod List -->
+    <aside class="career-pods__sidebar" role="complementary" aria-label="Deployment list">
+      <div class="career-pods__sidebar-header">
+        <span class="career-pods__sidebar-title">DEPLOYMENTS / ROLES</span>
+        <span class="material-symbols-outlined career-pods__sidebar-icon" aria-hidden="true">filter_list</span>
+      </div>
+      <div class="career-pods__sidebar-list" role="listbox" aria-label="Pods">
+        @for (pod of pods(); track pod.name) {
+          <button
+            type="button"
+            role="option"
+            class="career-pods__pod-item"
+            [class.career-pods__pod-item--active]="store.selectedPodIndex() === pod.index"
+            [attr.aria-selected]="store.selectedPodIndex() === pod.index"
+            (click)="selectPod(pod.index)"
+            (keydown)="onPodKeydown($event, pod.index)"
+          >
+            <div class="career-pods__pod-header">
+              <span class="career-pods__pod-name" [attr.title]="pod.name">{{ pod.name }}</span>
+              <div class="career-pods__pod-status">
+                <span class="career-pods__status-dot" aria-hidden="true"></span>
+                <span class="career-pods__status-text">RUNNING</span>
+              </div>
+            </div>
+            <div class="career-pods__pod-company">{{ pod.entry.company }}</div>
+            <div class="career-pods__pod-age">AGE: {{ calculateAge(pod.entry.period) }}</div>
+          </button>
+        }
+      </div>
+    </aside>
+
+    <!-- Main Canvas: Pod Details -->
+    <main class="career-pods__canvas" role="main">
+      <!-- Terminal Header -->
+      <div class="career-pods__terminal-header">
+        $ kubectl describe pod <span class="career-pods__pod-name-highlight">{{ selectedPod()?.name }}</span><span class="blinking-cursor" aria-hidden="true"></span>
+      </div>
+
+      @if (selectedPod(); as pod) {
+        <!-- Bento Grid -->
+        <div class="career-pods__bento-grid">
+          <!-- Core Info Card -->
+          <article class="career-pods__core-card" data-testid="core-card">
+            <div class="career-pods__core-card-bg" aria-hidden="true">
+              <span class="material-symbols-outlined">account_tree</span>
+            </div>
+            <div class="career-pods__core-card-header">
+              <span class="material-symbols-outlined career-pods__core-icon" aria-hidden="true">dns</span>
+              <h2 class="career-pods__core-title">Pod Configuration Spec</h2>
+            </div>
+            <div class="career-pods__core-grid">
+              <div>
+                <div class="career-pods__field-label">METADATA.NAME</div>
+                <div class="career-pods__field-value career-pods__field-value--primary">{{ pod.name }}</div>
+              </div>
+              <div>
+                <div class="career-pods__field-label">SPEC.NODE_SELECTOR (COMPANY)</div>
+                <div class="career-pods__field-value">{{ pod.entry.company }}</div>
+              </div>
+              <div>
+                <div class="career-pods__field-label">SPEC.CONTAINERS[0].NAME (ROLE)</div>
+                <div class="career-pods__field-value">{{ pod.entry.role }}</div>
+              </div>
+              <div>
+                <div class="career-pods__field-label">STATUS.START_TIME (TIMELINE)</div>
+                <div class="career-pods__field-value">{{ pod.entry.period }}</div>
+              </div>
+            </div>
+            <!-- Achievements Log -->
+            <div class="career-pods__achievements">
+              <div class="career-pods__achievements-label">EVENTS / LOGS</div>
+              <div class="career-pods__log-entries">
+                @for (highlight of pod.entry.highlights; track $index) {
+                  <div class="career-pods__log-entry">
+                    <span class="career-pods__log-level career-pods__log-level--info">[INFO]</span>
+                    <span class="career-pods__log-message">{{ highlight }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+
+          <!-- Side Metrics / Stack -->
+          <aside class="career-pods__side-stack" aria-label="Resource requests and liveness probe">
+            <!-- Tech Stack Resource Request -->
+            <div class="career-pods__stack-card" data-testid="stack-card">
+              <div class="career-pods__stack-header">
+                <span class="material-symbols-outlined career-pods__stack-icon" aria-hidden="true">memory</span>
+                <h3 class="career-pods__stack-title">Resource Requests</h3>
+              </div>
+              <div class="career-pods__tech-chips">
+                <span class="career-pods__tech-chip">Java 17</span>
+                <span class="career-pods__tech-chip career-pods__tech-chip--primary">Spring Boot</span>
+                <span class="career-pods__tech-chip">Kubernetes</span>
+                <span class="career-pods__tech-chip">Docker</span>
+                <span class="career-pods__tech-chip career-pods__tech-chip--secondary">PostgreSQL</span>
+                <span class="career-pods__tech-chip">Kafka</span>
+                <span class="career-pods__tech-chip">Redis</span>
+              </div>
+            </div>
+
+            <!-- Liveness Probe -->
+            <div class="career-pods__liveness-card" data-testid="liveness-card">
+              <div class="career-pods__liveness-header">
+                <div class="career-pods__liveness-title-row">
+                  <span class="material-symbols-outlined career-pods__liveness-icon" aria-hidden="true">monitor_heart</span>
+                  <h3 class="career-pods__liveness-title">Liveness Probe</h3>
+                </div>
+                <span class="career-pods__liveness-badge">HTTP 200 OK</span>
+              </div>
+              <div class="career-pods__liveness-bars">
+                <div class="career-pods__liveness-bar-row">
+                  <div class="career-pods__liveness-bar-label">
+                    <span>Motivation</span>
+                    <span>98%</span>
+                  </div>
+                  <div class="career-pods__liveness-bar-track">
+                    <div class="career-pods__liveness-bar-fill career-pods__liveness-bar-fill--primary" style="width: 98%"></div>
+                  </div>
+                </div>
+                <div class="career-pods__liveness-bar-row">
+                  <div class="career-pods__liveness-bar-label">
+                    <span>Caffeine Levels</span>
+                    <span>85%</span>
+                  </div>
+                  <div class="career-pods__liveness-bar-track">
+                    <div class="career-pods__liveness-bar-fill career-pods__liveness-bar-fill--secondary" style="width: 85%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
-        <h2 class="detail-role">{{ pod.entry.role }}</h2>
-        <p class="detail-company">{{ pod.entry.company }}</p>
-        <h3 class="detail-heading">RESPONSIBILITIES</h3>
-        <ul class="highlights-list">
-          @for (highlight of pod.entry.highlights; track highlight) {
-            <li class="highlight-item">{{ highlight }}</li>
-          }
-        </ul>
-      </article>
-    } @else {
-      <p class="detail-placeholder">SELECT A POD TO INSPECT</p>
-    }
+      } @else {
+        <p class="career-pods__placeholder">SELECT A POD TO INSPECT</p>
+      }
+    </main>
   </div>
 </section>

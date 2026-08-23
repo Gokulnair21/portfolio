@@ -29,6 +29,6 @@ export class TerminalConsole {
   }
 
   protected levelClass(level: LogLevel): string {
-    return `log-level-${level.toLowerCase()}`;
+    return `terminal-console__level--${level.toLowerCase()}`;
   }
 }

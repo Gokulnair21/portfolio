@@ -1,90 +1,181 @@
+/* ============================================================
+   Terminal Console — Footer-style Log Strip
+   Matches design.html footer console (lines 325–334 / 636–649 / 992–1004)
+   ============================================================ */
+
 :host {
   display: block;
 }
 
-.console {
+.terminal-console {
   display: flex;
   flex-direction: column;
-  height: calc(var(--space-8) * 3);
-  margin: 0 var(--space-5) var(--space-5);
-  background-color: var(--bg-panel);
-  border: var(--border-width) solid var(--border-dim);
-  border-radius: var(--radius-md);
+  background-color: var(--surface-container-lowest);
+  border-top: var(--border-width) solid var(--outline-variant);
+  border-bottom: none;
+  border-radius: 0;
+  min-height: 120px;
+  max-height: 200px;
 }
 
-.console-header {
+.terminal-console__header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-2) var(--space-4);
-  border-bottom: var(--border-width) solid var(--border-dim);
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-xs) var(--space-md);
+  overflow: hidden;
 }
 
-.console-title {
-  font-size: var(--text-sm);
+.terminal-console__prompt {
+  font-family: var(--font-label-mono-sm);
+  font-size: var(--text-label-mono-sm);
+  line-height: var(--line-label-mono-sm);
   font-weight: 700;
-  letter-spacing: 0.125em;
-  color: var(--text-primary);
+  color: var(--on-surface-variant);
+  flex-shrink: 0;
+  margin-right: var(--space-sm);
+  align-self: flex-start;
+  margin-top: 2px;
 }
 
-.console-count {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  letter-spacing: 0.125em;
+.terminal-console__output {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-xs) 0;
+  font-family: var(--font-label-mono-sm);
+  font-size: var(--text-label-mono-sm);
+  line-height: var(--line-label-mono-sm);
+  font-weight: var(--weight-label-mono-sm);
 }
 
-.console-empty {
+.terminal-console__empty {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  letter-spacing: 0.125em;
+  color: var(--on-surface-variant);
+  letter-spacing: var(--tracking-label-mono);
   text-align: center;
-  padding: var(--space-6);
+  padding: var(--space-md);
+  margin: 0;
 }
 
-.console-viewport {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: var(--space-2) var(--space-4);
-}
-
-.log-row {
+.terminal-console__log-row {
   display: flex;
   align-items: baseline;
-  gap: var(--space-3);
-  font-size: var(--text-xs);
-  line-height: 1.6;
+  gap: var(--space-sm);
   white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
 }
 
-.log-timestamp {
-  color: var(--text-muted);
+.terminal-console__log-entry {
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.log-source {
-  color: var(--status-info);
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.log-level {
+@media (prefers-reduced-motion: reduce) {
+  .terminal-console__log-entry {
+    animation: none;
+  }
+}
+
+.terminal-console__timestamp {
+  color: var(--on-surface-variant);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.terminal-console__source {
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+
+.terminal-console__level {
   font-weight: 700;
+  flex-shrink: 0;
 }
 
-.log-level-info {
-  color: var(--status-info);
+.terminal-console__level--info {
+  color: var(--primary);
 }
 
-.log-level-warn {
-  color: var(--status-warn);
+.terminal-console__level--warn {
+  color: var(--tertiary);
 }
 
-.log-level-error {
-  color: var(--status-degraded);
+.terminal-console__level--error {
+  color: var(--error);
 }
 
-.log-message {
-  color: var(--text-primary);
+.terminal-console__message {
+  color: var(--on-surface);
+  min-width: 0;
+}
+
+.terminal-console__cursor {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.blinking-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background-color: var(--primary);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blinking-cursor {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.terminal-console__status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-xs) var(--space-md);
+  border-top: var(--border-width) solid var(--outline-variant);
+  background-color: var(--surface-container-low);
+  flex-shrink: 0;
+}
+
+.terminal-console__count {
+  font-family: var(--font-label-mono-sm);
+  font-size: var(--text-label-mono-sm);
+  line-height: var(--line-label-mono-sm);
+  font-weight: var(--weight-label-mono-sm);
+  color: var(--on-surface-variant);
+  letter-spacing: var(--tracking-label-mono);
+}
+
+/* Focus visible for scrollable area */
+.terminal-console__output:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+@media (forced-colors: active) {
+  .terminal-console__output:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: -2px;
+  }
 }

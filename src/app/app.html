@@ -1,75 +1,104 @@
-<div class="shell">
-  <header class="header">
-    <span class="status-dot" aria-hidden="true"></span>
-    <h1 class="title">{{ serviceTitle() }}</h1>
-    <span class="status-badge" [class]="'status-badge status-' + statusLabel().toLowerCase()">{{
-      statusLabel()
-    }}</span>
-  </header>
-  <nav class="tab-bar" role="tablist" aria-label="Dashboard sections">
+<header class="top-nav" role="banner">
+  <div class="top-nav__brand">
+    <span class="material-symbols-outlined top-nav__glyph" aria-hidden="true">terminal</span>
+    <h1 class="top-nav__title">{{ serviceTitle() }}</h1>
+  </div>
+  <nav class="top-nav__tabs" role="tablist" aria-label="Dashboard sections">
     @for (tab of tabs; track tab.id) {
       <button
         type="button"
         role="tab"
-        class="tab-button"
+        class="top-nav__tab"
+        [class.top-nav__tab--active]="store.selectedTab() === tab.id"
         [disabled]="!tabsEnabled()"
-        [class.tab-active]="store.selectedTab() === tab.id"
         [attr.aria-selected]="store.selectedTab() === tab.id"
+        [attr.aria-disabled]="!tabsEnabled()"
         (click)="store.selectTab(tab.id)"
+        (keydown)="onTabKeydown($event, tab.id)"
       >
         {{ tab.label }}
       </button>
     }
   </nav>
-  <main class="panel-area" aria-label="Dashboard panels">
-    @switch (store.dataStatus()) {
-      @case ('ready') {
-        @switch (store.selectedTab()) {
-          @case ('health-dashboard') {
-            <app-health-dashboard />
-          }
-          @case ('service-topology') {
-            <app-service-topology />
-          }
-          @case ('env-registry') {
-            <app-env-registry />
-          }
-          @case ('career-pods') {
-            <app-career-pods />
-          }
-          @case ('swagger-playground') {
-            <app-swagger-playground />
-          }
-          @default {
-            <section class="panel">
-              <p class="panel-placeholder">MODULE NOT DEPLOYED</p>
-            </section>
-          }
+  <div class="top-nav__actions">
+    <button
+      type="button"
+      class="top-nav__icon-btn"
+      aria-label="Settings"
+      (click)="onSettingsClick()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+    </button>
+    <button
+      type="button"
+      class="top-nav__icon-btn"
+      aria-label="Terminal"
+      (click)="onTerminalClick()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">terminal</span>
+    </button>
+  </div>
+</header>
+
+<main class="main-content" role="main">
+  @switch (store.dataStatus()) {
+    @case ('ready') {
+      @switch (store.selectedTab()) {
+        @case ('health-dashboard') {
+          <app-health-dashboard />
+        }
+        @case ('service-topology') {
+          <app-service-topology />
+        }
+        @case ('env-registry') {
+          <app-env-registry />
+        }
+        @case ('career-pods') {
+          <app-career-pods />
+        }
+        @case ('swagger-playground') {
+          <app-swagger-playground />
+        }
+        @default {
+          <section class="panel panel--placeholder" aria-label="Not implemented">
+            <p class="panel__placeholder-text">MODULE NOT DEPLOYED</p>
+          </section>
         }
       }
-      @case ('failed') {
-        <section class="panel" role="alert">
-          <div class="failure-panel">
-            <p class="panel-placeholder panel-placeholder-degraded">SERVICE UNAVAILABLE</p>
-            <p class="failure-detail">PORTFOLIO DATA COULD NOT BE LOADED</p>
-            <button
-              type="button"
-              class="retry-button"
-              aria-label="Retry loading portfolio content"
-              [disabled]="loader.pending()"
-              (click)="retry()"
-            >
-              RETRY
-            </button>
-          </div>
-        </section>
-      }
-      @default {
-        <section class="panel" role="status" aria-live="polite">
-          <p class="panel-placeholder">LOADING CONTENT</p>
-        </section>
-      }
     }
-  </main>
-  <app-terminal-console />
-</div>
+    @case ('failed') {
+      <section class="panel panel--failure" role="alert" aria-live="assertive">
+        <div class="failure-panel">
+          <p class="panel__placeholder-text panel__placeholder-text--degraded">SERVICE UNAVAILABLE</p>
+          <p class="failure-panel__detail">PORTFOLIO DATA COULD NOT BE LOADED</p>
+          <button
+            type="button"
+            class="failure-panel__retry"
+            aria-label="Retry loading portfolio content"
+            [disabled]="loader.pending()"
+            (click)="retry()"
+          >
+            RETRY
+          </button>
+        </div>
+      </section>
+    }
+    @default {
+      <section class="panel panel--loading" role="status" aria-live="polite">
+        <p class="panel__placeholder-text">LOADING CONTENT</p>
+      </section>
+    }
+  }
+</main>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer__left">
+    <span class="footer__status">Build: v3.2.1-RELEASE | Node: cluster-a-x1</span>
+  </div>
+  <div class="footer__right">
+    <span class="footer__status">System Health: Healthy</span>
+    <span class="footer__status">Uptime: 99.9%</span>
+  </div>
+</footer>
+
+<app-terminal-console />

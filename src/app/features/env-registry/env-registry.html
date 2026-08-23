@@ -1,35 +1,60 @@
-<section class="panel" aria-label="Environment registry">
-  <div class="registry-layout">
-    <div class="registry-header">
-      <span class="registry-endpoint">/actuator/env</span>
-      <input
-        type="text"
-        class="filter-input"
-        placeholder="FILTER BY KEY OR VALUE"
-        aria-label="Filter environment properties by key or value"
-        [value]="filterText()"
-        (input)="onFilterInput($event)"
-      />
+<section class="env-registry" aria-label="Environment registry">
+  <div class="env-registry__layout">
+    <!-- Header & Search -->
+    <div class="env-registry__header">
+      <div>
+        <h1 class="env-registry__title">Property Registry</h1>
+        <p class="env-registry__subtitle">/actuator/env - Configured System Properties</p>
+      </div>
+      <div class="env-registry__filter-wrapper">
+        <span class="material-symbols-outlined env-registry__filter-icon" aria-hidden="true">search</span>
+        <input
+          type="text"
+          class="env-registry__filter-input"
+          placeholder="filter properties..."
+          aria-label="Filter environment properties by key or value"
+          [value]="filterText()"
+          (input)="onFilterInput($event)"
+        />
+      </div>
     </div>
-    @if (filteredProperties().length === 0) {
-      <p class="registry-empty">NO MATCHING PROPERTIES</p>
-    } @else {
-      <table class="property-table">
-        <thead>
-          <tr>
-            <th class="col-key">PROPERTY KEY</th>
-            <th class="col-value">VALUE</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (property of filteredProperties(); track property.key) {
-            <tr class="property-row">
-              <td class="cell-key">{{ property.key }}</td>
-              <td class="cell-value">{{ property.value }}</td>
+
+    <!-- Active Profiles Badge Bar -->
+    <div class="env-registry__profiles-bar">
+      <div class="env-registry__profiles-left">
+        <span class="material-symbols-outlined env-registry__profiles-icon" aria-hidden="true">eco</span>
+        <span class="env-registry__profiles-label">Active Profiles:</span>
+        <span class="env-registry__profile-badge env-registry__profile-badge--primary">prod</span>
+        <span class="env-registry__profile-badge env-registry__profile-badge--secondary">aws</span>
+      </div>
+      <div class="env-registry__profiles-right">
+        <span class="env-registry__health-dot" aria-hidden="true"></span>
+        <span class="env-registry__health-text">System Healthy</span>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="env-registry__table-wrapper">
+      @if (filteredProperties().length === 0) {
+        <p class="env-registry__empty">NO MATCHING PROPERTIES</p>
+      } @else {
+        <table class="env-registry__table" role="table">
+          <thead>
+            <tr>
+              <th class="env-registry__th env-registry__th--key">Property Key</th>
+              <th class="env-registry__th env-registry__th--value">Value</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    }
+          </thead>
+          <tbody>
+            @for (property of filteredProperties(); track property.key) {
+              <tr class="env-registry__row">
+                <td class="env-registry__td env-registry__td--key">{{ property.key }}</td>
+                <td class="env-registry__td env-registry__td--value">{{ property.value }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
   </div>
 </section>

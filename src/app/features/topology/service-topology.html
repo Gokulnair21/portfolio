@@ -1,74 +1,175 @@
-<section class="panel" aria-label="Service topology">
-  <div class="topology-layout">
-    <div class="map-frame">
+<section class="service-topology" aria-label="Service topology">
+  <div class="service-topology__layout">
+    <!-- Canvas Area -->
+    <main class="service-topology__canvas" role="region" aria-label="Topology map">
+      <!-- Schematic Grid Background -->
+      <div class="schematic-grid" aria-hidden="true"></div>
+
+      <!-- SVG for Connection Lines -->
       <svg
-        class="topology-svg"
-        viewBox="0 0 640 360"
+        class="service-topology__connections"
+        viewBox="0 0 1200 800"
+        preserveAspectRatio="none"
         role="img"
-        aria-label="Cluster service topology map"
+        aria-label="Service connection lines"
+        xmlns="http://www.w3.org/2000/svg"
       >
         @for (link of links(); track linkKey(link)) {
-          <line
-            class="topo-link"
-            [class.link-degraded]="isLinkDegraded(link)"
-            [attr.x1]="x(link.source)"
-            [attr.y1]="y(link.source)"
-            [attr.x2]="x(link.target)"
-            [attr.y2]="y(link.target)"
-          />
-          <line
-            class="topo-link-flow"
-            [class.link-flow-degraded]="isLinkDegraded(link)"
-            [attr.x1]="x(link.source)"
-            [attr.y1]="y(link.source)"
-            [attr.x2]="x(link.target)"
-            [attr.y2]="y(link.target)"
-          />
-        }
-        @for (node of nodes(); track node.id) {
-          <g
-            class="topo-node"
-            [class.node-selected]="store.selectedNodeId() === node.id"
-            [class.node-degraded]="isNodeDegraded(node.id)"
-            (click)="selectNode(node.id)"
-          >
-            <rect
-              class="node-body"
-              [attr.x]="rectX(node.id)"
-              [attr.y]="rectY(node.id)"
-              [attr.width]="nodeWidth"
-              [attr.height]="40"
-              [attr.rx]="2"
+          <g class="connection-group">
+            <!-- Base line (outline-variant) -->
+            <path
+              class="service-topology__link-base"
+              [attr.d]="linkPath(link)"
+              [class.service-topology__link-base--degraded]="isLinkDegraded(link)"
+              fill="none"
+              stroke-width="2"
             />
-            <text class="node-label" [attr.x]="x(node.id)" [attr.y]="y(node.id) + 4" text-anchor="middle">
-              {{ node.label }}
-            </text>
+            <!-- Animated flow line (primary) -->
+            <path
+              class="service-topology__link-flow"
+              [attr.d]="linkPath(link)"
+              [class.service-topology__link-flow--degraded]="isLinkDegraded(link)"
+              fill="none"
+              stroke-width="2"
+              stroke-dasharray="8 12"
+            />
           </g>
         }
       </svg>
-    </div>
-    @if (store.selectedNode(); as node) {
-      <div class="detail-card">
-        <h2 class="detail-title">{{ node.label }}</h2>
-        <p class="detail-description">{{ node.description }}</p>
-        <h3 class="detail-heading">CORE TECH STACK</h3>
-        <ul class="tech-list">
-          @for (tech of node.techStack; track $index) {
-            <li class="tech-item">{{ tech }}</li>
-          }
-        </ul>
-        <h3 class="detail-heading">METRICS</h3>
-        <dl class="metric-list">
-          @for (metric of store.selectedNodeMetrics(); track $index) {
-            <div class="metric-row">
-              <dt class="metric-label">{{ metric.label }}</dt>
-              <dd class="metric-value">{{ metric.value }}</dd>
+
+      <!-- Nodes Container (Positioned absolutely over SVG) -->
+      <div class="service-topology__nodes">
+        @for (node of nodes(); track node.id) {
+          <button
+            type="button"
+            class="service-topology__node"
+            [class.service-topology__node--selected]="store.selectedNodeId() === node.id"
+            [class.service-topology__node--degraded]="isNodeDegraded(node.id)"
+            [style.left.px]="x(node.id) - nodeWidth / 2"
+            [style.top.px]="y(node.id) - nodeHeight / 2"
+            [attr.aria-selected]="store.selectedNodeId() === node.id"
+            [attr.aria-pressed]="store.selectedNodeId() === node.id"
+            (click)="selectNode(node.id)"
+            (keydown)="onNodeKeydown($event, node.id)"
+            role="tab"
+          >
+            <div class="service-topology__node-card">
+              <div class="service-topology__node-header">
+                <div class="service-topology__node-icon-group">
+                  <span class="service-topology__node-icon material-symbols-outlined" [class]="'service-topology__node-icon--' + getNodeIconType(node)" aria-hidden="true">
+                    {{ getNodeIcon(node) }}
+                  </span>
+                  <span class="service-topology__node-label">{{ node.label }}</span>
+                </div>
+                <span class="service-topology__node-status-dot" [class]="'service-topology__node-status-dot--' + getNodeStatusClass(node)" aria-hidden="true"></span>
+              </div>
+              <div class="service-topology__node-meta">
+                <span class="service-topology__node-type">{{ getNodeType(node) }}</span>
+                <span class="service-topology__node-status-text" [class]="'service-topology__node-status-text--' + getNodeStatusClass(node)">
+                  {{ getNodeStatusText(node) }}
+                </span>
+              </div>
             </div>
-          }
-        </dl>
+          </button>
+        }
       </div>
-    } @else {
-      <p class="detail-placeholder">SELECT A SERVICE NODE TO INSPECT</p>
+
+      <!-- Canvas Controls -->
+      <div class="service-topology__canvas-controls" aria-label="Canvas controls">
+        <button type="button" class="service-topology__control-btn" aria-label="Zoom in" (click)="onZoomIn()">
+          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        </button>
+        <button type="button" class="service-topology__control-btn" aria-label="Zoom out" (click)="onZoomOut()">
+          <span class="material-symbols-outlined" aria-hidden="true">remove</span>
+        </button>
+        <button type="button" class="service-topology__control-btn" aria-label="Fit to screen" (click)="onFitScreen()">
+          <span class="material-symbols-outlined" aria-hidden="true">fit_screen</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- Detail Sidebar (Slide-in Overlay) -->
+    @if (store.selectedNode(); as node) {
+      <aside
+        class="service-topology__detail-sidebar"
+        role="complementary"
+        aria-label="Service details"
+        [attr.aria-expanded]="true"
+      >
+        <div class="service-topology__sidebar-header">
+          <div>
+            <div class="service-topology__sidebar-title-row">
+              <span class="service-topology__sidebar-status-dot" aria-hidden="true"></span>
+              <h2 class="service-topology__sidebar-title">{{ node.label }}</h2>
+            </div>
+            <p class="service-topology__sidebar-id">ID: {{ getNodeId(node) }}</p>
+          </div>
+          <button
+            type="button"
+            class="service-topology__sidebar-close"
+            aria-label="Close details"
+            (click)="store.selectNode(null)"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <div class="service-topology__sidebar-content">
+          <!-- Status Section -->
+          <div class="service-topology__sidebar-section">
+            <h3 class="service-topology__sidebar-section-title">Health Status</h3>
+            <div class="service-topology__sidebar-status">
+              <span class="service-topology__sidebar-status-label">System State</span>
+              <span class="service-topology__sidebar-status-badge" [class]="'service-topology__sidebar-status-badge--' + getSidebarStatusClass(node)">
+                {{ getSidebarStatusText(node) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Tech Stack Section -->
+          <div class="service-topology__sidebar-section">
+            <h3 class="service-topology__sidebar-section-title">Tech Stack</h3>
+            <ul class="service-topology__tech-list">
+              @for (tech of node.techStack; track $index) {
+                <li class="service-topology__tech-item">
+                  <span class="service-topology__tech-label">Framework</span>
+                  <span class="service-topology__tech-value">{{ tech }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+
+          <!-- Metrics Clusters Section -->
+          <div class="service-topology__sidebar-section">
+            <h3 class="service-topology__sidebar-section-title">Real-time Metrics</h3>
+            <div class="service-topology__metrics-grid">
+              @for (metric of store.selectedNodeMetrics(); track $index) {
+                <div class="service-topology__metric-card" [class.service-topology__metric-card--clickable]="isClickableMetric(metric)">
+                  <span class="service-topology__metric-label">{{ metric.label }}</span>
+                  <div class="service-topology__metric-value-row">
+                    <div class="service-topology__metric-value">{{ metric.value }}</div>
+                    @if (isErrorRateMetric(metric)) {
+                      <svg class="service-topology__metric-sparkline" viewBox="0 0 60 20" preserveAspectRatio="none" aria-hidden="true">
+                        <path d="M 0,18 L 10,15 L 20,17 L 30,10 L 40,12 L 50,5 L 60,8" fill="none" stroke="var(--tertiary)" stroke-width="1.5"></path>
+                      </svg>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="service-topology__sidebar-actions">
+          <button type="button" class="service-topology__view-logs-btn" (click)="onViewLogs(node.id)">
+            View Logs
+          </button>
+        </div>
+      </aside>
+
+      <!-- Sidebar Backdrop for mobile -->
+      <div class="service-topology__sidebar-backdrop" (click)="store.selectNode(null)" aria-hidden="true"></div>
     }
   </div>
 </section>

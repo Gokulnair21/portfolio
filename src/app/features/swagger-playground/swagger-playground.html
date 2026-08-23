@@ -1,37 +1,37 @@
-<section class="panel" aria-label="Swagger playground">
-  <div class="playground-layout">
-    <div class="endpoint-header">
-      <span class="method-badge">{{ httpMethod }}</span>
-      <span class="endpoint-path">{{ endpointPath }}</span>
+<section class="swagger-playground" aria-label="Swagger playground">
+  <div class="swagger-playground__layout">
+    <div class="swagger-playground__endpoint-header">
+      <span class="swagger-playground__method-badge">{{ httpMethod }}</span>
+      <span class="swagger-playground__endpoint-path">{{ endpointPath }}</span>
       <button
         type="button"
-        class="try-button"
-        [class.try-active]="tryItOut()"
+        class="swagger-playground__try-button"
+        [class.swagger-playground__try-button--active]="tryItOut()"
         (click)="toggleTryItOut()"
       >
         {{ tryItOut() ? 'CANCEL' : 'TRY IT OUT' }}
       </button>
     </div>
     @if (tryItOut()) {
-      <label class="body-label" for="request-body">REQUEST BODY</label>
+      <label class="swagger-playground__body-label" for="request-body">REQUEST BODY</label>
       <textarea
         id="request-body"
-        class="request-editor"
+        class="swagger-playground__request-editor"
         aria-label="Contact request JSON body"
         spellcheck="false"
         [value]="bodyText()"
         (input)="onBodyInput($event)"
       ></textarea>
       @if (validationError(); as error) {
-        <p class="validation-error" role="alert">{{ error }}</p>
+        <p class="swagger-playground__validation-error" role="alert">{{ error }}</p>
       }
       @if (deliveryError(); as error) {
-        <p class="delivery-error" role="alert">DELIVERY FAILED: {{ error }}</p>
+        <p class="swagger-playground__delivery-error" role="alert">DELIVERY FAILED: {{ error }}</p>
       }
-      <div class="execute-row">
+      <div class="swagger-playground__execute-row">
         <button
           type="button"
-          class="execute-button"
+          class="swagger-playground__execute-button"
           [disabled]="sending()"
           (click)="execute()"
         >
@@ -39,14 +39,14 @@
         </button>
       </div>
     } @else {
-      <pre class="request-preview">{{ bodyText() }}</pre>
+      <pre class="swagger-playground__request-preview">{{ bodyText() }}</pre>
     }
     @if (receipt(); as confirmed) {
-      <div class="response-section">
-        <span class="body-label">SERVER RESPONSE</span>
-        <pre class="response-viewer response-headers">{{ responseHeadersText }}</pre>
-        <span class="body-label">KAFKA RECEIPT</span>
-        <pre class="response-viewer">{{ formatReceipt(confirmed) }}</pre>
+      <div class="swagger-playground__response-section">
+        <span class="swagger-playground__body-label">SERVER RESPONSE</span>
+        <pre class="swagger-playground__response-viewer swagger-playground__response-viewer--headers">{{ responseHeadersText }}</pre>
+        <span class="swagger-playground__body-label">KAFKA RECEIPT</span>
+        <pre class="swagger-playground__response-viewer">{{ formatReceipt(confirmed) }}</pre>
       </div>
     }
   </div>

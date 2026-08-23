@@ -30,3 +30,33 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-epic-4-swagger-contact-playground-go-live.md`
   summary: Run or explicitly skip the Epic 4 retrospective now that all three of its stories are done.
   evidence: Review found `epic-4-retrospective: optional` left undecided after epic-4 flipped to done; the run/skip decision is human-owned, same as the epic-1/epic-2/epic-3 precedent.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Add ARIA live regions for dynamic status updates (liveness status, error rate, data status) — screen readers currently miss health transitions.
+  evidence: Blind-hunter review found reactive status signals change without aria-live="polite" or role="status" containers.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Add loading/skeleton states with aria-busy for async panels (career pods, env registry, health dashboard, topology) — currently only static placeholders.
+  evidence: Blind-hunter review found no skeleton loaders or spinners during data fetch.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Add per-panel error boundaries with retry affordance and error message display — currently only app-shell failure panel exists.
+  evidence: Blind-hunter review found dataStatus === 'error' renders empty panel in feature components.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Implement RTL layout support using logical properties (margin-inline, border-inline, flex logical) — currently flex/grid uses physical directions.
+  evidence: Blind-hunter review; architectural gap predating this redesign.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Add @media print stylesheet — footer, tab bar, sidebar, animations, dark backgrounds print poorly.
+  evidence: Blind-hunter review; architectural gap predating this redesign.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Add will-change/contain to long-running animations for compositor performance — 7 concurrent infinite animations risk thread contention.
+  evidence: Blind-hunter review; new animations added by redesign.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Add light-mode theme variant or prefers-color-scheme support — currently color-scheme: dark only despite token restructure.
+  evidence: Blind-hunter review; spec explicitly forbids light mode but future theming needs hook.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Migrate responsive components to container queries instead of viewport breakpoints — currently @media (max-width: 60rem).
+  evidence: Blind-hunter review; architectural improvement for nested layout flexibility.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Document design token rationale inline in styles.css — currently only references design.html line numbers.
+  evidence: Blind-hunter review; maintenance burden increased.
+- source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
+  summary: Measure and optimize Google Fonts bundle impact — 3 families likely add 100-200KB critical path; consider subsetting/self-hosting.
+  evidence: Blind-hunter review; new font loads added by redesign.

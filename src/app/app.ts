@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { PortfolioDataLoader } from './core/data/portfolio-data-loader.service';
 import { ClusterStateService } from './core/state/cluster-state.service';
-import { TABS } from './core/state/tabs';
+import { TABS, TabId } from './core/state/tabs';
 import { CareerPods } from './features/career-pods/career-pods';
 import { EnvRegistry } from './features/env-registry/env-registry';
 import { HealthDashboard } from './features/health-dashboard/health-dashboard';
@@ -24,7 +24,7 @@ import { TerminalConsole } from './features/terminal-console/terminal-console';
   templateUrl: './app.html',
 })
 export class App {
-  protected readonly serviceTitle = signal('PORTFOLIO-SERVICE');
+  protected readonly serviceTitle = signal('SpringActuator-Portfolio');
 
   protected readonly tabs = TABS;
   protected readonly store = inject(ClusterStateService);
@@ -35,6 +35,43 @@ export class App {
   );
 
   protected readonly tabsEnabled = computed(() => this.store.dataStatus() === 'ready');
+
+  protected onTabKeydown(event: KeyboardEvent, tabId: TabId): void {
+    const tabIds = this.tabs.map((t) => t.id);
+    const currentIndex = tabIds.indexOf(tabId);
+    let newIndex = currentIndex;
+
+    switch (event.key) {
+      case 'ArrowRight':
+        event.preventDefault();
+        newIndex = (currentIndex + 1) % tabIds.length;
+        break;
+      case 'ArrowLeft':
+        event.preventDefault();
+        newIndex = (currentIndex - 1 + tabIds.length) % tabIds.length;
+        break;
+      case 'Home':
+        event.preventDefault();
+        newIndex = 0;
+        break;
+      case 'End':
+        event.preventDefault();
+        newIndex = tabIds.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    this.store.selectTab(tabIds[newIndex]);
+  }
+
+  protected onSettingsClick(): void {
+    console.log('Settings clicked');
+  }
+
+  protected onTerminalClick(): void {
+    console.log('Terminal clicked');
+  }
 
   protected retry(): void {
     if (!this.loader.pending()) {
