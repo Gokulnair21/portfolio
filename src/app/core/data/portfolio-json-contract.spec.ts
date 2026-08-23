@@ -29,7 +29,6 @@ describe('public/portfolio-data.json contract', () => {
 
     for (const project of data!.projects) {
       expect(project.stack.length).toBeGreaterThan(0);
-      expect(project.repoUrl).toMatch(/^https?:\/\//);
     }
   });
 
@@ -40,7 +39,6 @@ describe('public/portfolio-data.json contract', () => {
         name: p.name,
         description: p.description,
         stack: p.stack,
-        repoUrl: p.repoUrl,
       })),
     );
   });

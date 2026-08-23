@@ -10,7 +10,6 @@ export interface ProjectEntry {
   name: string;
   description: string;
   stack: string[];
-  repoUrl: string;
 }
 
 export interface ExperienceEntry {
@@ -114,12 +113,11 @@ function fail(section: string, detail: string): { ok: false; reason: string } {
 function parseProjectEntry(value: unknown): ParseResult<ProjectEntry> {
   if (!isRecord(value)) return fail('projects[]', 'entry is not an object');
 
-  const { name, description, stack, repoUrl } = value;
+  const { name, description, stack } = value;
   if (!isString(name)) return fail('projects[].name', 'expected string');
   if (!isString(description)) return fail('projects[].description', 'expected string');
   if (!isStringArray(stack)) return fail('projects[].stack', 'expected string array');
-  if (!isString(repoUrl)) return fail('projects[].repoUrl', 'expected string');
-  return { ok: true, value: { name, description, stack, repoUrl } };
+  return { ok: true, value: { name, description, stack } };
 }
 
 function parseExperienceEntry(value: unknown): ParseResult<ExperienceEntry> {

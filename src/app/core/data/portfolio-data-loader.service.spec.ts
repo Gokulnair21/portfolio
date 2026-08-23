@@ -12,7 +12,6 @@ const VALID_PAYLOAD = {
       name: 'cluster-control',
       description: 'Ops console.',
       stack: ['Angular', 'TypeScript'],
-      repoUrl: 'https://github.com/example/cluster-control',
     },
   ],
   experience: [

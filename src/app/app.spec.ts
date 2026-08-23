@@ -18,7 +18,6 @@ const VALID_DATA: PortfolioData = {
       name: 'cluster-control',
       description: 'Ops console.',
       stack: ['Angular'],
-      repoUrl: 'https://github.com/example/cluster-control',
     },
   ],
   experience: [],
