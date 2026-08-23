@@ -1,8 +1,9 @@
 ---
-stepsCompleted: [step-01, step-02, step-03]
+stepsCompleted: [step-01, step-02, step-03, step-04-change-request]
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-portfolio-2026-08-15/prd.md
   - _bmad-output/planning-artifacts/architecture/architecture-Portfolio-2026-08-22/ARCHITECTURE-SPINE.md
+  - _bmad-output/planning-artifacts/sprint-change-proposal-2026-08-23.md
 ---
 
 # Portfolio - Epic Breakdown
@@ -49,6 +50,14 @@ NFR4: Single-page layout — everything bundled in one clean layout; no multiple
 
 (No dedicated UX design document was provided. Theme vocabulary is carried by PRD feature descriptions and Architecture design tokens (AD-6).)
 
+### Change Requirements (Sprint Change Proposal 2026-08-23)
+
+CR1: Replace all placeholder portfolio content (contact, experience, projects, envProperties) with real CV data — Neosoft Technologies identity, three client projects (Bank ABC, TATA AIG, EKAM), real email/GitHub/LinkedIn
+CR2: Re-theme the service topology to the multi-region core banking platform — exactly 5 nodes: bff-gateway, onboarding-service, payment-service, deposit-service, core-bank-db, with links bff-gateway → {onboarding, payment, deposit} and {payment, deposit} → core-bank-db
+CR3: Remove repoUrl from ProjectEntry schema and its parser validation (zero UI impact — projects[] not rendered by any feature)
+CR4: Update portfolio-json-contract.spec.ts expectations (new node IDs, payment-service → core-bank-db link, drop repoUrl assertions) and strip repoUrl from all test fixtures
+CR5: Zero placeholder strings remain anywhere in rendered UI (example.com, Example Corp, your-handle, etc.)
+
 ### FR Coverage Map
 
 FR1: Epic 1 - Health probes & metrics display
@@ -58,6 +67,11 @@ FR4: Epic 3 - Env property search filtering
 FR5: Epic 3 - Career pod selection & details
 FR6: Epic 4 - Swagger execution + EmailJS delivery
 FR7: Epic 1 - Runtime JSON content hydration
+CR1: Epic 5 - Real CV content population
+CR2: Epic 5 - Core-banking topology re-theme
+CR3: Epic 5 - Schema & contract updates (repoUrl removal)
+CR4: Epic 5 - Contract spec & fixture updates
+CR5: Epic 5 - Placeholder elimination audit
 
 ## Epic List
 
@@ -76,6 +90,10 @@ Recruiters explore Gokul's work: click topology nodes to inspect projects, searc
 ### Epic 4: Swagger Contact Playground & Go-Live
 Recruiters send a real message via the mock Swagger UI (EmailJS behind the `MessageDelivery` port) and the site deploys to GitHub Pages via GitHub Actions — completing SM-1 and SM-3 ($0 hosting).
 **FRs covered:** FR6 (+ SM-1, AD-7 deployment)
+
+### Epic 5: Real CV Content Alignment & Go-Live Readiness
+Replace every scaffold placeholder with Gokul's actual CV identity and re-theme the topology to his real multi-region core banking platform — making the portfolio a truthful job-seeking asset before go-live. Validates the content-driven architecture delivered by Epics 1–4: a pure data swap with no structural code changes.
+**Requirements covered:** CR1, CR2, CR3, CR4, CR5
 
 ## Epic 1: Dashboard Foundation & Live System Health
 
@@ -383,3 +401,55 @@ So that the site stays live at $0/month with zero manual steps.
 **Given** the site is live on GitHub Pages
 **When** monthly costs are reviewed
 **Then** total maintenance cost is $0 using only free-tier services (NFR2, SM-3)
+
+## Epic 5: Real CV Content Alignment & Go-Live Readiness
+
+Replace every scaffold placeholder with Gokul's actual CV identity and re-theme the topology to his real multi-region core banking platform — making the portfolio a truthful job-seeking asset before go-live. Validates the content-driven architecture delivered by Epics 1–4: a pure data swap with no structural code changes. Source: `sprint-change-proposal-2026-08-23.md` (approved).
+
+### Story 5.1: Schema & Contract Updates — Remove repoUrl
+
+As a builder (Gokul),
+I want the `ProjectEntry` schema to drop `repoUrl` and all tests updated in lockstep,
+So that the content contract matches reality (no public repos exist) with no broken tests.
+
+**Acceptance Criteria:**
+
+**Given** `src/app/core/data/portfolio-data.ts`
+**When** inspected
+**Then** `repoUrl` is removed from `ProjectEntry` and its validation line removed from `parseProjectEntry` (CR3)
+
+**Given** `portfolio-json-contract.spec.ts`
+**When** run
+**Then** round-trip expectations assert node IDs `bff-gateway, onboarding-service, payment-service, deposit-service, core-bank-db`, the link `payment-service → core-bank-db`, and contain no `repoUrl` assertions (CR4)
+
+**Given** fixtures in `app.spec.ts`, `portfolio-data-loader.service.spec.ts`, and `cluster-state.service.spec.ts`
+**When** inspected
+**Then** no fixture contains `repoUrl` (CR4)
+
+**Given** the full unit suite runs via `ng test`
+**When** completed
+**Then** all tests pass and lint/typecheck are clean
+
+### Story 5.2: CV Content Population & Placeholder Elimination
+
+As a recruiter,
+I want every panel to show Gokul's real experience, skills, projects, and contact details,
+So that the portfolio truthfully represents him as a job-seeking asset.
+
+**Acceptance Criteria:**
+
+**Given** `public/portfolio-data.json`
+**When** hydrated
+**Then** career-pods shows the Neosoft Technologies pod (`Associate Team Lead — Java Backend Engineer`, Jun 2021 — Present) with the 5 CV highlights; env-registry renders the 11 skill rows from CV Technical Skills; swagger-playground targets `gokul.nairmurali@gmail.com` (CR1)
+
+**Given** the service-topology panel renders
+**When** inspected
+**Then** it shows the 5 core-banking nodes (`bff-gateway`, `onboarding-service`, `payment-service`, `deposit-service`, `core-bank-db`) with their real stack/metrics and links per the proposal, staying at `MAX_TOPOLOGY_NODES = 5` (CR2)
+
+**Given** any panel of the rendered app
+**When** audited for placeholder strings (`example.com`, `Example Corp`, `your-handle`, etc.)
+**Then** zero placeholders remain anywhere in the UI (CR5)
+
+**Given** the app boots after the data swap
+**When** hydration completes
+**Then** no component or logic code changes were required — validating AD-3/AD-11's content-driven seam
