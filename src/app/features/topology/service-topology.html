@@ -16,6 +16,14 @@
             [attr.x2]="x(link.target)"
             [attr.y2]="y(link.target)"
           />
+          <line
+            class="topo-link-flow"
+            [class.link-flow-degraded]="isLinkDegraded(link)"
+            [attr.x1]="x(link.source)"
+            [attr.y1]="y(link.source)"
+            [attr.x2]="x(link.target)"
+            [attr.y2]="y(link.target)"
+          />
         }
         @for (node of nodes(); track node.id) {
           <g

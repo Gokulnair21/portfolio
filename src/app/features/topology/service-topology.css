@@ -42,6 +42,33 @@
   stroke: var(--status-degraded);
 }
 
+.topo-link-flow {
+  stroke: var(--status-info);
+  stroke-width: 2;
+  stroke-dasharray: 6 10;
+  opacity: 0.55;
+  animation: link-flow 1.2s linear infinite;
+  pointer-events: none;
+}
+
+.link-flow-degraded {
+  stroke: var(--status-degraded);
+  opacity: 0.9;
+}
+
+@keyframes link-flow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topo-link-flow {
+    animation: none;
+    opacity: 0.25;
+  }
+}
+
 .topo-node {
   cursor: pointer;
 }

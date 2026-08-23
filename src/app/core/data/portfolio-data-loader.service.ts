@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DOCUMENT } from '@angular/core';
 import { Injectable, inject, signal } from '@angular/core';
 import { ClusterStateService } from '../state/cluster-state.service';
+import { bootLogEntries } from '../simulation/boot-sequence';
 import { parsePortfolioDataDetailed } from './portfolio-data';
 
 const DATA_FILE = 'portfolio-data.json';
@@ -34,6 +35,7 @@ export class PortfolioDataLoader {
           return;
         }
         this.#store.hydrate(result.value);
+        bootLogEntries().forEach((entry) => this.#store.appendLog(entry));
       },
       error: (error: unknown) => {
         if (request !== this.#requestSeq) return;
