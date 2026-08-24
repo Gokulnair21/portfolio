@@ -7,23 +7,23 @@ interface NodeLayoutSlot {
   readonly y: number;
 }
 
-const NODE_WIDTH = 180;
+const NODE_WIDTH = 256;
 const NODE_HEIGHT = 80;
 
 const NODE_SLOTS: readonly NodeLayoutSlot[] = [
-  { x: 600, y: 120 },    // bff-gateway (center top)
-  { x: 200, y: 320 },    // onboarding-service (left middle)
-  { x: 1000, y: 320 },   // payment-service (right middle)
-  { x: 600, y: 520 },    // deposit-service (center bottom)
-  { x: 350, y: 520 },    // core-bank-db (left bottom)
+  { x: 250, y: 140 },    // bff-gateway (top left - api-gateway position)
+  { x: 700, y: 240 },    // onboarding-service (right middle - auth-service position)
+  { x: 150, y: 520 },    // payment-service (bottom left - payment-service position)
+  { x: 700, y: 440 },    // deposit-service (right middle - notification-service position)
+  { x: 650, y: 640 },    // core-bank-db (bottom right - inventory-db position)
 ];
 
 const LINK_PATHS: Record<string, string> = {
-  'bff-gateway->onboarding-service': 'M 600,160 Q 400,160 290,280',
-  'bff-gateway->payment-service': 'M 600,160 Q 800,160 910,280',
-  'bff-gateway->deposit-service': 'M 600,160 L 600,480',
-  'payment-service->core-bank-db': 'M 910,360 Q 910,440 600,480 L 440,480',
-  'deposit-service->core-bank-db': 'M 600,560 L 440,480',
+  'bff-gateway->onboarding-service': 'M 250,180 Q 500,180 610,200',
+  'bff-gateway->payment-service': 'M 250,180 C 250,350 150,400 150,480',
+  'payment-service->deposit-service': 'M 150,560 Q 500,560 610,480',
+  'payment-service->core-bank-db': 'M 150,560 C 150,700 650,700 650,680',
+  'deposit-service->core-bank-db': 'M 700,480 L 650,600',
 };
 
 @Component({

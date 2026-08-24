@@ -16,6 +16,11 @@
   border-radius: 0;
   min-height: 120px;
   max-height: 200px;
+  position: fixed;
+  bottom: 48px;
+  left: 0;
+  right: 0;
+  z-index: 45;
 }
 
 .terminal-console__header {

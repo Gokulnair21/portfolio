@@ -163,6 +163,14 @@
   max-width: 1600px;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
+}
+
+/* Topology needs to fill full available space without padding */
+.main-content:has(app-service-topology) {
+  padding: 0;
+  padding-bottom: calc(var(--space-xl) + 48px + 120px);
+  max-width: none;
 }
 
 /* ---- Panels ---- */
@@ -302,15 +310,15 @@
   }
 }
 
-/* ---- Responsive Main Content Padding for Fixed Footer ---- */
+/* ---- Responsive Main Content Padding for Fixed Footer + Terminal Console ---- */
 @media (min-width: 768px) {
   .main-content {
-    padding-bottom: calc(var(--space-xl) + 48px);
+    padding-bottom: calc(var(--space-xl) + 48px + 120px);
   }
 }
 
 @media (max-width: 767px) {
   .main-content {
-    padding-bottom: calc(var(--space-lg) + 48px);
+    padding-bottom: calc(var(--space-lg) + 48px + 120px);
   }
 }

@@ -31,7 +31,7 @@
               [class.service-topology__link-flow--degraded]="isLinkDegraded(link)"
               fill="none"
               stroke-width="2"
-              stroke-dasharray="8 12"
+              stroke-dasharray="4"
             />
           </g>
         }
@@ -99,7 +99,7 @@
         <div class="service-topology__sidebar-header">
           <div>
             <div class="service-topology__sidebar-title-row">
-              <span class="service-topology__sidebar-status-dot" aria-hidden="true"></span>
+              <span class="service-topology__sidebar-status-dot" [class]="'service-topology__sidebar-status-dot--' + getSidebarStatusClass(node)" aria-hidden="true"></span>
               <h2 class="service-topology__sidebar-title">{{ node.label }}</h2>
             </div>
             <p class="service-topology__sidebar-id">ID: {{ getNodeId(node) }}</p>
