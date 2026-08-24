@@ -16,7 +16,7 @@ export interface TabConfig {
 export const TABS: readonly TabConfig[] = [
   { id: 'health-dashboard', label: 'Health Dashboard' },
   //{ id: 'terminal-console', label: 'Terminal Console' },
-  { id: 'service-topology', label: 'Service Topology' },
+ // { id: 'service-topology', label: 'Service Topology' },
   { id: 'env-registry', label: 'Env Registry' },
   { id: 'career-pods', label: 'Career Pods' },
   { id: 'swagger-playground', label: 'Swagger Playground' },
