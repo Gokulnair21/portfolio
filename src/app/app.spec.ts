@@ -135,18 +135,17 @@ describe('App', () => {
       await fixture.whenStable();
       const compiled = fixture.nativeElement as HTMLElement;
       const buttons = Array.from(compiled.querySelectorAll<HTMLButtonElement>('.top-nav__tab'));
-      const terminalButton = buttons.find((b) => b.textContent?.trim() === 'Terminal Console')!;
+      const envRegistryButton = buttons.find((b) => b.textContent?.trim() === 'Env Registry')!;
 
-      terminalButton.click();
+      envRegistryButton.click();
       await fixture.whenStable();
 
       const activeButtons = compiled.querySelectorAll('.top-nav__tab--active');
       expect(activeButtons.length).toBe(1);
-      expect(activeButtons[0].textContent?.trim()).toBe('Terminal Console');
+      expect(activeButtons[0].textContent?.trim()).toBe('Env Registry');
 
-      const placeholder = compiled.querySelector('.panel__placeholder-text');
-      expect(placeholder).toBeTruthy();
-      expect(placeholder?.textContent).toContain('MODULE NOT DEPLOYED');
+      const panelArea = compiled.querySelector('.main-content')!;
+      expect(panelArea.querySelector('app-env-registry')).toBeTruthy();
     });
 
     it('should keep state unchanged when clicking the already-active tab', async () => {
@@ -234,7 +233,7 @@ describe('App', () => {
     // ArrowRight from first to second
     buttons[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
-    expect(store.selectedTab()).toBe('terminal-console');
+    expect(store.selectedTab()).toBe('env-registry');
 
     // ArrowLeft from second to first
     buttons[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
