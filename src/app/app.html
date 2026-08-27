@@ -23,6 +23,16 @@
   <div class="top-nav__actions">
     <button
       type="button"
+      class="top-nav__mobile-toggle"
+      aria-label="Open navigation"
+      [attr.aria-expanded]="sheetOpen()"
+      aria-controls="mobile-tab-sheet"
+      (click)="toggleSheet()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+    </button>
+    <button
+      type="button"
       class="top-nav__icon-btn"
       aria-label="Settings"
       (click)="onSettingsClick()"
@@ -39,6 +49,36 @@
     </button>
   </div>
 </header>
+
+<!-- Mobile bottom sheet navigation -->
+<div
+  class="mobile-tab-sheet__backdrop"
+  [class.mobile-tab-sheet__backdrop--open]="sheetOpen()"
+  (click)="closeSheet()"
+  aria-hidden="true"
+></div>
+<div
+  id="mobile-tab-sheet"
+  class="mobile-tab-sheet"
+  [class.mobile-tab-sheet--open]="sheetOpen()"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Navigation"
+  (keydown.escape)="closeSheet()"
+>
+  <div class="mobile-tab-sheet__drag-handle" aria-hidden="true"></div>
+  @for (tab of tabs; track tab.id) {
+    <button
+      type="button"
+      class="mobile-tab-sheet__tab"
+      [class.mobile-tab-sheet__tab--active]="store.selectedTab() === tab.id"
+      [disabled]="!tabsEnabled()"
+      (click)="selectTabAndClose(tab.id)"
+    >
+      {{ tab.label }}
+    </button>
+  }
+</div>
 
 <main class="main-content" role="main">
   @switch (store.dataStatus()) {

@@ -138,4 +138,65 @@
       }
     </main>
   </div>
+
+  <!-- Mobile bottom sheet detail -->
+  @if (selectedPod(); as pod) {
+    <div
+      class="career-pods__detail-sheet-backdrop"
+      [class.career-pods__detail-sheet-backdrop--open]="store.selectedPodIndex() !== null"
+      (click)="selectPod(null)"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="career-pods__detail-sheet"
+      [class.career-pods__detail-sheet--open]="store.selectedPodIndex() !== null"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Pod details"
+      tabindex="-1"
+      (keydown.escape)="selectPod(null)"
+      (touchstart)="onSheetTouchStart($event)"
+      (touchend)="onSheetTouchEnd($event)"
+    >
+      <div class="career-pods__detail-sheet-drag" aria-hidden="true"></div>
+      <button type="button" class="career-pods__detail-sheet-close" aria-label="Close details" (click)="selectPod(null)">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+      <div class="career-pods__core-card">
+        <div class="career-pods__core-card-header">
+          <span class="material-symbols-outlined career-pods__core-icon" aria-hidden="true">dns</span>
+          <h2 class="career-pods__core-title">Pod Configuration Spec</h2>
+        </div>
+        <div class="career-pods__core-grid">
+          <div>
+            <div class="career-pods__field-label">METADATA.NAME</div>
+            <div class="career-pods__field-value career-pods__field-value--primary">{{ pod.name }}</div>
+          </div>
+          <div>
+            <div class="career-pods__field-label">SPEC.NODE_SELECTOR (COMPANY)</div>
+            <div class="career-pods__field-value">{{ pod.entry.company }}</div>
+          </div>
+          <div>
+            <div class="career-pods__field-label">SPEC.CONTAINERS[0].NAME (ROLE)</div>
+            <div class="career-pods__field-value">{{ pod.entry.role }}</div>
+          </div>
+          <div>
+            <div class="career-pods__field-label">STATUS.START_TIME (TIMELINE)</div>
+            <div class="career-pods__field-value">{{ pod.entry.period }}</div>
+          </div>
+        </div>
+        <div class="career-pods__achievements">
+          <div class="career-pods__achievements-label">EVENTS / LOGS</div>
+          <div class="career-pods__log-entries">
+            @for (highlight of pod.entry.highlights; track $index) {
+              <div class="career-pods__log-entry">
+                <span class="career-pods__log-level career-pods__log-level--info">[INFO]</span>
+                <span class="career-pods__log-message">{{ highlight }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </section>

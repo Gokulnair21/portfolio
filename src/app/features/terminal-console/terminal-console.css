@@ -14,13 +14,34 @@
   border-top: var(--border-width) solid var(--outline-variant);
   border-bottom: none;
   border-radius: 0;
+  height: var(--terminal-height);
   min-height: 120px;
   max-height: 200px;
   position: fixed;
-  bottom: 48px;
+  bottom: calc(var(--footer-height) + var(--safe-bottom));
   left: 0;
   right: 0;
   z-index: 45;
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+  touch-action: pan-y;
+}
+
+@media (max-width: 767px) {
+  .terminal-console {
+    height: var(--terminal-height-mobile-portrait);
+    min-height: 120px;
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 767px) and (orientation: landscape) and (max-height: 500px) {
+  .terminal-console {
+    height: var(--terminal-height-mobile-landscape);
+    min-height: 100px;
+    max-height: 150px;
+  }
 }
 
 .terminal-console__header {

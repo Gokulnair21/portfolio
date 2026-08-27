@@ -82,6 +82,7 @@
 
 .env-registry__filter-input {
   width: 100%;
+  min-height: var(--touch-target-min);
   font-family: var(--font-label-mono);
   font-size: var(--text-label-mono);
   line-height: var(--line-label-mono);
@@ -93,6 +94,12 @@
   border-radius: var(--radius-sm);
   padding: var(--space-sm) var(--space-md) var(--space-sm) calc(var(--space-md) + 24px);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+@media (max-width: 767px) {
+  .env-registry__filter-input {
+    font-size: 16px;
+  }
 }
 
 .env-registry__filter-input::placeholder {
@@ -227,6 +234,77 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.env-registry__cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.env-registry__card {
+  background-color: var(--surface-container-low);
+  border: var(--border-width) solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.env-registry__card-key {
+  font-family: var(--font-label-mono);
+  font-size: var(--text-label-mono);
+  line-height: var(--line-label-mono);
+  font-weight: var(--weight-label-mono);
+  letter-spacing: var(--tracking-label-mono);
+  color: var(--primary);
+  word-break: break-word;
+}
+
+.env-registry__card-value {
+  font-family: var(--font-body-sm);
+  font-size: var(--text-body-sm);
+  line-height: var(--line-body-sm);
+  color: var(--on-surface);
+  word-break: break-word;
+}
+
+@media (max-width: 479px) {
+  .env-registry__table-wrapper {
+    display: none;
+  }
+  .env-registry__cards {
+    display: flex;
+  }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .env-registry__table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    display: flex;
+  }
+  .env-registry__table {
+    min-width: 480px;
+  }
+  .env-registry__th {
+    position: sticky;
+    top: 0;
+    background-color: var(--surface-container-low);
+    z-index: 1;
+  }
+  .env-registry__th--key,
+  .env-registry__td--key {
+    position: sticky;
+    left: 0;
+    background-color: var(--surface-container-low);
+    z-index: 2;
+  }
+  .env-registry__th--key {
+    z-index: 3;
+  }
 }
 
 .env-registry__empty {

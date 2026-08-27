@@ -9,10 +9,11 @@
       <svg
         class="service-topology__connections"
         viewBox="0 0 1200 800"
-        preserveAspectRatio="none"
+        preserveAspectRatio="xMidYMid meet"
         role="img"
         aria-label="Service connection lines"
         xmlns="http://www.w3.org/2000/svg"
+        style="touch-action: pan-x pan-y pinch-zoom;"
       >
         @for (link of links(); track linkKey(link)) {
           <g class="connection-group">
@@ -88,13 +89,18 @@
       </div>
     </main>
 
-    <!-- Detail Sidebar (Slide-in Overlay) -->
+    <!-- Detail Sidebar (Slide-in Overlay / Bottom Sheet on mobile) -->
     @if (store.selectedNode(); as node) {
       <aside
         class="service-topology__detail-sidebar"
-        role="complementary"
+        role="dialog"
+        aria-modal="true"
         aria-label="Service details"
         [attr.aria-expanded]="true"
+        tabindex="-1"
+        (keydown.escape)="store.selectNode(null)"
+        (touchstart)="onTouchStart($event)"
+        (touchend)="onTouchEnd($event)"
       >
         <div class="service-topology__sidebar-header">
           <div>

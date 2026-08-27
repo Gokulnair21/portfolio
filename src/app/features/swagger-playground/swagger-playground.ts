@@ -132,6 +132,21 @@ export class SwaggerPlayground {
     return JSON.stringify(receipt, null, 2);
   }
 
+  protected clearReceipt(): void {
+    this.receipt.set(null);
+  }
+
+  protected async copyReceipt(receipt: DeliveryReceipt): Promise<void> {
+    const text = this.formatReceipt(receipt);
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      }
+    } catch {
+      // clipboard fallback ignored
+    }
+  }
+
   #appendLog(source: string, message: string): void {
     const timestampMs = Math.max(Date.now(), this.#lastTimestampMs + 1);
     this.#lastTimestampMs = timestampMs;

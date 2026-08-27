@@ -19,6 +19,10 @@
         class="swagger-playground__request-editor"
         aria-label="Contact request JSON body"
         spellcheck="false"
+        inputmode="text"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
         [value]="bodyText()"
         (input)="onBodyInput($event)"
       ></textarea>
@@ -47,6 +51,37 @@
         <pre class="swagger-playground__response-viewer swagger-playground__response-viewer--headers">{{ responseHeadersText }}</pre>
         <span class="swagger-playground__body-label">KAFKA RECEIPT</span>
         <pre class="swagger-playground__response-viewer">{{ formatReceipt(confirmed) }}</pre>
+        <button type="button" class="swagger-playground__copy-btn" aria-label="Copy receipt" (click)="copyReceipt(confirmed)">
+          <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+        </button>
+      </div>
+      <!-- Mobile modal copy -->
+      <div
+        class="swagger-playground__receipt-backdrop"
+        [class.swagger-playground__receipt-backdrop--open]="receipt() !== null"
+        (click)="clearReceipt()"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="swagger-playground__receipt-modal"
+        [class.swagger-playground__receipt-modal--open]="receipt() !== null"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Delivery receipt"
+        (keydown.escape)="clearReceipt()"
+        tabindex="-1"
+      >
+        <div class="swagger-playground__receipt-modal-header">
+          <span class="swagger-playground__receipt-modal-title">SERVER RESPONSE — KAFKA RECEIPT</span>
+          <button type="button" class="swagger-playground__receipt-close" aria-label="Close receipt" (click)="clearReceipt()">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+          <button type="button" class="swagger-playground__copy-btn" aria-label="Copy receipt" (click)="copyReceipt(confirmed)">
+            <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+          </button>
+        </div>
+        <pre class="swagger-playground__receipt-modal-viewer swagger-playground__receipt-modal-viewer--headers">{{ responseHeadersText }}</pre>
+        <pre class="swagger-playground__receipt-modal-viewer">{{ formatReceipt(confirmed) }}</pre>
       </div>
     }
   </div>

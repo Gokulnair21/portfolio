@@ -161,6 +161,48 @@
   --space-margin-mobile: 16px;
   --space-margin-desktop: 32px;
 
+  /* ---- Safe-Area Insets (iOS notch / dynamic island) ---- */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  /* ---- Touch Targets ---- */
+  --touch-target-min: 48px;
+  --touch-target-comfortable: 56px;
+  --touch-spacing-min: 8px;
+
+  /* ---- Mobile Breakpoints ---- */
+  --bp-mobile-xs: 320px;
+  --bp-mobile-sm: 375px;
+  --bp-mobile-md: 393px;
+  --bp-mobile-lg: 430px;
+
+  /* ---- Terminal / Footer Heights ---- */
+  --terminal-height-mobile-portrait: clamp(120px, 35dvh, 200px);
+  --terminal-height-mobile-landscape: clamp(100px, 25dvh, 150px);
+  --terminal-height-desktop: 120px;
+  --footer-height-mobile: 56px;
+  --footer-height-desktop: 48px;
+  --terminal-height: var(--terminal-height-desktop);
+  --footer-height: var(--footer-height-desktop);
+
+  /* ---- Fluid Typography (clamp fluid between mobile and desktop) ---- */
+  --text-label-mono-sm-fluid: clamp(10px, 0.625rem + 0.1vw, 11px);
+  --text-label-mono-fluid: clamp(11px, 0.7rem + 0.15vw, 12px);
+  --text-body-sm-fluid: clamp(11px, 0.7rem + 0.2vw, 12px);
+  --text-body-md-fluid: clamp(13px, 0.8125rem + 0.2vw, 14px);
+  --text-title-sm-fluid: clamp(16px, 1rem + 0.4vw, 18px);
+  --text-headline-md-fluid: clamp(20px, 1.25rem + 0.8vw, 24px);
+  --text-display-lg-fluid: clamp(24px, 1.5rem + 1.2vw, 32px);
+
+  /* ---- Fluid Spacing ---- */
+  --space-xs-fluid: clamp(4px, 0.25rem + 0.15vw, 6px);
+  --space-sm-fluid: clamp(6px, 0.4rem + 0.2vw, 8px);
+  --space-md-fluid: clamp(12px, 0.75rem + 0.4vw, 16px);
+  --space-lg-fluid: clamp(16px, 1rem + 0.6vw, 24px);
+  --space-xl-fluid: clamp(24px, 1.5rem + 0.8vw, 32px);
+
   /* ---- Border Width ---- */
   --border-width: 1px;
 
@@ -175,6 +217,93 @@
   --transition-fast: 150ms ease;
   --transition-normal: 200ms ease;
   --transition-slow: 300ms ease;
+}
+
+/* ---- Responsive alias switching for terminal/footer ---- */
+@media (max-width: 767px) {
+  :root {
+    --terminal-height: var(--terminal-height-mobile-portrait);
+    --footer-height: var(--footer-height-mobile);
+  }
+}
+
+@media (max-width: 767px) and (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --terminal-height: var(--terminal-height-mobile-landscape);
+  }
+}
+
+/* ---- Fluid typography application via container/media queries ---- */
+@container dashboard (max-width: 767px) {
+  :root {
+    --text-label-mono-sm: var(--text-label-mono-sm-fluid);
+    --text-label-mono: var(--text-label-mono-fluid);
+    --text-body-sm: var(--text-body-sm-fluid);
+    --text-body-md: var(--text-body-md-fluid);
+    --text-title-sm: var(--text-title-sm-fluid);
+    --text-headline-md: var(--text-headline-md-fluid);
+    --text-display-lg: var(--text-display-lg-fluid);
+  }
+}
+
+/* ---- Bottom Sheet Shared Base ---- */
+.bottom-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-normal), visibility var(--transition-normal);
+}
+
+.bottom-sheet__backdrop--open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  max-height: min(60vh, 60dvh);
+  background-color: var(--surface-container-low);
+  border-top: var(--border-width) solid var(--outline-variant);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  z-index: 95;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform var(--transition-normal);
+  padding-bottom: var(--safe-bottom);
+  -webkit-overflow-scrolling: touch;
+}
+
+.bottom-sheet--open {
+  transform: translateY(0);
+}
+
+.bottom-sheet__drag-handle {
+  width: 36px;
+  height: 4px;
+  background-color: var(--outline);
+  border-radius: var(--radius-full);
+  margin: var(--space-sm) auto;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-sheet,
+  .bottom-sheet__backdrop {
+    transition: none;
+  }
+  .bottom-sheet {
+    transform: none;
+  }
+  .bottom-sheet:not(.bottom-sheet--open) {
+    display: none;
+  }
 }
 
 /* ============================================================
@@ -204,6 +333,12 @@ body {
   font-weight: var(--weight-body-md);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+html {
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 /* ============================================================
@@ -269,6 +404,112 @@ body {
   /* Ensure SVG paths and text use forced colors */
   svg {
     forced-color-adjust: auto;
+  }
+}
+
+/* ============================================================
+   Mobile Touch & Fluid Sweep (WCAG 2.1 AA + Lighthouse)
+   Ensure all interactive targets meet 48px minima on mobile
+   ============================================================ */
+@media (max-width: 767px) {
+  button,
+  input,
+  textarea,
+  select,
+  a[href] {
+    min-height: var(--touch-target-min);
+  }
+  button {
+    min-width: var(--touch-target-min);
+  }
+  /* Pseudo enlargement for visually smaller controls */
+  .failure-panel__retry,
+  .service-topology__view-logs-btn,
+  .top-nav__tab {
+    position: relative;
+  }
+  .failure-panel__retry::before,
+  .service-topology__view-logs-btn::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+  /* Ensure spacing between adjacent targets */
+  .top-nav__tabs,
+  .mobile-tab-sheet,
+  .env-registry__cards,
+  .career-pods__sidebar-list,
+  .swagger-playground__layout {
+    gap: var(--touch-spacing-min);
+  }
+  /* Fluid typography application on mobile */
+  .panel__placeholder-text {
+    font-size: var(--text-label-mono-fluid);
+  }
+  .env-registry__title {
+    font-size: var(--text-display-lg-fluid);
+  }
+  .career-pods__core-title,
+  .service-topology__sidebar-title {
+    font-size: var(--text-title-sm-fluid);
+  }
+  /* Code/monospace remains >=11px and wraps */
+  .terminal-console__output,
+  .swagger-playground__request-editor,
+  .swagger-playground__response-viewer,
+  .env-registry__td--key,
+  .env-registry__td--value,
+  .career-pods__field-value {
+    font-size: max(11px, var(--text-body-sm-fluid));
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Container query fallback for fluid spacing */
+@container dashboard (max-width: 767px) {
+  .panel {
+    padding: var(--space-md-fluid);
+  }
+  .main-content {
+    gap: var(--space-md-fluid);
+  }
+}
+
+/* Reduced motion sweep already global via prefers-reduced-motion, ensure sheet specifics */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-tab-sheet,
+  .service-topology__detail-sidebar,
+  .career-pods__detail-sheet,
+  .swagger-playground__receipt-modal {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Forced colors sweep: ensure outlines and SVG strokes use CanvasText */
+@media (forced-colors: active) {
+  .service-topology__link-base,
+  .service-topology__link-base--degraded,
+  .service-topology__link-flow,
+  .service-topology__link-flow--degraded {
+    stroke: CanvasText;
+  }
+  .service-topology__node-card,
+  .career-pods__core-card,
+  .career-pods__stack-card,
+  .env-registry__card,
+  .swagger-playground__receipt-modal {
+    forced-color-adjust: auto;
+    border-color: CanvasText;
+  }
+  .mobile-tab-sheet,
+  .service-topology__detail-sidebar,
+  .career-pods__detail-sheet,
+  .swagger-playground__receipt-modal {
+    border-color: CanvasText;
   }
 }
 

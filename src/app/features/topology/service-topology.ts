@@ -160,6 +160,23 @@ export class ServiceTopology {
     console.log('Fit to screen');
   }
 
+  private touchStartY = 0;
+
+  protected onTouchStart(event: TouchEvent): void {
+    this.touchStartY = event.touches[0]?.clientY ?? 0;
+  }
+
+  protected onTouchEnd(event: TouchEvent): void {
+    const delta = (event.changedTouches[0]?.clientY ?? 0) - this.touchStartY;
+    if (delta > 60) {
+      this.selectNode(null);
+    }
+  }
+
+  protected onBackdropClick(): void {
+    this.selectNode(null);
+  }
+
   protected onViewLogs(nodeId: string): void {
     console.log('View logs for', nodeId);
   }

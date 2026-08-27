@@ -20,6 +20,7 @@ const DEFAULT_BROKER_ACTIVE = 2;
 const DEFAULT_BROKER_TOTAL = 2;
 const DEFAULT_ERROR_RATE = 0;
 export const LOG_CAP = 200;
+export const LOG_CAP_MOBILE = 100;
 
 const NO_NODE_ID = null;
 
@@ -112,7 +113,17 @@ export class ClusterStateService {
   }
 
   appendLog(entry: LogEntry): void {
-    this.#logs.update((current) => [...current, entry].slice(-LOG_CAP));
+    const isMobile =
+      typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+        ? window.matchMedia('(max-width: 767px)').matches
+        : false;
+    const cap = isMobile ? LOG_CAP_MOBILE : LOG_CAP;
+    this.#logs.update((current) => [...current, entry].slice(-cap));
+  }
+
+  /** Test helper: append with explicit cap (avoids needing to mock matchMedia) */
+  appendLogWithCap(entry: LogEntry, cap: number): void {
+    this.#logs.update((current) => [...current, entry].slice(-cap));
   }
 
   beginOutage(errorRate: number): boolean {
