@@ -60,3 +60,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-redesign-ui-to-design-mockups.md`
   summary: Measure and optimize Google Fonts bundle impact — 3 families likely add 100-200KB critical path; consider subsetting/self-hosting.
   evidence: Blind-hunter review; new font loads added by redesign.
+- source_spec: `_bmad-output/implementation-artifacts/spec-terminal-toggle-visibility.md`
+  summary: Add @supports fallback for :has(app-service-topology) selector used in main-content topology padding variants.
+  evidence: Edge-case review found :has unsupported in older browsers causes topology content to overlap footer/terminal; topology padding logic existed pre-story but new visibility variants extend the same selector.

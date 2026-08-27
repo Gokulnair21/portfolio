@@ -311,7 +311,7 @@
   flex-direction: column;
   min-height: 0;
   padding: var(--space-lg) var(--space-gutter) var(--space-xl);
-  padding-bottom: calc(var(--terminal-height) + var(--footer-height) + var(--safe-bottom) + var(--space-xl));
+  padding-bottom: calc(var(--footer-height) + var(--safe-bottom) + var(--space-xl));
   padding-left: calc(var(--space-gutter) + var(--safe-left));
   padding-right: calc(var(--space-gutter) + var(--safe-right));
   margin: 0 auto;
@@ -323,13 +323,21 @@
   container-type: inline-size;
 }
 
+.main-content--terminal-visible {
+  padding-bottom: calc(var(--terminal-height) + var(--footer-height) + var(--safe-bottom) + var(--space-xl));
+}
+
 /* Topology needs to fill full available space without padding */
 .main-content:has(app-service-topology) {
   padding: 0;
-  padding-bottom: calc(var(--terminal-height) + var(--footer-height) + var(--safe-bottom) + var(--space-xl));
+  padding-bottom: calc(var(--footer-height) + var(--safe-bottom) + var(--space-xl));
   padding-left: var(--safe-left);
   padding-right: var(--safe-right);
   max-width: none;
+}
+
+.main-content--terminal-visible:has(app-service-topology) {
+  padding-bottom: calc(var(--terminal-height) + var(--footer-height) + var(--safe-bottom) + var(--space-xl));
 }
 
 /* ---- Panels ---- */
@@ -495,7 +503,7 @@
 
 /* ---- Responsive fallback for older browsers without var(--terminal-height) ---- */
 @media (min-width: 768px) {
-  .main-content {
+  .main-content--terminal-visible {
     padding-bottom: calc(var(--terminal-height) + var(--footer-height) + var(--safe-bottom) + var(--space-xl));
   }
 }

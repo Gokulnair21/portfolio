@@ -281,6 +281,117 @@ describe('App', () => {
     expect(statusItems).toContain('System Health: Healthy');
     expect(statusItems).toContain('Uptime: 99.9%');
   });
+
+  describe('terminal toggle visibility', () => {
+    it('should hide terminal by default (small aspect ratio and desktop initially)', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const terminal = compiled.querySelector('.terminal-console') as HTMLElement;
+      expect(terminal.classList.contains('terminal-console--hidden')).toBe(true);
+      expect(terminal.getAttribute('aria-hidden')).toBe('true');
+      expect(terminal.hasAttribute('inert')).toBe(true);
+      expect(compiled.querySelector('.main-content')?.classList.contains('main-content--terminal-visible')).toBe(false);
+      expect(compiled.querySelector('#terminal-console')).toBeTruthy();
+      const button = Array.from(compiled.querySelectorAll<HTMLButtonElement>('.top-nav__icon-btn')).find(
+        (b) => b.getAttribute('aria-controls') === 'terminal-console',
+      )!;
+      expect(button.getAttribute('aria-controls')).toBe(compiled.querySelector('#terminal-console')?.id);
+    });
+
+    it('should show terminal when clicking terminal icon button (hidden -> visible)', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const button = Array.from(compiled.querySelectorAll<HTMLButtonElement>('.top-nav__icon-btn')).find(
+        (b) => b.getAttribute('aria-controls') === 'terminal-console',
+      )!;
+      expect(button.getAttribute('aria-controls')).toBe('terminal-console');
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+      expect(compiled.querySelector('#terminal-console')).toBeTruthy();
+
+      button.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const terminal = compiled.querySelector('.terminal-console') as HTMLElement;
+      expect(terminal.classList.contains('terminal-console--visible')).toBe(true);
+      expect(terminal.classList.contains('terminal-console--hidden')).toBe(false);
+      expect(terminal.getAttribute('aria-hidden')).toBe('false');
+      expect(terminal.hasAttribute('inert')).toBe(false);
+      expect(compiled.querySelector('.main-content')?.classList.contains('main-content--terminal-visible')).toBe(true);
+      expect(button.getAttribute('aria-expanded')).toBe('true');
+      expect(button.getAttribute('aria-label')).toBe('Hide terminal');
+      expect(compiled.querySelector('#terminal-console')).toBeTruthy();
+      expect(button.getAttribute('aria-controls')).toBe(compiled.querySelector('#terminal-console')?.id);
+    });
+
+    it('should hide terminal when clicking terminal icon again (visible -> hidden)', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const button = Array.from(compiled.querySelectorAll<HTMLButtonElement>('.top-nav__icon-btn')).find(
+        (b) => b.getAttribute('aria-controls') === 'terminal-console',
+      )!;
+      button.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(store.terminalVisible()).toBe(true);
+
+      button.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const terminal = compiled.querySelector('.terminal-console') as HTMLElement;
+      expect(terminal.classList.contains('terminal-console--hidden')).toBe(true);
+      expect(terminal.hasAttribute('inert')).toBe(true);
+      expect(terminal.getAttribute('aria-hidden')).toBe('true');
+      expect(compiled.querySelector('.main-content')?.classList.contains('main-content--terminal-visible')).toBe(false);
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+      expect(button.getAttribute('aria-label')).toBe('Show terminal');
+    });
+
+    it('should toggle terminal identically on desktop (>=768px) — parity with mobile', async () => {
+      // No media-specific branch: same signal toggle applies on desktop viewport
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const button = Array.from(compiled.querySelectorAll<HTMLButtonElement>('.top-nav__icon-btn')).find(
+        (b) => b.getAttribute('aria-controls') === 'terminal-console',
+      )!;
+      button.click();
+      fixture.detectChanges();
+      expect(store.terminalVisible()).toBe(true);
+      expect(compiled.querySelector('.main-content--terminal-visible')).toBeTruthy();
+      expect(button.getAttribute('aria-label')).toBe('Hide terminal');
+      button.click();
+      fixture.detectChanges();
+      expect(store.terminalVisible()).toBe(false);
+      expect(compiled.querySelector('.main-content--terminal-visible')).toBeNull();
+      expect(button.getAttribute('aria-label')).toBe('Show terminal');
+    });
+
+    it('should preserve toggle state through rapid toggles without layout loss', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const button = Array.from(compiled.querySelectorAll<HTMLButtonElement>('.top-nav__icon-btn')).find(
+        (b) => b.getAttribute('aria-controls') === 'terminal-console',
+      )!;
+      button.click();
+      button.click();
+      button.click();
+      fixture.detectChanges();
+      expect(store.terminalVisible()).toBe(true);
+      expect(compiled.querySelector('.terminal-console--visible')).toBeTruthy();
+      expect(compiled.querySelector('.terminal-console')?.hasAttribute('inert')).toBe(false);
+      button.click();
+      fixture.detectChanges();
+      expect(store.terminalVisible()).toBe(false);
+      expect(compiled.querySelector('.terminal-console--hidden')).toBeTruthy();
+      expect(compiled.querySelector('.terminal-console')?.hasAttribute('inert')).toBe(true);
+    });
+  });
 });
 
 describe('App with real application providers', () => {

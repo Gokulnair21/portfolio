@@ -26,6 +26,28 @@
   padding-left: var(--safe-left);
   padding-right: var(--safe-right);
   touch-action: pan-y;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition: transform var(--transition-normal);
+}
+
+.terminal-console--hidden {
+  transform: translateY(calc(100% + var(--footer-height) + var(--safe-bottom)));
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.terminal-console--visible {
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-console {
+    transition: none;
+  }
 }
 
 @media (max-width: 767px) {
