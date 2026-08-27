@@ -42,8 +42,10 @@
     <button
       type="button"
       class="top-nav__icon-btn"
-      aria-label="Terminal"
-      (click)="onTerminalClick()"
+      [attr.aria-label]="store.terminalVisible() ? 'Hide terminal' : 'Show terminal'"
+      aria-controls="terminal-console"
+      [attr.aria-expanded]="store.terminalVisible()"
+      (click)="toggleTerminal()"
     >
       <span class="material-symbols-outlined" aria-hidden="true">terminal</span>
     </button>
@@ -80,7 +82,7 @@
   }
 </div>
 
-<main class="main-content" role="main">
+<main class="main-content" role="main" [class.main-content--terminal-visible]="store.terminalVisible()">
   @switch (store.dataStatus()) {
     @case ('ready') {
       @switch (store.selectedTab()) {
@@ -141,4 +143,4 @@
   </div>
 </footer>
 
-<app-terminal-console />
+<app-terminal-console id="terminal-console" />

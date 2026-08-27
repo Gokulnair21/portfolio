@@ -87,8 +87,12 @@ export class App {
     console.log('Settings clicked');
   }
 
+  protected toggleTerminal(): void {
+    this.store.toggleTerminal();
+  }
+
   protected onTerminalClick(): void {
-    console.log('Terminal clicked');
+    this.toggleTerminal();
   }
 
   protected retry(): void {

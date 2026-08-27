@@ -1,4 +1,11 @@
-<section class="terminal-console" aria-label="Terminal console">
+<section
+  class="terminal-console"
+  [class.terminal-console--hidden]="!store.terminalVisible()"
+  [class.terminal-console--visible]="store.terminalVisible()"
+  aria-label="Terminal console"
+  [attr.aria-hidden]="!store.terminalVisible()"
+  [attr.inert]="!store.terminalVisible() ? '' : null"
+>
   <header class="terminal-console__header">
     <span class="terminal-console__prompt" aria-hidden="true">$</span>
     <div class="terminal-console__output" #viewport>

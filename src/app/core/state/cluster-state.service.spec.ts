@@ -430,4 +430,39 @@ describe('ClusterStateService', () => {
       expect(store.errorRateIsZero()).toBe(true);
     });
   });
+
+  describe('terminal visibility', () => {
+    it('should default terminalVisible to false (hidden on small aspect ratio and desktop initially)', () => {
+      expect(store.terminalVisible()).toBe(false);
+    });
+
+    it('should toggle terminalVisible on each toggleTerminal call', () => {
+      expect(store.terminalVisible()).toBe(false);
+      store.toggleTerminal();
+      expect(store.terminalVisible()).toBe(true);
+      store.toggleTerminal();
+      expect(store.terminalVisible()).toBe(false);
+    });
+
+    it('should set terminalVisible explicitly via setTerminalVisible', () => {
+      store.setTerminalVisible(true);
+      expect(store.terminalVisible()).toBe(true);
+      store.setTerminalVisible(false);
+      expect(store.terminalVisible()).toBe(false);
+    });
+
+    it('should expose terminalVisible as read-only', () => {
+      expect((store as { terminalVisible: unknown }).terminalVisible).not.toHaveProperty('set');
+    });
+
+    it('should preserve rapid toggle sequence without state loss (orientation change resilience)', () => {
+      store.setTerminalVisible(false);
+      store.toggleTerminal();
+      store.toggleTerminal();
+      store.toggleTerminal();
+      expect(store.terminalVisible()).toBe(true);
+      store.toggleTerminal();
+      expect(store.terminalVisible()).toBe(false);
+    });
+  });
 });

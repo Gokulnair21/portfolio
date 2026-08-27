@@ -42,6 +42,7 @@ export class ClusterStateService {
   readonly #outage = signal<OutageOverlay | null>(null);
   readonly #selectedNodeId = signal<string | null>(NO_NODE_ID);
   readonly #selectedPodIndex = signal<number | null>(null);
+  readonly #terminalVisible = signal<boolean>(false);
 
   readonly selectedTab = this.#tab.asReadonly();
   readonly dataStatus = this.#dataStatus.asReadonly();
@@ -50,6 +51,7 @@ export class ClusterStateService {
   readonly outage = this.#outage.asReadonly();
   readonly selectedNodeId = this.#selectedNodeId.asReadonly();
   readonly selectedPodIndex = this.#selectedPodIndex.asReadonly();
+  readonly terminalVisible = this.#terminalVisible.asReadonly();
 
   readonly topologyNodes = computed<TopologyNode[]>(() => this.#content()?.topology.nodes ?? []);
   readonly topologyLinks = computed(() => this.#content()?.topology.links ?? []);
@@ -146,5 +148,13 @@ export class ClusterStateService {
     if (this.#outage() === null) return false;
     this.#outage.set(null);
     return true;
+  }
+
+  toggleTerminal(): void {
+    this.#terminalVisible.update((v) => !v);
+  }
+
+  setTerminalVisible(visible: boolean): void {
+    this.#terminalVisible.set(visible);
   }
 }
