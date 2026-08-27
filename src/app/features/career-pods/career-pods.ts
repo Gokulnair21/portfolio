@@ -46,8 +46,17 @@ export class CareerPods {
     return this.pods().find((pod) => pod.index === index) ?? null;
   });
 
-  protected selectPod(index: number): void {
+  protected selectPod(index: number | null): void {
     this.store.selectPod(index);
+  }
+
+  private sheetTouchStartY = 0;
+  protected onSheetTouchStart(event: TouchEvent): void {
+    this.sheetTouchStartY = event.touches[0]?.clientY ?? 0;
+  }
+  protected onSheetTouchEnd(event: TouchEvent): void {
+    const delta = (event.changedTouches[0]?.clientY ?? 0) - this.sheetTouchStartY;
+    if (delta > 60) this.selectPod(null);
   }
 
   protected calculateAge(period: string): string {

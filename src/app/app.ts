@@ -29,6 +29,7 @@ export class App {
   protected readonly tabs = TABS;
   protected readonly store = inject(ClusterStateService);
   protected readonly loader = inject(PortfolioDataLoader);
+  protected readonly sheetOpen = signal(false);
 
   protected readonly statusLabel = computed(() =>
     this.store.dataStatus() === 'failed' ? 'DOWN' : 'UP',
@@ -63,6 +64,23 @@ export class App {
     }
 
     this.store.selectTab(tabIds[newIndex]);
+  }
+
+  protected toggleSheet(): void {
+    this.sheetOpen.update((v) => !v);
+  }
+
+  protected openSheet(): void {
+    this.sheetOpen.set(true);
+  }
+
+  protected closeSheet(): void {
+    this.sheetOpen.set(false);
+  }
+
+  protected selectTabAndClose(id: TabId): void {
+    this.store.selectTab(id);
+    this.closeSheet();
   }
 
   protected onSettingsClick(): void {

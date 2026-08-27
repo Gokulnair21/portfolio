@@ -13,6 +13,10 @@
           class="env-registry__filter-input"
           placeholder="filter properties..."
           aria-label="Filter environment properties by key or value"
+          inputmode="text"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
           [value]="filterText()"
           (input)="onFilterInput($event)"
         />
@@ -38,7 +42,7 @@
       @if (filteredProperties().length === 0) {
         <p class="env-registry__empty">NO MATCHING PROPERTIES</p>
       } @else {
-        <table class="env-registry__table" role="table">
+        <table class="env-registry__table" role="table" aria-label="Environment properties">
           <thead>
             <tr>
               <th class="env-registry__th env-registry__th--key">Property Key</th>
@@ -54,6 +58,20 @@
             }
           </tbody>
         </table>
+      }
+    </div>
+
+    <!-- Mobile Cards (visible <480px) -->
+    <div class="env-registry__cards" aria-label="Environment properties as cards">
+      @if (filteredProperties().length === 0) {
+        <p class="env-registry__empty">NO MATCHING PROPERTIES</p>
+      } @else {
+        @for (property of filteredProperties(); track property.key) {
+          <div class="env-registry__card">
+            <div class="env-registry__card-key">{{ property.key }}</div>
+            <div class="env-registry__card-value">{{ property.value }}</div>
+          </div>
+        }
       }
     </div>
   </div>

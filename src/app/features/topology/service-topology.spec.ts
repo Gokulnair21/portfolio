@@ -42,7 +42,7 @@ describe('ServiceTopology', () => {
     const svg = compiled.querySelector('svg.service-topology__connections');
     expect(svg).not.toBeNull();
     expect(svg?.getAttribute('viewBox')).toBe('0 0 1200 800');
-    expect(svg?.getAttribute('preserveAspectRatio')).toBe('none');
+    expect(svg?.getAttribute('preserveAspectRatio')).toBe('xMidYMid meet');
   });
 
   it('should show the inspection placeholder before any selection (no sidebar)', () => {
