@@ -453,3 +453,154 @@ So that the portfolio truthfully represents him as a job-seeking asset.
 **Given** the app boots after the data swap
 **When** hydration completes
 **Then** no component or logic code changes were required — validating AD-3/AD-11's content-driven seam
+
+## Epic 6: Mobile Aspect Ratio Support
+
+Make the Actuator portfolio fully usable across mobile aspect ratios (19:9 to 4:3) and both orientations — viewport-fit, safe-area insets, orientation-aware layouts, dvh-based terminal/footer, touch targets ≥48px, fluid typography, and bottom-sheet detail patterns. Validates NFR1 (1.5s mobile load) and AD-6. Source: `_bmad-output/specs/spec-mobile-aspect-ratio-2026-08-27/SPEC.md`.
+
+### Story 6.1: Viewport, Safe-Area & Design Token Foundation
+
+As a builder (Gokul),
+I want viewport-fit and safe-area handling plus fluid/breakpoint tokens,
+So that every later responsive story has the correct foundation.
+
+**Acceptance Criteria:**
+
+**Given** `src/index.html`
+**When** inspected
+**Then** viewport meta is `width=device-width, initial-scale=1, viewport-fit=cover` (user-scalable=yes, maximum-scale=5)
+
+**Given** `src/styles.css` design tokens
+**When** inspected
+**Then** new tokens exist: `--safe-top/right/bottom/left` via `env(safe-area-inset-*,0px)`, `--touch-target-min:48px`, `--touch-target-comfortable:56px`, `--touch-spacing-min:8px`, `--bp-mobile-xs/sm/md/lg` (320/375/393/430), `--terminal-height-mobile-portrait: clamp(120px,35dvh,200px)`, `--terminal-height-mobile-landscape: clamp(100px,25dvh,150px)`, `--footer-height-mobile:56px`, and fluid `--text-*-fluid` / `--space-*-fluid` via `clamp()`
+
+**Given** Chrome DevTools device toolbar at 320, 375, 393, 430, 768 widths
+**When** any panel loads
+**Then** no horizontal scroll occurs and content is not clipped by notch/dynamic island on iPhone 15 Pro simulation; footer/terminal respect `var(--safe-bottom)`
+
+**Given** `ng build` runs
+**When** completed
+**Then** build succeeds with no new JS bundle, only token CSS additions
+
+### Story 6.2: App Shell Responsive — Header, Tabs, Main Layout & Orientation
+
+As a visitor on mobile,
+I want header/tabs/layout to adapt to portrait and landscape,
+So that I can navigate without horizontal scroll or clipped content.
+
+**Acceptance Criteria:**
+
+**Given** viewport width <768px
+**When** the shell renders
+**Then** `.top-nav__tabs` is hidden; a 48×48 tab-bar button (hamburger) appears and opens a bottom sheet with full-width 56px tab buttons (12px spacing); selecting a tab dismisses the sheet and switches panels via the existing `selectedTab` signal (AD-1/AD-2 intact, no router)
+
+**Given** `@media (orientation: landscape) and (max-height: 500px)` is active
+**When** inspected
+**Then** header density reduces and tabs use horizontal scroll with gradient fade or remain in sheet — no overlap
+
+**Given** `.main-content`
+**When** inspected
+**Then** it has `container-name: dashboard; container-type: inline-size` and orientation media queries are used (no JS resize listener, AD-8/AD-9 intact)
+
+**Given** device is rotated portrait↔landscape
+**When** the layout reflows
+**Then** Cumulative Layout Shift <0.1 and tab state is preserved
+
+### Story 6.3: Adaptive Terminal Console & Footer
+
+As a visitor watching the simulation on mobile,
+I want terminal and footer to adapt their height to the viewport,
+So that primary content is never hidden behind fixed elements.
+
+**Acceptance Criteria:**
+
+**Given** portrait mobile (<768px)
+**When** the terminal renders
+**Then** its height is `var(--terminal-height-mobile-portrait)` (clamp 120px,35dvh,200px); in landscape it is `clamp(100px,25dvh,150px)`; desktop remains 120px
+
+**Given** any orientation
+**When** main content padding is inspected
+**Then** `padding-bottom = calc(var(--terminal-height) + var(--footer-height) + var(--safe-bottom))` so no content is hidden behind terminal/footer/home indicator
+
+**Given** more than 100 log entries exist on mobile
+**When** a new entry is added
+**Then** oldest entries drop (mobile cap 100 vs desktop 200) — verified in `ClusterStateService`; auto-scroll to latest is preserved
+
+**Given** the footer on mobile (<480px)
+**When** inspected
+**Then** status items stack or collapse to icon-only as needed, height 56px, gap adapts, all text remains without horizontal scroll
+
+### Story 6.4: Feature Panels Mobile UX — Topology, Career Pods, Env Registry
+
+As a recruiter exploring on a phone,
+I want topology, pods, and env registry to be thumb-friendly,
+So that I can inspect projects and experience without zooming.
+
+**Acceptance Criteria:**
+
+**Given** the Topology panel on mobile (<768px)
+**When** rendered
+**Then** the SVG has `viewBox`/`preserveAspectRatio="xMidYMid meet"`, container `max-height:60vh`/`width:100%`, `touch-action: pan-x pan-y pinch-zoom` enables native pan/pinch-zoom, and a 56×56 invisible hit-area exists around each node; degraded link stroke ≥3px and node border ≥3px remain visible (WCAG AA)
+
+**Given** a node is tapped on mobile
+**When** selection occurs
+**Then** detail opens as a bottom sheet (max 60vh, drag handle, `role="dialog" aria-modal="true"`, focus-trapped, ESC/backdrop/swipe-down dismiss) rather than a side panel
+
+**Given** Career Pods on mobile
+**When** rendered
+**Then** pods stack single-column full-width (min 48px), replica detail uses the same bottom-sheet pattern
+
+**Given** Env Registry on mobile
+**When** width <480px: cards (key label-mono + value body-sm) stack vertically filtered by the 48px search input; 480–767px: table with `overflow-x:auto`, sticky first (key) column and sticky header, `touch-action: pan-x`; **Then** values are readable without page-level horizontal scroll
+
+### Story 6.5: Swagger Playground Mobile Form
+
+As a recruiter sending a contact message on a phone,
+I want the Swagger form to handle the on-screen keyboard gracefully,
+So that I can fill JSON and see the receipt without obscured controls.
+
+**Acceptance Criteria:**
+
+**Given** the Swagger panel on mobile (320px width)
+**When** the JSON editor renders
+**Then** it is full-width, min-height 200px, font-size ≥16px or configured to prevent iOS auto-zoom, `overflow-x:auto` for long lines, `inputmode="text"` with no autocorrect/capitalize
+
+**Given** the keyboard is open on iOS/Android
+**When** the form is focused
+**Then** the viewport uses `dvh` units so the Execute button (full-width 56px, sticky above keyboard or fixed bottom) remains visible and tappable
+
+**Given** valid JSON is executed
+**When** the response arrives
+**Then** mock `200 OK` headers plus Kafka receipt JSON appear in a scrollable modal/bottom sheet (90vw max, syntax highlighted, horizontal scroll) with a 48×48 Copy button; terminal appends ingestion logs via the existing `MessageDelivery` port (AD-4/AD-11) and typed failures render as a banner
+
+**Given** invalid JSON is submitted
+**When** Execute is pressed
+**Then** an inline validation error appears and no request is sent
+
+### Story 6.6: Touch Targets, Fluid Typography & Accessibility Audit
+
+As any mobile visitor including keyboard/screen-reader users,
+I want every interaction to be reachable and legible at any scale,
+So that the site passes WCAG 2.1 AA and Lighthouse mobile gates.
+
+**Acceptance Criteria:**
+
+**Given** Chrome DevTools "Show touch targets" on mobile
+**When** audited
+**Then** every button/input/link/select/textarea is ≥48×48px (via actual size or `::before` pseudo-element enlargement) with ≥8px spacing between adjacent targets; verified by axe-core plus manual check
+
+**Given** typography and spacing on mobile
+**When** traced
+**Then** fluid tokens (`--text-*-fluid` via `clamp()` and `--space-*-fluid`) are applied through `@container dashboard` or `@media` queries — no hardcoded px outside tokens; code/monospace (logs/JSON) remains ≥11px and wraps/scrolls without page overflow
+
+**Given** `prefers-reduced-motion: reduce` is active
+**When** any animation would run
+**Then** bottom-sheet slide, terminal auto-scroll, topology pan/zoom transitions, and tab switches are disabled (AD-6 a11y)
+
+**Given** `forced-colors: active` and 200%/400% zoom
+**When** any panel is inspected
+**Then** focus outlines are 2px solid CanvasText, SVG strokes use tokens/currentColor, status is not color-only, text reflows at 200% and no horizontal scroll appears at 400% (320px equiv.)
+
+**Given** Lighthouse mobile preset at 393×852 (iPhone 15 Pro)
+**When** run via CI
+**Then** Performance ≥90, Accessibility 100, Best Practices ≥90, no horizontal overflow, and `ng test` plus `ng build` remain green
