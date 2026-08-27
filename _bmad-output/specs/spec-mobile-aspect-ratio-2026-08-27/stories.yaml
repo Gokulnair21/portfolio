@@ -1,0 +1,107 @@
+# stories.yaml — Mobile Aspect Ratio Support
+# Each story maps to one or more CAPs from SPEC.md
+# Follows bmad-spec stories-schema.md
+
+stories:
+  - id: 6.1
+    title: "Viewport, Safe-Area & Design Token Foundation"
+    capability_ids: [CAP-1, CAP-5]
+    description: >
+      Extend design tokens with fluid typography/spacing, safe-area insets, touch/breakpoint tokens;
+      fix viewport meta to viewport-fit=cover; prove no horizontal scroll and notch-safe rendering.
+    actor: "Builder (Gokul)"
+    slicing_rationale: "Foundation — all later stories depend on tokens and viewport correctness; independently verifiable via DevTools"
+    acceptance_criteria:
+      - "Viewport meta includes width=device-width, initial-scale=1, viewport-fit=cover"
+      - "CSS tokens for --safe-* (env()), --touch-* , --bp-mobile-*, --terminal-height-* , fluid --text-* via clamp() in styles.css"
+      - "No horizontal scroll at 320px, 375px, 393px, 430px in Chrome DevTools"
+      - "Content not clipped by notch/dynamic island on simulated iPhone 15 Pro"
+    spec_checkpoint: "Lighthouse mobile no horizontal overflow; visual check on iOS simulator"
+    done_checkpoint: "npm run build succeeds; manual DevTools device toolbar pass"
+    invoke_dev_with: "Start from src/styles.css and src/index.html only; no component changes yet"
+
+  - id: 6.2
+    title: "App Shell Responsive — Header, Tabs, Main Layout & Orientation"
+    capability_ids: [CAP-2]
+    description: >
+      Make TopNavBar, tab navigation, and main-content container adapt to portrait/landscape.
+      Tabs become bottom-sheet on <768px; main-content gets container-name dashboard and container queries;
+      header remains sticky with safe-area insets.
+    actor: "Visitor (Recruiter) on mobile"
+    slicing_rationale: "Shell owns navigation — blocks all panel testing; orientation logic centralizes here"
+    acceptance_criteria:
+      - "At <768px tabs hidden, tab-bar button (48x48) opens bottom sheet with 56px tab buttons"
+      - "@media (orientation: landscape) and (max-height: 500px) reduces header/tab density"
+      - ".main-content has container-name: dashboard; container-type: inline-size"
+      - "No Angular Router import added (AD-2); no JS resize listener"
+    spec_checkpoint: "Bottom sheet opens/closes via CSS :target, keyboard ESC, backdrop tap"
+    done_checkpoint: "Manual rotate portrait↔landscape no CLS >0.1; axe tab order correct"
+    invoke_dev_with: "Touch src/app/app.css + app.html + app.ts (signals if needed); keep OnPush"
+
+  - id: 6.3
+    title: "Adaptive Terminal Console & Footer"
+    capability_ids: [CAP-4]
+    description: >
+      Terminal and footer use dvh units and orientation-aware heights; main-content padding-bottom
+      calculated from both; terminal caps at 100 entries on mobile for perf.
+    actor: "Visitor watching simulation on mobile"
+    slicing_rationale: "Fixed elements overlap content most on mobile — isolate before feature panels"
+    acceptance_criteria:
+      - "Terminal heights: clamp(120px,35dvh,200px) portrait, clamp(100px,25dvh,150px) landscape; footer 56px mobile 48px desktop"
+      - "main-content padding-bottom = calc(var(--terminal-height) + var(--footer-height) + var(--safe-bottom))"
+      - "No content hidden behind terminal/footer at 320px portrait or 667px landscape height"
+      - "Terminal auto-scroll and 100-entry cap on mobile verified in ClusterStateService/logic"
+    spec_checkpoint: "Visual: terminal readable, footer always accessible; logs scroll correctly"
+    done_checkpoint: "ng test: log cap still 200 desktop, 100 mobile path covered"
+    invoke_dev_with: "Edit terminal-console.css, app.css, styles.css, and cluster-state.service.ts (cap logic)"
+
+  - id: 6.4
+    title: "Feature Panels Mobile UX — Topology, Career Pods, Env Registry"
+    capability_ids: [CAP-6, CAP-7]
+    description: >
+      Topology fits width, touch-action pan/pinch-zoom, node hit-areas 56x56, detail as bottom sheet;
+      Career pods stack full-width, detail as bottom sheet; Env registry uses card layout <480px else scroll table with sticky key col.
+    actor: "Recruiter exploring projects and career on phone"
+    slicing_rationale: "Three panels share same pattern (list/detail) — ship together, independently demo-able"
+    acceptance_criteria:
+      - "Topology SVG viewBox/preserveAspectRatio, touch-action: pan-x pan-y pinch-zoom, container max-height 60vh on mobile"
+      - "Node/detail opens as bottom sheet (60vh max, drag handle, swipe-down dismiss)"
+      - "Career pods: single column full-width; replica detail same bottom-sheet"
+      - "Env registry: <480px cards (key+value), >=480px table overflow-x:auto with sticky first col; filter input 48px"
+    spec_checkpoint: "Topology pan/zoom native, no JS; detail sheets focus-trapped, ESC/backdrop dismiss"
+    done_checkpoint: "Manual touch test on device toolbar; no horizontal scroll except intentional table scroll"
+    invoke_dev_with: "Touch service-topology.*, career-pods.*, env-registry.* — CSS-only sheets, no CDK"
+
+  - id: 6.5
+    title: "Swagger Playground Mobile Form"
+    capability_ids: [CAP-8]
+    description: >
+      JSON editor full-width (12px min font to prevent iOS zoom), Execute full-width 56px,
+      keyboard handling via dvh, response as scrollable modal/bottom sheet with Copy.
+    actor: "Recruiter sending contact message on phone"
+    slicing_rationale: "Form has unique keyboard/viewport interaction — isolate to test Send flow on mobile"
+    acceptance_criteria:
+      - "Textarea font-size >=16px on mobile (or 12px with proper viewport to avoid zoom), min-height 200px, overflow-x:auto"
+      - "Execute button full-width 56px, sticky-above-keyboard via dvh or fixed bottom"
+      - "Mock 200 OK + Kafka receipt in modal 90vw max-width, copy button 48x48"
+      - "Typed MessageDelivery port still used (AD-4); failures as typed banner"
+    spec_checkpoint: "Fill + Execute on iPhone SE simulation, keyboard does not obscure button"
+    done_checkpoint: "Manual E2E: valid JSON → receipt + terminal logs; invalid JSON → inline error"
+    invoke_dev_with: "Edit swagger-playground.* only; keep port/adapter untouched"
+
+  - id: 6.6
+    title: "Touch Targets, Fluid Typography & Accessibility Audit"
+    capability_ids: [CAP-3, CAP-5]
+    description: >
+      Enforce 48x48 touch minima via pseudo-element enlargement, 8px inter-target spacing,
+      apply fluid clamp() tokens (or container-query) to typography/spacing, and pass WCAG 2.1 AA + Lighthouse mobile >=90.
+    actor: "Any mobile visitor including keyboard/screen-reader users"
+    slicing_rationale: "Polish story — sweeps all components after they are responsive; Lighthouse gate"
+    acceptance_criteria:
+      - "All buttons/inputs/links >=48x48 on mobile (Chrome 'Show touch targets' + axe)"
+      - "Fluid tokens applied: --text-*-fluid and --space-*-fluid used via @container or @media"
+      - "Reduced-motion disables sheet/log/topology animations; forced-colors outlines visible"
+      - "Lighthouse Mobile Performance >=90, Accessibility 100, Best Practices >=90 at 393x852; no 200% zoom overflow"
+    spec_checkpoint: "Lighthouse CI mobile preset; axe-core 0 violations; manual 200%/400% zoom check"
+    done_checkpoint: "ng test + Lighthouse CI green; demo all 5 previous stories together on real device"
+    invoke_dev_with: "Sweep styles.css + all feature *.css; add @media (prefers-reduced-motion) and (forced-colors) where missing"
