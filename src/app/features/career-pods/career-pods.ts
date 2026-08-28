@@ -50,6 +50,11 @@ export class CareerPods {
     this.store.selectPod(index);
   }
 
+  protected getDisplayHighlights(entry: ExperienceEntry): string[] {
+    // Live reframing via store lens, fallback to base highlights
+    return this.store.getExperienceDisplayHighlights(entry);
+  }
+
   private sheetTouchStartY = 0;
   protected onSheetTouchStart(event: TouchEvent): void {
     this.sheetTouchStartY = event.touches[0]?.clientY ?? 0;

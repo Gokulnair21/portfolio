@@ -169,6 +169,16 @@
   min-width: 0;
 }
 
+.terminal-console__tip {
+  font-family: var(--font-label-mono-sm);
+  font-size: var(--text-label-mono-sm);
+  line-height: var(--line-label-mono-sm);
+  color: var(--on-surface-variant);
+  margin: var(--space-xs) 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .terminal-console__cursor {
   align-self: flex-start;
   margin-top: 2px;

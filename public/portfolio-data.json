@@ -3,17 +3,29 @@
     {
       "name": "Bank ABC",
       "description": "Multi-country core banking platform — idempotent payment APIs with zero double-debit incidents, Drools-based onboarding BRMS, and mTLS-secured communication across Algeria, Egypt, and Tunisia.",
-      "stack": ["Spring Boot", "Kafka", "Drools", "mTLS"]
+      "stack": ["Spring Boot", "Kafka", "Drools", "mTLS"],
+      "lensDescription": {
+        "recruiter": "Delivered core banking platform across 3 countries — zero double-debits, robust onboarding, mTLS-secured.",
+        "engineer": "Idempotent payments (Kafka), Drools BRMS, mTLS inter-service, MySQL replication — P99 38ms."
+      }
     },
     {
       "name": "TATA AIG",
       "description": "Insurance BFF platform — webhook-driven event callbacks eliminating 80,000+ redundant API calls/day, Kafka multi-consumer-group sync pipeline, and circuit-breaker-guarded third-party integrations.",
-      "stack": ["Spring Boot", "Kafka", "Redis", "Circuit Breaker", "Dynatrace"]
+      "stack": ["Spring Boot", "Kafka", "Redis", "Circuit Breaker", "Dynatrace"],
+      "lensDescription": {
+        "recruiter": "Saved 80k API calls/day via webhooks — scalable event pipeline with resilient third-party integrations.",
+        "engineer": "Kafka multi-consumer sync, Redis cache, circuit-breaker guards, webhook callbacks, Dynatrace tracing."
+      }
     },
     {
       "name": "EKAM — Union Bank of India",
       "description": "Enterprise HR platform for 60,000+ employees — hierarchical RBAC (Branch/Region/Zone/Corporate), JWT auth with refresh rotation, and AES encryption for all PII fields.",
-      "stack": ["Spring Boot", "MySQL", "JWT", "RBAC", "AES"]
+      "stack": ["Spring Boot", "MySQL", "JWT", "RBAC", "AES"],
+      "lensDescription": {
+        "recruiter": "Built HR platform for 60k employees — secure, compliant, role-aware across enterprise hierarchy.",
+        "engineer": "RBAC (B/R/Z/C), JWT rotation, AES PII, Spring Security, MySQL — 60k scale."
+      }
     }
   ],
   "experience": [
@@ -27,7 +39,23 @@
         "Secured all inter-service and client communication with Mutual TLS (mTLS) plus AES encryption for financial data in transit across three country deployments.",
         "Scaled engineering quality across an 8–10 person team — code review standards and internal sessions on Kafka, CQRS, and resilience patterns drove a 35% reduction in recurring architecture defects.",
         "Led technical hiring for mid-to-senior Java backend roles, defining the evaluation bar and screening pipeline."
-      ]
+      ],
+      "highlightsByLens": {
+        "recruiter": [
+          "Delivered multi-region core banking platform (3 countries) — ownership of onboarding, payments, deposits, loans microservices.",
+          "Cut BFF load time 7s→3s via Redis caching + async decoupling — directly improved user experience for 60k+ employees.",
+          "Achieved zero double-debit incidents at 210 txn/s with mTLS/AES-secured financial data across 3 deployments.",
+          "Mentored 8–10 engineers and reduced architecture defects by 35% through reviews and Kafka/CQRS sessions.",
+          "Defined hiring bar for mid-to-senior Java backend roles and led technical interviews."
+        ],
+        "engineer": [
+          "Spring Boot microservices: BFF Gateway (Redis + DB fallback), Drools BRMS onboarding (P99 24ms), idempotent payments (Kafka exactly-once, mTLS), deposit JPA sagas.",
+          "Performance: decoupled static/dynamic paths via Redis, async loading — 7s→<3s, P99 38-51ms, 72/100 MySQL connections, 0.3s replication lag.",
+          "Security: mTLS inter-service + AES PII, JWT refresh rotation, hierarchical RBAC (Branch/Region/Zone/Corporate).",
+          "Resilience: circuit-breakers, Kafka multi-consumer-group sync, Dynatrace observability, 99.9% uptime.",
+          "Process: tech hiring bar, code review standards, internal talks on CQRS/Saga/Circuit Breaker."
+        ]
+      }
     }
   ],
   "topology": {
@@ -41,7 +69,11 @@
           { "label": "Load Time", "value": "< 3 s" },
           { "label": "P99 Latency", "value": "38 ms" },
           { "label": "Error Rate", "value": "0.01%" }
-        ]
+        ],
+        "lensDescription": {
+          "recruiter": "Orchestrated gateway delivering sub-3s experiences for 3 countries — outcome: 80k fewer redundant calls/day.",
+          "engineer": "Spring Cloud Gateway with Redis cache + DB fallback, async static/dynamic split, P99 38ms, circuit-breaker guarded fanout."
+        }
       },
       {
         "id": "onboarding-service",
@@ -52,7 +84,11 @@
           { "label": "Onboarding/min", "value": "120" },
           { "label": "Rule Eval P99", "value": "24 ms" },
           { "label": "Error Rate", "value": "0.00%" }
-        ]
+        ],
+        "lensDescription": {
+          "recruiter": "Accelerated customer onboarding — rule-driven validation enabling 120 onboardings/min with zero manual intervention.",
+          "engineer": "Drools BRMS with Kafka events, 24ms P99 rule eval, idempotent onboarding saga, 0.00% error via circuit-breaker."
+        }
       },
       {
         "id": "payment-service",
@@ -63,7 +99,11 @@
           { "label": "Throughput", "value": "210 txn/s" },
           { "label": "Double-Debits", "value": "0" },
           { "label": "Error Rate", "value": "0.00%" }
-        ]
+        ],
+        "lensDescription": {
+          "recruiter": "Zero double-debit transactions at 210 txn/s — business-critical reliability for core banking across 3 regions.",
+          "engineer": "Idempotent payment APIs, mTLS + AES, Kafka exactly-once semantics, P99 <40ms, 0 double-debits in prod."
+        }
       },
       {
         "id": "deposit-service",
@@ -74,7 +114,11 @@
           { "label": "Bookings/day", "value": "4,800" },
           { "label": "P99 Latency", "value": "51 ms" },
           { "label": "Error Rate", "value": "0.02%" }
-        ]
+        ],
+        "lensDescription": {
+          "recruiter": "Enabled 4,800 compliant bookings/day — regulatory-aligned deposits powering 60k+ employee enterprise.",
+          "engineer": "Hibernate/JPA per-country compliance modules, P99 51ms, saga-managed bookings, 0.02% error rate."
+        }
       },
       {
         "id": "core-bank-db",
@@ -85,7 +129,11 @@
           { "label": "Connections", "value": "72 / 100" },
           { "label": "Replication Lag", "value": "0.3 s" },
           { "label": "Error Rate", "value": "0.00%" }
-        ]
+        ],
+        "lensDescription": {
+          "recruiter": "Resilient data foundation — replicated MySQL ensuring 99.9% uptime across 3 countries.",
+          "engineer": "MySQL primary with cross-region replication, 72/100 connections, 0.3s lag, 0.00% error."
+        }
       }
     ],
     "links": [
@@ -119,5 +167,15 @@
     "brokerTotal": 2,
     "brokerActive": 2,
     "errorRate": 0
+  },
+  "display": {
+    "profileBioByLens": {
+      "recruiter": "Architecting resilient, high-throughput microservices within the Spring Boot ecosystem. Specializing in JVM performance tuning, distributed systems observability, and building self-healing infrastructures.",
+      "engineer": "Spring Boot microservices (BFF, onboarding, payments, deposits) on Kafka + Redis + MySQL. P99 <51ms, 210 txn/s idempotent payments, mTLS/AES, circuit-breakers, Drools BRMS — multi-region replication (Algeria, Egypt, Tunisia)."
+    },
+    "healthTaglineByLens": {
+      "recruiter": "Resilient platform serving 60k+ employees across 3 countries with 99.9% uptime.",
+      "engineer": "P99 latencies <60ms, 0% double-debit, replicated MySQL — observability via Dynatrace."
+    }
   }
 }

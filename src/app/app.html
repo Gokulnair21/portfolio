@@ -32,9 +32,13 @@
       <span class="material-symbols-outlined" aria-hidden="true">menu</span>
     </button>
     <button
+      id="settings-trigger"
       type="button"
       class="top-nav__icon-btn"
       aria-label="Settings"
+      aria-haspopup="dialog"
+      aria-controls="settings-surface"
+      [attr.aria-expanded]="settingsOpen()"
       (click)="onSettingsClick()"
     >
       <span class="material-symbols-outlined" aria-hidden="true">settings</span>
@@ -49,6 +53,51 @@
     >
       <span class="material-symbols-outlined" aria-hidden="true">terminal</span>
     </button>
+    <div
+      id="settings-surface"
+      class="settings-sheet"
+      [class.settings-sheet--open]="settingsOpen()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-title"
+      tabindex="-1"
+      [attr.inert]="!settingsOpen() ? '' : null"
+      (keydown)="onSettingsKeydown($event)"
+    >
+      <div class="settings-sheet__drag-handle" aria-hidden="true"></div>
+      <div class="settings-sheet__header">
+        <h2 id="settings-title" class="settings-sheet__title">Settings</h2>
+        <button
+          type="button"
+          class="settings-sheet__close"
+          aria-label="Close settings"
+          (click)="closeSettings()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <p class="settings-sheet__description">Content lens — reframes the same portfolio for two audiences.</p>
+      <div class="settings-sheet__control" role="group" aria-label="Content lens">
+        <button
+          type="button"
+          class="settings-sheet__option"
+          [class.settings-sheet__option--active]="store.lens() === 'recruiter'"
+          [attr.aria-pressed]="store.lens() === 'recruiter'"
+          (click)="store.setLens('recruiter')"
+        >
+          Recruiter
+        </button>
+        <button
+          type="button"
+          class="settings-sheet__option"
+          [class.settings-sheet__option--active]="store.lens() === 'engineer'"
+          [attr.aria-pressed]="store.lens() === 'engineer'"
+          (click)="store.setLens('engineer')"
+        >
+          Engineer
+        </button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -81,6 +130,14 @@
     </button>
   }
 </div>
+
+<!-- Settings backdrop (mobile bottom-sheet) -->
+<div
+  class="settings-sheet__backdrop"
+  [class.settings-sheet__backdrop--open]="settingsOpen()"
+  (click)="closeSettings()"
+  aria-hidden="true"
+></div>
 
 <main class="main-content" role="main" [class.main-content--terminal-visible]="store.terminalVisible()">
   @switch (store.dataStatus()) {
@@ -140,6 +197,7 @@
   <div class="footer__right">
     <span class="footer__status">System Health: Healthy</span>
     <span class="footer__status">Uptime: 99.9%</span>
+    <span class="footer__chip footer__chip--view">View: {{ store.lens() === 'engineer' ? 'Engineer' : 'Recruiter' }}</span>
   </div>
 </footer>
 
