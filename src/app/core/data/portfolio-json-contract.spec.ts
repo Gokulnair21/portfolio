@@ -61,13 +61,21 @@ describe('public/portfolio-data.json contract', () => {
 
   it('should match the parsed value against the shipped sections', () => {
     const data = parsePortfolioData(portfolioDataJson)!;
-    expect(data.projects).toEqual(
+    // Projects may include optional lensDescription; compare base fields
+    expect(data.projects.map((p) => ({ name: p.name, description: p.description, stack: p.stack }))).toEqual(
       portfolioDataJson.projects.map((p) => ({
         name: p.name,
         description: p.description,
         stack: p.stack,
       })),
     );
+    // If lens variants present, they should round-trip
+    for (let i = 0; i < data.projects.length; i++) {
+      const expected = (portfolioDataJson.projects[i] as unknown as { lensDescription?: unknown }).lensDescription;
+      if (expected !== undefined) {
+        expect(data.projects[i].lensDescription).toEqual(expected);
+      }
+    }
   });
 
   it('should round-trip the shipped health section', () => {
@@ -236,6 +244,39 @@ describe('public/portfolio-data.json contract', () => {
       expect(result.ok).toBe(false);
       if (!result.ok)
         expect(result.reason).toContain(`expected at most ${MAX_TOPOLOGY_NODES} entries`);
+    });
+  });
+
+  describe('lens variants (additive, optional)', () => {
+    it('should accept JSON without lens variants (fallback)', () => {
+      const withoutLens = JSON.parse(JSON.stringify(portfolioDataJson));
+      // Strip lens fields if present
+      delete (withoutLens as Record<string, unknown>)['display'];
+      for (const n of withoutLens.topology.nodes) delete n.lensDescription;
+      delete withoutLens.experience[0].highlightsByLens;
+      for (const p of withoutLens.projects) delete p.lensDescription;
+      const result = parsePortfolioDataDetailed(withoutLens);
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value.topology.nodes[0].lensDescription).toBeUndefined();
+        expect(result.value.experience[0].highlightsByLens).toBeUndefined();
+      }
+    });
+
+    it('should round-trip lens variants when present', () => {
+      const data = parsePortfolioData(portfolioDataJson)!;
+      expect(data.topology.nodes[0].lensDescription?.recruiter).toBeDefined();
+      expect(data.topology.nodes[0].lensDescription?.engineer).toBeDefined();
+      expect(data.experience[0].highlightsByLens?.recruiter?.length).toBeGreaterThan(0);
+      expect(data.experience[0].highlightsByLens?.engineer?.length).toBeGreaterThan(0);
+      expect(data.display?.profileBioByLens?.recruiter).toBeDefined();
+    });
+
+    it('should fail when lens variant has wrong type', () => {
+      const bad = JSON.parse(JSON.stringify(portfolioDataJson));
+      bad.topology.nodes[0].lensDescription = { recruiter: 123 };
+      const result = parsePortfolioDataDetailed(bad);
+      expect(result.ok).toBe(false);
     });
   });
 });

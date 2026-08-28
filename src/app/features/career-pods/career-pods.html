@@ -72,7 +72,7 @@
             <div class="career-pods__achievements">
               <div class="career-pods__achievements-label">EVENTS / LOGS</div>
               <div class="career-pods__log-entries">
-                @for (highlight of pod.entry.highlights; track $index) {
+                @for (highlight of getDisplayHighlights(pod.entry); track $index) {
                   <div class="career-pods__log-entry">
                     <span class="career-pods__log-level career-pods__log-level--info">[INFO]</span>
                     <span class="career-pods__log-message">{{ highlight }}</span>
@@ -188,7 +188,7 @@
         <div class="career-pods__achievements">
           <div class="career-pods__achievements-label">EVENTS / LOGS</div>
           <div class="career-pods__log-entries">
-            @for (highlight of pod.entry.highlights; track $index) {
+            @for (highlight of getDisplayHighlights(pod.entry); track $index) {
               <div class="career-pods__log-entry">
                 <span class="career-pods__log-level career-pods__log-level--info">[INFO]</span>
                 <span class="career-pods__log-message">{{ highlight }}</span>

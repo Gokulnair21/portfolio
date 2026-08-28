@@ -178,4 +178,25 @@ describe('TerminalConsole', () => {
     expect(timestamp).toBeTruthy();
     expect(timestamp?.classList.contains('terminal-console__timestamp')).toBe(true);
   });
+
+  it('should show tip line when lens is recruiter and hide when engineer', () => {
+    store.setLens('recruiter');
+    store.appendLog(makeLog(0));
+    let fixture = render();
+    let compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.terminal-console__tip')?.textContent?.trim()).toBe('> tip: toggle view in settings');
+
+    store.setLens('engineer');
+    fixture.detectChanges();
+    compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.terminal-console__tip')).toBeNull();
+  });
+
+  it('should have no coachmark in terminal', () => {
+    store.appendLog(makeLog(0));
+    const fixture = render();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('[class*="coachmark"]')).toBeNull();
+    expect(compiled.querySelector('[class*="tutorial"]')).toBeNull();
+  });
 });

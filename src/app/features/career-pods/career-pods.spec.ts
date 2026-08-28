@@ -124,7 +124,9 @@ describe('CareerPods', () => {
     const logEntries = Array.from(coreCard.querySelectorAll('.career-pods__log-entry')).map((entry) =>
       entry.querySelector('.career-pods__log-message')?.textContent?.trim(),
     );
-    expect(logEntries).toEqual(expected.highlights);
+    // Lens-aware: default lens is recruiter, so highlightsByLens recruiter variant is shown with fallback to base
+    const expectedHighlights = (expected.highlightsByLens?.[store.lens() as 'recruiter' | 'engineer'] ?? expected.highlights) as string[];
+    expect(logEntries).toEqual(expectedHighlights);
     expect(logEntries.length).toBeGreaterThan(0);
   });
 

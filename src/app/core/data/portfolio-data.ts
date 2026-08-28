@@ -6,10 +6,23 @@
  * runtime guards below validate the parsed JSON before hydration.
  */
 
+export type Lens = 'recruiter' | 'engineer';
+
+export interface LensStringMap {
+  recruiter?: string;
+  engineer?: string;
+}
+
+export interface LensStringArrayMap {
+  recruiter?: string[];
+  engineer?: string[];
+}
+
 export interface ProjectEntry {
   name: string;
   description: string;
   stack: string[];
+  lensDescription?: LensStringMap;
 }
 
 export interface ExperienceEntry {
@@ -17,6 +30,7 @@ export interface ExperienceEntry {
   role: string;
   period: string;
   highlights: string[];
+  highlightsByLens?: LensStringArrayMap;
 }
 
 export interface ContactInfo {
@@ -41,6 +55,7 @@ export interface TopologyNode {
   description: string;
   techStack: string[];
   metrics: TopologyMetric[];
+  lensDescription?: LensStringMap;
 }
 
 export interface TopologyLink {
@@ -63,6 +78,11 @@ export interface HealthConfig {
   errorRate: number;
 }
 
+export interface PortfolioDisplay {
+  profileBioByLens?: LensStringMap;
+  healthTaglineByLens?: LensStringMap;
+}
+
 export interface PortfolioData {
   projects: ProjectEntry[];
   experience: ExperienceEntry[];
@@ -70,6 +90,7 @@ export interface PortfolioData {
   contact: ContactInfo;
   envProperties: EnvProperty[];
   health: HealthConfig;
+  display?: PortfolioDisplay;
 }
 
 export type ClusterStatus = 'UP' | 'DEGRADED' | 'HALF-OPEN';
@@ -110,25 +131,93 @@ function fail(section: string, detail: string): { ok: false; reason: string } {
   return { ok: false, reason: `${section}: ${detail}` };
 }
 
+function parseLensStringMap(value: unknown, section: string): ParseResult<LensStringMap | undefined> {
+  if (value === undefined) return { ok: true, value: undefined };
+  if (!isRecord(value)) return fail(section, 'expected object with recruiter/engineer strings');
+  const result: LensStringMap = {};
+  if ('recruiter' in value) {
+    if (value['recruiter'] !== undefined) {
+      if (!isString(value['recruiter'])) return fail(`${section}.recruiter`, 'expected string');
+      const v = (value['recruiter'] as string).trim();
+      if (v.length > 0) result.recruiter = v;
+    }
+  }
+  if ('engineer' in value) {
+    if (value['engineer'] !== undefined) {
+      if (!isString(value['engineer'])) return fail(`${section}.engineer`, 'expected string');
+      const v = (value['engineer'] as string).trim();
+      if (v.length > 0) result.engineer = v;
+    }
+  }
+  // Allow empty map as undefined for cleanliness, but return map if any key present
+  if (Object.keys(result).length === 0) return { ok: true, value: undefined };
+  // If extra keys, ignore but tolerant
+  return { ok: true, value: result };
+}
+
+function parseLensStringArrayMap(value: unknown, section: string): ParseResult<LensStringArrayMap | undefined> {
+  if (value === undefined) return { ok: true, value: undefined };
+  if (!isRecord(value)) return fail(section, 'expected object with recruiter/engineer string arrays');
+  const result: LensStringArrayMap = {};
+  if ('recruiter' in value) {
+    if (value['recruiter'] !== undefined) {
+      if (!isStringArray(value['recruiter'])) return fail(`${section}.recruiter`, 'expected string array');
+      const arr = (value['recruiter'] as string[]).map((s) => s.trim()).filter((s) => s.length > 0);
+      if (arr.length > 0) result.recruiter = arr;
+    }
+  }
+  if ('engineer' in value) {
+    if (value['engineer'] !== undefined) {
+      if (!isStringArray(value['engineer'])) return fail(`${section}.engineer`, 'expected string array');
+      const arr = (value['engineer'] as string[]).map((s) => s.trim()).filter((s) => s.length > 0);
+      if (arr.length > 0) result.engineer = arr;
+    }
+  }
+  if (Object.keys(result).length === 0) return { ok: true, value: undefined };
+  return { ok: true, value: result };
+}
+
+function parsePortfolioDisplay(value: unknown): ParseResult<PortfolioDisplay | undefined> {
+  if (value === undefined) return { ok: true, value: undefined };
+  if (!isRecord(value)) return fail('display', 'expected object');
+  const profileBio = parseLensStringMap(value['profileBioByLens'], 'display.profileBioByLens');
+  if (!profileBio.ok) return profileBio as ParseResult<never>;
+  const healthTagline = parseLensStringMap(value['healthTaglineByLens'], 'display.healthTaglineByLens');
+  if (!healthTagline.ok) return healthTagline as ParseResult<never>;
+  const display: PortfolioDisplay = {};
+  if (profileBio.value !== undefined) display.profileBioByLens = profileBio.value;
+  if (healthTagline.value !== undefined) display.healthTaglineByLens = healthTagline.value;
+  if (Object.keys(display).length === 0) return { ok: true, value: undefined };
+  return { ok: true, value: display };
+}
+
 function parseProjectEntry(value: unknown): ParseResult<ProjectEntry> {
   if (!isRecord(value)) return fail('projects[]', 'entry is not an object');
 
-  const { name, description, stack } = value;
+  const { name, description, stack, lensDescription } = value as Record<string, unknown>;
   if (!isString(name)) return fail('projects[].name', 'expected string');
   if (!isString(description)) return fail('projects[].description', 'expected string');
   if (!isStringArray(stack)) return fail('projects[].stack', 'expected string array');
-  return { ok: true, value: { name, description, stack } };
+  const lens = parseLensStringMap(lensDescription, 'projects[].lensDescription');
+  if (!lens.ok) return lens as ParseResult<never>;
+  const entry: ProjectEntry = { name, description, stack };
+  if (lens.value !== undefined) entry.lensDescription = lens.value;
+  return { ok: true, value: entry };
 }
 
 function parseExperienceEntry(value: unknown): ParseResult<ExperienceEntry> {
   if (!isRecord(value)) return fail('experience[]', 'entry is not an object');
 
-  const { company, role, period, highlights } = value;
+  const { company, role, period, highlights, highlightsByLens } = value as Record<string, unknown>;
   if (!isString(company)) return fail('experience[].company', 'expected string');
   if (!isString(role)) return fail('experience[].role', 'expected string');
   if (!isString(period)) return fail('experience[].period', 'expected string');
   if (!isStringArray(highlights)) return fail('experience[].highlights', 'expected string array');
-  return { ok: true, value: { company, role, period, highlights } };
+  const lens = parseLensStringArrayMap(highlightsByLens, 'experience[].highlightsByLens');
+  if (!lens.ok) return lens as ParseResult<never>;
+  const entry: ExperienceEntry = { company, role, period, highlights };
+  if (lens.value !== undefined) entry.highlightsByLens = lens.value;
+  return { ok: true, value: entry };
 }
 
 function parseContactInfo(value: unknown): ParseResult<ContactInfo> {
@@ -162,7 +251,7 @@ function parseTopologyMetric(value: unknown): ParseResult<TopologyMetric> {
 function parseTopologyNode(value: unknown): ParseResult<TopologyNode> {
   if (!isRecord(value)) return fail('topology.nodes[]', 'entry is not an object');
 
-  const { id, label, description, techStack, metrics } = value;
+  const { id, label, description, techStack, metrics, lensDescription } = value as Record<string, unknown>;
   if (!isString(id) || id.length === 0) return fail('topology.nodes[].id', 'expected non-empty string');
   if (!isString(label) || label.length === 0)
     return fail('topology.nodes[].label', 'expected non-empty string');
@@ -172,9 +261,14 @@ function parseTopologyNode(value: unknown): ParseResult<TopologyNode> {
   const parsedMetrics = parseEntries(metrics, 'topology.nodes[].metrics', parseTopologyMetric);
   if (!parsedMetrics.ok) return parsedMetrics;
 
+  const lens = parseLensStringMap(lensDescription, 'topology.nodes[].lensDescription');
+  if (!lens.ok) return lens as ParseResult<never>;
+
+  const node: TopologyNode = { id, label, description, techStack, metrics: parsedMetrics.value };
+  if (lens.value !== undefined) node.lensDescription = lens.value;
   return {
     ok: true,
-    value: { id, label, description, techStack, metrics: parsedMetrics.value },
+    value: node,
   };
 }
 
@@ -279,16 +373,21 @@ export function parsePortfolioDataDetailed(value: unknown): ParseResult<Portfoli
   const health = parseHealthConfig(value['health']);
   if (!health.ok) return health;
 
+  const display = parsePortfolioDisplay((value as Record<string, unknown>)['display']);
+  if (!display.ok) return display as ParseResult<never>;
+
+  const result: PortfolioData = {
+    projects: projects.value,
+    experience: experience.value,
+    topology: topology.value,
+    contact: contact.value,
+    envProperties: envProperties.value,
+    health: health.value,
+  };
+  if (display.value !== undefined) result.display = display.value;
   return {
     ok: true,
-    value: {
-      projects: projects.value,
-      experience: experience.value,
-      topology: topology.value,
-      contact: contact.value,
-      envProperties: envProperties.value,
-      health: health.value,
-    },
+    value: result,
   };
 }
 

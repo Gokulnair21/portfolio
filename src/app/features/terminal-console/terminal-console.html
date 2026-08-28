@@ -20,7 +20,13 @@
             <span class="terminal-console__message">{{ entry.message }}</span>
           </p>
         }
+        @if (store.lens() === 'recruiter') {
+          <p class="terminal-console__tip">> tip: toggle view in settings</p>
+        }
         <span class="terminal-console__cursor blinking-cursor" aria-hidden="true"></span>
+      }
+      @if (store.logs().length === 0 && store.lens() === 'recruiter') {
+        <p class="terminal-console__tip">> tip: toggle view in settings</p>
       }
     </div>
   </header>

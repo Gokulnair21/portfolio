@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { SimulationEngine } from '../../core/simulation/simulation-engine';
 import { ClusterStateService } from '../../core/state/cluster-state.service';
 
@@ -11,6 +11,9 @@ import { ClusterStateService } from '../../core/state/cluster-state.service';
 export class HealthDashboard {
   protected readonly store = inject(ClusterStateService);
   protected readonly engine = inject(SimulationEngine);
+
+  // Lens-aware bio: falls back to base when variant missing, live without reload
+  protected readonly bio = computed(() => this.store.displayProfileBio());
 
   protected get outageActive(): boolean {
     return this.store.outage() !== null;

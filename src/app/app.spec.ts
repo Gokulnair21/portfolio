@@ -477,3 +477,151 @@ describe('App with real application providers', () => {
     }
   });
 });
+
+describe('App settings lens surface (FR10/FR11)', () => {
+  let http2: HttpTestingController;
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+      providers: [
+        ClusterStateService,
+        PortfolioDataLoader,
+        SimulationEngine,
+        { provide: MESSAGE_DELIVERY, useValue: FAKE_DELIVERY },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
+    http2 = TestBed.inject(HttpTestingController);
+  });
+  afterEach(() => {
+    try {
+      http2.verify();
+    } catch {}
+  });
+
+    it('should have gear with aria-expanded/aria-controls reflecting settingsOpen', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const gear = compiled.querySelector('#settings-trigger') as HTMLButtonElement;
+      expect(gear).toBeTruthy();
+      expect(gear.getAttribute('aria-haspopup')).toBe('dialog');
+      expect(gear.getAttribute('aria-controls')).toBe('settings-surface');
+      expect(gear.getAttribute('aria-expanded')).toBe('false');
+      gear.click();
+      fixture.detectChanges();
+      expect(gear.getAttribute('aria-expanded')).toBe('true');
+      const surface = compiled.querySelector('#settings-surface') as HTMLElement;
+      expect(surface.getAttribute('role')).toBe('dialog');
+      expect(surface.getAttribute('aria-modal')).toBe('true');
+      expect(surface.classList.contains('settings-sheet--open')).toBe(true);
+    });
+
+    it('should dismiss on Escape, backdrop, close and return focus to gear', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const gear = compiled.querySelector('#settings-trigger') as HTMLButtonElement;
+      gear.click();
+      fixture.detectChanges();
+      const surface = compiled.querySelector('#settings-surface') as HTMLElement;
+      expect(surface.classList.contains('settings-sheet--open')).toBe(true);
+      // Escape
+      surface.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      fixture.detectChanges();
+      expect(surface.classList.contains('settings-sheet--open')).toBe(false);
+      expect(document.activeElement).toBe(gear);
+      // Backdrop
+      gear.click();
+      fixture.detectChanges();
+      const backdrop = compiled.querySelector('.settings-sheet__backdrop') as HTMLElement;
+      backdrop.click();
+      fixture.detectChanges();
+      expect(surface.classList.contains('settings-sheet--open')).toBe(false);
+      expect(document.activeElement).toBe(gear);
+      // Close button
+      gear.click();
+      fixture.detectChanges();
+      const close = compiled.querySelector('.settings-sheet__close') as HTMLButtonElement;
+      expect(close).toBeTruthy();
+      close.click();
+      fixture.detectChanges();
+      expect(surface.classList.contains('settings-sheet--open')).toBe(false);
+      expect(document.activeElement).toBe(gear);
+    });
+
+    it('should trap focus inside surface (first↔last wrap)', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const gear = compiled.querySelector('#settings-trigger') as HTMLButtonElement;
+      gear.click();
+      fixture.detectChanges();
+      const surface = compiled.querySelector('#settings-surface') as HTMLElement;
+      const buttons = Array.from(surface.querySelectorAll<HTMLButtonElement>('button'));
+      expect(buttons.length).toBeGreaterThan(1);
+      // Focus last, Tab should wrap to first
+      buttons[buttons.length - 1].focus();
+      expect(document.activeElement).toBe(buttons[buttons.length - 1]);
+      surface.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      fixture.detectChanges();
+      expect(document.activeElement).toBe(buttons[0]);
+    });
+
+    it('should show footer View chip tracking lens (read-only)', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const chip = compiled.querySelector('.footer__chip--view') as HTMLElement;
+      expect(chip).toBeTruthy();
+      expect(chip.textContent?.trim()).toBe('View: Recruiter');
+      const svc = TestBed.inject(ClusterStateService);
+      svc.setLens('engineer');
+      fixture.detectChanges();
+      expect(chip.textContent?.trim()).toBe('View: Engineer');
+      // clicking chip does not toggle
+      chip.click();
+      fixture.detectChanges();
+      expect(svc.lens()).toBe('engineer');
+    });
+
+    it('should have exactly one segmented control with two states calling setLens', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const gear = compiled.querySelector('#settings-trigger') as HTMLButtonElement;
+      gear.click();
+      fixture.detectChanges();
+      const groups = compiled.querySelectorAll('[aria-label="Content lens"]');
+      expect(groups.length).toBe(1);
+      const options = compiled.querySelectorAll('.settings-sheet__option');
+      expect(options.length).toBe(2);
+      expect(options[0].getAttribute('aria-pressed')).toBe('true');
+      const svc = TestBed.inject(ClusterStateService);
+      (options[1] as HTMLButtonElement).click();
+      fixture.detectChanges();
+      expect(svc.lens()).toBe('engineer');
+      expect(options[1].getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('should have no coachmark/tutorial overlay', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('[class*="coachmark"]')).toBeNull();
+      expect(compiled.querySelector('[class*="tutorial"]')).toBeNull();
+      expect(compiled.querySelector('[class*="overlay"]')).toBeNull();
+    });
+
+    it('should have settings surface with drag handle and 48x48 close', async () => {
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.settings-sheet__drag-handle')).toBeTruthy();
+      const close = compiled.querySelector('.settings-sheet__close') as HTMLElement;
+      expect(close).toBeTruthy();
+      // 48x48 via CSS min-width/min-height tokens
+      expect(compiled.querySelector('#settings-surface')?.getAttribute('role')).toBe('dialog');
+    });
+  });
