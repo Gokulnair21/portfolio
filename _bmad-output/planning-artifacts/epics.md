@@ -1,9 +1,10 @@
 ---
-stepsCompleted: [step-01, step-02, step-03, step-04-change-request]
+stepsCompleted: [step-01, step-02, step-03, step-04-change-request, step-01-settings-lens, step-02-settings-lens, step-03-settings-lens, step-04-settings-lens]
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-portfolio-2026-08-15/prd.md
   - _bmad-output/planning-artifacts/architecture/architecture-Portfolio-2026-08-22/ARCHITECTURE-SPINE.md
   - _bmad-output/planning-artifacts/sprint-change-proposal-2026-08-23.md
+  - _bmad-output/specs/spec-settings-icon-actions/SPEC.md
 ---
 
 # Portfolio - Epic Breakdown
@@ -23,6 +24,10 @@ FR4: Provide an `/actuator/env`-styled searchable property table; typing in the 
 FR5: Present career history as Kubernetes-style replica pods; clicking a pod (e.g. `pod-experience-senior-neosoft-0`) updates the replica details card showing timeline, role description, and bulleted responsibilities.
 FR6: Provide a mock Swagger UI contact playground where the user edits a JSON request payload and clicks "Execute"; the interface prints a mock `200 OK` response header plus Kafka queuing receipt JSON, appends ingestion logs to the Terminal Console, and sends a real message behind the scenes via EmailJS.
 FR7: Dynamically load all portfolio content (projects, experience, contact details, env properties) at runtime from a static JSON configuration file; content changes require no HTML or JS logic changes.
+FR8 (SPEC CAP-1): Content Lens Switch — toggle portfolio between exactly two lenses (Recruiter, Engineer) reframing the same underlying content through audience-appropriate copy; switching without page reload; current lens visually indicated in settings surface; exactly two states.
+FR9 (SPEC CAP-2): Per-device persistence — first visit (no stored value) defaults to Recruiter; after toggling and reloading, last selected lens restores; stored in localStorage only; no network request; Recruiter default is non-negotiable.
+FR10 (SPEC CAP-3): Responsive settings surface — gear at `src/app/app.html:37` (`onSettingsClick` at `src/app/app.ts:86`) opens bottom-sheet on mobile (reusing `src/app/app.html:56` pattern) and popover anchored to gear on iPad/desktop; same single toggle control, not separate settings; dismissible via backdrop, close affordance, and Escape; focus traps correctly; works on mobile, iPad, desktop.
+FR11 (SPEC CAP-4): Ambient discoverability — footer View chip at `src/app/app.html:138` reflects current lens (read-only indicator, not second toggle); terminal shows tip `> tip: toggle view in settings`; no coachmark/tutorial overlay presented.
 
 ### NonFunctional Requirements
 
@@ -30,6 +35,11 @@ NFR1: Performance — page load under 1.5 seconds on mobile and desktop (SM-2), 
 NFR2: Cost — $0/month maintenance; hosted on GitHub Pages using only free-tier services (SM-3).
 NFR3: Static single-page application — no JVM server backend, no real Kafka cluster, no database persistence, no user login/auth.
 NFR4: Single-page layout — everything bundled in one clean layout; no multiple HTML pages.
+NFR5 (SPEC): Actuator/Microservices Dashboard theme compliance — settings surface must fit visually (monospace, status-chip, terminal palette, design tokens in `src/styles.css`) — AD-6.
+NFR6 (SPEC): Static GitHub Pages constraint — no backend; all state client-side (localStorage only, namespaced key, lens is only persisted setting); no API/server persistence.
+NFR7 (SPEC): Single-setting minimalism — one toggle only; no density sliders, no multi-preset bundles, no additional controls in scope.
+NFR8 (SPEC): Subtle discoverability only — View chip + terminal tip; no coachmark, no onboarding overlay.
+NFR9 (SPEC-Assumption): Lens change re-renders visible panels live without full page reload; lenses reframe presentation/copy of same data, not separate content sets.
 
 ### Additional Requirements
 
@@ -50,6 +60,22 @@ NFR4: Single-page layout — everything bundled in one clean layout; no multiple
 
 (No dedicated UX design document was provided. Theme vocabulary is carried by PRD feature descriptions and Architecture design tokens (AD-6).)
 
+### SPEC Settings-Icon-Actions — Additional Constraints & Non-Goals
+
+- Static GitHub Pages — no backend; all state is client-side (`localStorage`); no API/server persistence.
+- Must fit Actuator/Microservices Dashboard theme visually (monospace, status-chip, terminal palette, existing design tokens in `src/styles.css`).
+- Must support mobile/iPad/desktop — bottom-sheet vs popover are the same control, not separate settings.
+- Single-setting minimalism — one toggle only; no density sliders, multi-preset bundles.
+- Reuse anchors: gear at `src/app/app.html:37`, `onSettingsClick` at `src/app/app.ts:86`, bottom-sheet pattern at `src/app/app.html:56`, footer chip slot at `src/app/app.html:138`.
+- Discoverability is subtle only — footer chip + terminal tip; no coachmark.
+- Non-goals (explicit out-of-scope): DJ Equalizer/Density sliders, Contact Dock/Business Card, Ambient Control presets (Day Ops/Night Ops/Focus), Coachmark overlay/tutorial, Private Session, Smart referrer/Balanced defaults — all rejected in favor of Recruiter-default + `localStorage`.
+- Assumptions: lens toggles presentation/copy framing of same data; View chip is read-only; `localStorage` key namespaced; lens is only persisted setting; cross-tab sync via `storage` event nice-to-have not required.
+- Open Questions (gaps requiring product decision before Story 7.2/7.4): lens copy delta per tab, animation/transition spec, terminal tip trigger/wording/placement.
+
+### UX Design Requirements (SPEC-derived)
+
+UX-SPEC1: Settings surface must use actuator tokens (monospace, chip, terminal palette) and remain legible at mobile 320px through desktop.
+
 ### Change Requirements (Sprint Change Proposal 2026-08-23)
 
 CR1: Replace all placeholder portfolio content (contact, experience, projects, envProperties) with real CV data — Neosoft Technologies identity, three client projects (Bank ABC, TATA AIG, EKAM), real email/GitHub/LinkedIn
@@ -67,6 +93,10 @@ FR4: Epic 3 - Env property search filtering
 FR5: Epic 3 - Career pod selection & details
 FR6: Epic 4 - Swagger execution + EmailJS delivery
 FR7: Epic 1 - Runtime JSON content hydration
+FR8: Epic 7 - Content Lens Switch (Recruiter ↔ Engineer) without reload
+FR9: Epic 7 - Per-device persistence (Recruiter default, localStorage)
+FR10: Epic 7 - Responsive settings surface (bottom-sheet mobile / popover desktop)
+FR11: Epic 7 - Ambient discoverability (footer View chip + terminal tip)
 CR1: Epic 5 - Real CV content population
 CR2: Epic 5 - Core-banking topology re-theme
 CR3: Epic 5 - Schema & contract updates (repoUrl removal)
@@ -94,6 +124,14 @@ Recruiters send a real message via the mock Swagger UI (EmailJS behind the `Mess
 ### Epic 5: Real CV Content Alignment & Go-Live Readiness
 Replace every scaffold placeholder with Gokul's actual CV identity and re-theme the topology to his real multi-region core banking platform — making the portfolio a truthful job-seeking asset before go-live. Validates the content-driven architecture delivered by Epics 1–4: a pure data swap with no structural code changes.
 **Requirements covered:** CR1, CR2, CR3, CR4, CR5
+
+### Epic 6: Mobile Aspect Ratio Support
+Make the Actuator portfolio fully usable across mobile aspect ratios (19:9 to 4:3) and both orientations — viewport-fit, safe-area insets, orientation-aware layouts, dvh-based terminal/footer, touch targets ≥48px, fluid typography, and bottom-sheet detail patterns. Validates NFR1 and AD-6.
+**FRs covered:** NFR1, AD-6, responsive foundation (no new FR, enhances FR1-FR6)
+
+### Epic 7: Settings Icon — Content Lens Switch (Recruiter-default)
+Visitors toggle the portfolio between Recruiter and Engineer lenses via the gear settings; preference persists per-device via localStorage (Recruiter default), discoverable via footer View chip and terminal tip, with a responsive bottom-sheet (mobile) / popover (iPad/desktop) that fits the Actuator theme. The gear at `src/app/app.html:37` finally does something — one minimal, non-negotiable setting.
+**FRs covered:** FR8, FR9, FR10, FR11 (+ NFR5-NFR9, AD-1, AD-2, AD-6, AD-8, AD-9)
 
 ## Epic 1: Dashboard Foundation & Live System Health
 
@@ -604,3 +642,153 @@ So that the site passes WCAG 2.1 AA and Lighthouse mobile gates.
 **Given** Lighthouse mobile preset at 393×852 (iPhone 15 Pro)
 **When** run via CI
 **Then** Performance ≥90, Accessibility 100, Best Practices ≥90, no horizontal overflow, and `ng test` plus `ng build` remain green
+
+## Epic 7: Settings Icon — Content Lens Switch (Recruiter-default)
+
+Visitors toggle the portfolio between Recruiter and Engineer lenses via the gear settings; preference persists per-device via localStorage (Recruiter default), discoverable via footer View chip and terminal tip, with a responsive bottom-sheet (mobile) / popover (iPad/desktop) that fits the Actuator theme. The gear at `src/app/app.html:37` finally does something — one lean, non-negotiable setting. Source: `_bmad-output/specs/spec-settings-icon-actions/SPEC.md`.
+
+### Story 7.1: Lens State Signal, Recruiter Default & localStorage Persistence
+
+As a visitor,
+I want my lens preference to default to Recruiter and persist per-device,
+So that return visits restore my last choice without any backend.
+
+**Acceptance Criteria:**
+
+**Given** `ClusterStateService` in `src/app/core/state/cluster-state.service.ts`
+**When** inspected
+**Then** it exposes a read-only `lens` signal typed `Lens = 'recruiter' | 'engineer'` with initial value `'recruiter'` and a method `setLens(l: Lens)` / `toggleLens()`
+**And** components mutate lens only through store methods (AD-1); signals are read via `computed()`; no component-local lens duplicates
+
+**Given** the app boots with no stored value in `localStorage`
+**When** the store initializes
+**Then** `lens()` is `'recruiter'` (FR9 default) and the store writes `'recruiter'` to a namespaced key `portfolio:lens` (or `portfolio:content-lens` — name documented)
+**And** no network request is issued
+
+**Given** a previous lens was persisted (e.g. `'engineer'` under the namespaced key)
+**When** the app boots
+**Then** the store hydrates `lens()` from `localStorage` before first render, so the first paint already reflects the persisted lens
+**And** after toggling and reloading the page, the last selected lens restores
+
+**Given** `localStorage` contains a corrupted or unknown value for the lens key
+**When** the app boots
+**Then** the store discards it and falls back to `'recruiter'`; no crash, no blank state
+
+**Given** the lens signal changes
+**When** an effect runs
+**Then** the new value is written to `localStorage` immediately (client-side only, `localStorage` seam); lens is the only persisted setting; no other store state is persisted
+
+**Given** unit tests run via `ng test` (Vitest)
+**When** exercised
+**Then** first-visit default is `'recruiter'`; set→persist→reload→restore is verified; corrupted value falls back; no network calls are asserted; typed `Lens` union is enforced
+
+### Story 7.2: Responsive Settings Surface — Bottom-Sheet (Mobile) / Popover (Desktop)
+
+As a visitor on any device,
+I want the gear icon to open a settings surface that fits my viewport,
+So that I can operate the lens switch without a separate page.
+
+**Acceptance Criteria:**
+
+**Given** the gear button at `src/app/app.html:37` with `onSettingsClick` at `src/app/app.ts:86`
+**When** the template is inspected
+**Then** `onSettingsClick` no longer logs only; it toggles a `settingsOpen` signal (or store-owned signal) that drives the surface visibility
+**And** `aria-expanded` and `aria-controls` reflect open/closed state for the gear button
+
+**Given** viewport is mobile (<768px) and gear is clicked
+**When** the surface opens
+**Then** it renders as a bottom-sheet reusing the existing pattern at `src/app/app.html:56` (`.mobile-tab-sheet` structure: backdrop, drag handle, `role="dialog" aria-modal="true"`)
+**And** it is max 60vh, has a visible close affordance (X button 48×48) and drag handle
+
+**Given** viewport is iPad/desktop (≥768px) and gear is clicked
+**When** the surface opens
+**Then** it renders as a popover anchored to the gear (e.g. `.settings-popover` positioned absolute/right-aligned to `.top-nav__actions`), not a full-screen sheet
+**And** it shares the same template/component source as the mobile sheet (one control, two presentations via CSS container/media query — not two separate settings)
+
+**Given** the settings surface is open
+**When** the visitor presses `Escape`, clicks the backdrop, or clicks the close affordance
+**Then** the surface dismisses and focus returns to the gear button
+
+**Given** the surface is open
+**When** tab is pressed repeatedly
+**Then** focus is trapped inside the surface (first/last focusable wrap), verified with keyboard-only navigation; focus does not escape to main content or terminal
+
+**Given** the surface styling is inspected
+**When** traced
+**Then** it uses only Actuator design tokens (monospace stack, status-chip colors, terminal palette, spacing/safe-area tokens from `src/styles.css` — AD-6); hand-rolled CSS only; no new color literals outside tokens
+**And** it respects iPhone safe-area (`var(--safe-bottom)` if bottom-sheet) and `dvh` where needed
+
+**Given** the app is inspected for regressions
+**When** checked
+**Then** no Angular Router import exists (AD-2 intact); all components remain standalone + OnPush + `@if/@for`; no coachmark/tutorial overlay is present (FR11 non-goal)
+
+### Story 7.3: Lens Toggle Control & Live Content Reframing
+
+As a visitor,
+I want to toggle between Recruiter and Engineer lenses and see the same portfolio reframed instantly,
+So that I can choose outcome-focused or implementation-depth framing without a page reload.
+
+**Acceptance Criteria:**
+
+**Given** the settings surface from Story 7.2 is open
+**When** inspected
+**Then** it contains exactly one toggle control with two states (Recruiter ↔ Engineer) — implemented as a segmented control (two buttons) or `role="switch"` with `aria-checked` / `aria-label` — showing the current lens with a visually distinct active state (chip/pill or switch track using status tokens)
+**And** no density sliders, multi-preset bundles, or additional controls exist (NFR7 single-setting minimalism)
+
+**Given** the current lens is indicated in the surface
+**When** the visitor activates the toggle (click or keyboard Space/Enter)
+**Then** the store `setLens`/`toggleLens` is called; `lens()` flips to the other value; `localStorage` updates per Story 7.1; the indicator updates immediately to the new lens
+**And** exactly two states exist — no third or indeterminate state
+
+**Given** the lens signal changes
+**When** any feature panel is visible (health-dashboard, service-topology, env-registry, career-pods, swagger-playground)
+**Then** visible copy reframing updates live without page reload (SPEC Assumption) via computed selectors reading `lens()` from the store
+**And** the reframing is presentation/copy only — the same underlying `public/portfolio-data.json` data is shown through two audience framings (not separate content sets)
+
+**Given** the default content-gap assumption is applied (until product provides final copy map)
+**When** the lens is `'recruiter'`
+**Then** panels show outcome/impact tone (e.g. health-dashboard tagline emphasizes availability, topology node descriptions emphasize business outcome, career-pods highlights emphasize leadership/impact)
+**When** lens is `'engineer'`
+**Then** panels show implementation-depth tone (e.g. same nodes show stack, P99, error-rate, circuit-breaker detail)
+**And** where a variant does not yet exist, the same content is shown for both lenses (graceful fallback); schema change to `public/portfolio-data.json` is additive (e.g. `description` + `descriptionRecruiter`/`descriptionEngineer` or `{ recruiter, engineer }` object) validated against interfaces in `src/app/core/data` (AD-11); components never fetch content themselves
+
+**Given** the lens toggles
+**When** observed
+**Then** no page reload occurs, no route change (AD-2), and no backend call; switching is instant with no animation beyond optional instant cross-fade (if an animation is added, it respects `prefers-reduced-motion`); it affects all tabs uniformly
+
+**Given** unit tests run (Vitest)
+**When** exercised
+**Then** toggle flips `lens()` between exactly two values; computed selectors return the correct variant per lens; fallback when variant missing returns base content; localStorage persistence is asserted end-to-end (FR8 + FR9 integration)
+
+### Story 7.4: Ambient Discoverability — Footer View Chip & Terminal Tip
+
+As a visitor,
+I want subtle cues that a lens switch exists,
+So that I discover it without a tutorial overlay.
+
+**Acceptance Criteria:**
+
+**Given** the footer at `src/app/app.html:138`
+**When** rendered
+**Then** a View chip is present in the `.footer__right` or `.footer__left` area (e.g. `<span class="footer__chip footer__chip--view">View: Recruiter</span>` or `View: Engineer`) reflecting `lens()` live from the store
+**And** the chip is read-only (not a second toggle), styled as a status-chip using Actuator tokens (monospace, status-chip border/background, spacing), and updates instantly when the lens toggles in the settings surface
+**And** chip text uses exact strings `View: Recruiter` / `View: Engineer` (product can rename but must remain exhaustive of two states)
+
+**Given** the Terminal Console (`app-terminal-console`)
+**When** the app boots and simulated boot logs stream
+**Then** the tip `> tip: toggle view in settings` is visible as a distinct line in the terminal (first line after boot log sequence or as a pinned suffix)
+**And** per default assumption the tip shows on every visit while lens is still the Recruiter default; when lens is `'engineer'` the tip is suppressed (or remains but product may choose to keep — document the chosen trigger in code comment); exact trigger is documented and testable
+**And** wording is exactly `> tip: toggle view in settings` (lowercase, with `>` prefix and monospace styling matching terminal palette)
+
+**Given** the implementation is inspected
+**When** checked
+**Then** no coachmark, overlay tutorial, onboarding popover, or highlight ring is present anywhere (SPEC Non-goal — FR11 success signal)
+**And** no additional onboarding logic beyond chip + tip exists
+
+**Given** a manual verification pass is performed across mobile (320/375/393) and desktop viewports
+**When** the footer chip and terminal tip are inspected, lens is toggled, page is reloaded, and `localStorage` is inspected (Application → Local Storage → namespaced key)
+**Then** chip reflects current lens at all widths without horizontal scroll; tip is visible in terminal; toggling reframes content (Story 7.3) and persists after reload; no coachmark appears — matching the SPEC Success signal
+
+**Given** unit / DOM tests run
+**When** exercised
+**Then** chip text tracks `lens()`; terminal contains tip line when condition met; absence of coachmark selectors is asserted; chip and tip use only design tokens
