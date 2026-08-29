@@ -481,6 +481,12 @@ describe('App with real application providers', () => {
 describe('App settings lens surface (FR10/FR11)', () => {
   let http2: HttpTestingController;
   beforeEach(async () => {
+    try {
+      window.localStorage.clear();
+    } catch {}
+    try {
+      window.localStorage.removeItem('portfolio:lens');
+    } catch {}
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
@@ -497,6 +503,12 @@ describe('App settings lens surface (FR10/FR11)', () => {
   afterEach(() => {
     try {
       http2.verify();
+    } catch {}
+    try {
+      window.localStorage.clear();
+    } catch {}
+    try {
+      window.localStorage.removeItem('portfolio:lens');
     } catch {}
   });
 
@@ -589,20 +601,28 @@ describe('App settings lens surface (FR10/FR11)', () => {
     it('should have exactly one segmented control with two states calling setLens', async () => {
       const fixture = TestBed.createComponent(App);
       await fixture.whenStable();
+      // Normalize to known default before asserting - isolates from prior localStorage/effect leak
+      const svc = TestBed.inject(ClusterStateService);
+      svc.setLens('recruiter');
+      fixture.detectChanges();
+      await fixture.whenStable();
       const compiled = fixture.nativeElement as HTMLElement;
       const gear = compiled.querySelector('#settings-trigger') as HTMLButtonElement;
       gear.click();
       fixture.detectChanges();
+      await fixture.whenStable();
       const groups = compiled.querySelectorAll('[aria-label="Content lens"]');
       expect(groups.length).toBe(1);
       const options = compiled.querySelectorAll('.settings-sheet__option');
       expect(options.length).toBe(2);
       expect(options[0].getAttribute('aria-pressed')).toBe('true');
-      const svc = TestBed.inject(ClusterStateService);
+      expect(options[1].getAttribute('aria-pressed')).toBe('false');
       (options[1] as HTMLButtonElement).click();
       fixture.detectChanges();
+      await fixture.whenStable();
       expect(svc.lens()).toBe('engineer');
       expect(options[1].getAttribute('aria-pressed')).toBe('true');
+      expect(options[0].getAttribute('aria-pressed')).toBe('false');
     });
 
     it('should have no coachmark/tutorial overlay', async () => {

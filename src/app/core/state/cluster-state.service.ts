@@ -204,11 +204,28 @@ export class ClusterStateService {
   }
 
   setLens(lens: Lens): void {
-    if (isLens(lens)) this.#lens.set(lens);
+    if (isLens(lens)) {
+      this.#lens.set(lens);
+      try {
+        if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+          window.localStorage.setItem(LENS_STORAGE_KEY, lens);
+        }
+      } catch {
+        // swallow
+      }
+    }
   }
 
   toggleLens(): void {
-    this.#lens.update((v) => (v === 'recruiter' ? 'engineer' : 'recruiter'));
+    const next = this.#lens() === 'recruiter' ? 'engineer' : 'recruiter';
+    this.#lens.set(next);
+    try {
+      if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+        window.localStorage.setItem(LENS_STORAGE_KEY, next);
+      }
+    } catch {
+      // swallow
+    }
   }
 
   // ---- Lens-aware computed selectors with fallback to base content ----
